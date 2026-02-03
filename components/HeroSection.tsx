@@ -4,10 +4,10 @@ import React from 'react';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-32 pb-20 px-4 sm:px-6">
+    <section className="relative min-h-screen flex items-center justify-center pt-40 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto w-full">
         {/* Badge */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-6">
           <div className="tag flex items-center gap-2">
             <span className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse"></span>
             <span>50+ SMBs Building Their Own AI Systems</span>

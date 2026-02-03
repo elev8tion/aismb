@@ -10,6 +10,7 @@ import PricingSection from '@/components/PricingSection';
 import FAQSection from '@/components/FAQSection';
 import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
+import VoiceAgentFAB from '@/components/VoiceAgentFAB';
 
 export default function Home() {
   return (
@@ -20,12 +21,15 @@ export default function Home() {
       <ProblemSection />
       <HowItWorksSection />
       <UseCaseSelector />
-      <ROICalculator />
       <CaseStudiesSection />
+      <ROICalculator />
       <PricingSection />
       <FAQSection />
       <FinalCTA />
       <Footer />
+
+      {/* Voice Agent FAB */}
+      <VoiceAgentFAB />
     </main>
   );
 }

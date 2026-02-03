@@ -5,43 +5,64 @@ import React from 'react';
 export default function PricingSection() {
   const pricingTiers = [
     {
-      name: 'Foundation Builder',
-      subtitle: 'Learn & build',
-      setupFee: '$8,000',
-      monthlyFee: '$2,000',
-      minimumTerm: '3 months',
-      description: 'Build your first intelligent systems and master AI fundamentals',
+      name: 'AI Discovery',
+      subtitle: 'Perfect starter',
+      setupFee: '$2,500',
+      monthlyFee: '$750',
+      minimumTerm: '2 months',
+      description: 'Discover where AI can transform YOUR business and build your first intelligent system',
       features: [
-        '8-week AI foundations program',
-        'Build 1-2 core agentic systems together',
-        'Weekly co-creation sessions',
-        'Templates, tools, and frameworks',
-        'Community access + learning resources',
-        'You\'ll learn: System design, deployment, integration',
+        '4-week AI opportunity assessment',
+        'Build 1 core agentic system together',
+        'Bi-weekly co-creation sessions (video calls)',
+        'Email support between sessions',
+        'Starter templates & frameworks',
+        'Documentation & resources',
+        'You\'ll learn: AI fundamentals, system design basics',
       ],
-      outcome: 'Independent with foundational systems',
-      cta: 'Start Building',
+      outcome: 'First working AI system + clear roadmap',
+      cta: 'Start Your Journey',
       highlighted: false,
     },
     {
-      name: 'Systems Architect',
+      name: 'Foundation Builder',
       subtitle: 'Most popular',
-      setupFee: '$18,000',
-      monthlyFee: '$4,500',
+      setupFee: '$5,000',
+      monthlyFee: '$1,500',
+      minimumTerm: '3 months',
+      description: 'Build multiple intelligent systems and master AI fundamentals',
+      features: [
+        'Everything in AI Discovery',
+        '8-week comprehensive AI training',
+        'Build 2-3 core agentic systems',
+        'Weekly co-creation sessions (video calls)',
+        'Priority email & messaging support',
+        'Full template library & tools',
+        'You\'ll learn: System design, deployment, integration',
+      ],
+      outcome: 'Independent with foundational systems',
+      cta: 'Build Your Foundation',
+      highlighted: true,
+    },
+    {
+      name: 'Systems Architect',
+      subtitle: 'Advanced capability',
+      setupFee: '$12,000',
+      monthlyFee: '$3,000',
       minimumTerm: '6 months',
       description: 'Transform your operations with advanced intelligent systems',
       features: [
         'Everything in Foundation Builder',
-        'Build 3-5 advanced agentic systems',
+        'Build 4-6 advanced agentic systems',
         'Custom system architecture design',
         'Advanced training: Multi-agent orchestration',
-        'Priority partnership support',
-        'Quarterly strategy sessions',
+        'Priority email & messaging support',
+        'Monthly strategy sessions (dedicated)',
         'You\'ll learn: Advanced patterns, scaling, optimization',
       ],
       outcome: 'Master builder with production systems',
       cta: 'Transform Your Business',
-      highlighted: true,
+      highlighted: false,
     },
     {
       name: 'AI-Native Enterprise',
@@ -78,7 +99,7 @@ export default function PricingSection() {
             One-time capability transfer fee + ongoing partnership support. Our goal is your independence, not your ongoing payments.
           </p>
           <p className="text-sm text-white/50 max-w-xl mx-auto">
-            After minimum term: Optional community membership ($500/month) for continued learning and support.
+            After minimum term: You're independent! Extend sessions month-to-month if you want continued guidance on new projects.
           </p>
         </div>
 
@@ -119,7 +140,24 @@ export default function PricingSection() {
               </div>
 
               {/* Description */}
-              <p className="text-sm text-white/60 mb-6">{tier.description}</p>
+              <p className="text-sm text-white/60 mb-4">{tier.description}</p>
+
+              {/* ROI Indicator */}
+              {tier.name !== 'AI-Native Enterprise' && (
+                <div className="mb-6 p-3 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <svg className="w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span className="text-xs text-[#22C55E] font-semibold">Typical ROI</span>
+                  </div>
+                  <p className="text-sm text-white font-semibold">
+                    {tier.name === 'AI Discovery' && '200-450% in 2 months'}
+                    {tier.name === 'Foundation Builder' && '150-250% in 3 months'}
+                    {tier.name === 'Systems Architect' && '180-300% in 6 months'}
+                  </p>
+                </div>
+              )}
 
               {/* Features */}
               <ul className="space-y-3 mb-6 flex-grow">

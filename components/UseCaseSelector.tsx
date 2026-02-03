@@ -83,7 +83,7 @@ export default function UseCaseSelector() {
             Agentic systems that learn and adapt
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Build intelligent systems tailored to YOUR business. Each system type teaches you new capabilities you can apply across your operations.
+            Build intelligent systems tailored to YOUR business—regardless of industry. Each system type teaches you new capabilities you can apply across your operations. These are examples, not limits.
           </p>
         </div>
 
@@ -149,7 +149,7 @@ export default function UseCaseSelector() {
         {/* Bottom Note */}
         <div className="mt-12 text-center">
           <p className="text-sm text-white/50 max-w-2xl mx-auto">
-            These are system types, not rigid templates. We'll work together to adapt them to your unique business needs and opportunities.
+            These are system types, not rigid templates. We'll work together to adapt them to your unique business needs and opportunities—no matter what industry you're in.
           </p>
         </div>
       </div>

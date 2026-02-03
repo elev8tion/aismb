@@ -31,7 +31,7 @@ export default function HowItWorksSection() {
     {
       step: '03',
       title: 'Deploy & Master Independence',
-      description: 'Launch your systems with ongoing partnership support. Learn to monitor, optimize, and expand on your own. Join our community of AI-building SMBs.',
+      description: 'Launch your systems with ongoing partnership support. Learn to monitor, optimize, and expand on your own. Master the skills to identify and build new systems independently.',
       duration: 'Week 7+',
       deliverable: 'Production systems + independent mastery',
       icon: (
@@ -100,7 +100,7 @@ export default function HowItWorksSection() {
             { icon: '🤝', label: 'Collaborative building' },
             { icon: '📚', label: 'Continuous learning' },
             { icon: '🛠️', label: 'Tools & templates' },
-            { icon: '🌟', label: 'Builder community' },
+            { icon: '🌟', label: 'Ongoing support' },
           ].map((item, idx) => (
             <div key={idx} className="glass flex items-center gap-3 px-5 py-4">
               <span className="text-xl">{item.icon}</span>

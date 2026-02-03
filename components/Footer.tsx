@@ -6,10 +6,10 @@ import Image from 'next/image';
 export default function Footer() {
   const footerLinks = {
     solutions: [
-      { label: 'HVAC Automation', href: '#' },
-      { label: 'Plumbing Automation', href: '#' },
-      { label: 'Property Management', href: '#' },
-      { label: 'Construction', href: '#' },
+      { label: 'Customer Communication Agents', href: '#use-cases' },
+      { label: 'Intelligent Document Processing', href: '#use-cases' },
+      { label: 'Predictive Business Analytics', href: '#use-cases' },
+      { label: 'Multi-Agent Orchestration', href: '#use-cases' },
     ],
     company: [
       { label: 'About', href: '#' },
