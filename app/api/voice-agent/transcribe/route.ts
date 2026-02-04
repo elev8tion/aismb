@@ -37,9 +37,17 @@ export async function POST(request: NextRequest) {
     const buffer = new Uint8Array(await audioFile.arrayBuffer());
 
     // Use correct file extension based on MIME type
-    const extension = audioFile.type.includes('mp4') ? 'mp4' :
-                      audioFile.type.includes('webm') ? 'webm' :
-                      audioFile.type.includes('ogg') ? 'ogg' : 'audio';
+    const getExtension = (mimeType: string): string => {
+      if (mimeType.includes('webm')) return 'webm';
+      if (mimeType.includes('mp4')) return 'mp4';
+      if (mimeType.includes('mpeg') || mimeType.includes('mp3')) return 'mp3';
+      if (mimeType.includes('ogg')) return 'ogg';
+      if (mimeType.includes('wav')) return 'wav';
+      if (mimeType.includes('flac')) return 'flac';
+      if (mimeType.includes('m4a')) return 'm4a';
+      return 'webm'; // Default fallback
+    };
+    const extension = getExtension(audioFile.type);
     const file = new File([buffer], `audio.${extension}`, { type: audioFile.type });
 
     // Call OpenAI Whisper API
