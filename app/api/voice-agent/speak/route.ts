@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { openai, MODELS } from '@/lib/openai/config';
+import { getRequestContext } from '@cloudflare/next-on-pages';
+import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { rateLimiter, getClientIP } from '@/lib/security/rateLimiter';
 import { validateText } from '@/lib/security/requestValidator';
 import { costMonitor, estimateTTSCost } from '@/lib/security/costMonitor';
@@ -20,6 +21,10 @@ const ttsCacheWithTimestamp = new Map<string, TTSCacheEntry>();
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const clientIP = getClientIP(request);
+
+  // Get OpenAI API key from Cloudflare env
+  const { env } = getRequestContext();
+  const openai = createOpenAI(env.OPENAI_API_KEY);
 
   try {
     // 🛡️ SECURITY 1: Rate limiting

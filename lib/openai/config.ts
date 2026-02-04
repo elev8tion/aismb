@@ -1,37 +1,26 @@
 import OpenAI from 'openai';
 
-// Lazy initialization to work in edge runtime
-let _openai: OpenAI | null = null;
-
-export function getOpenAIClient(): OpenAI {
-  if (!_openai) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not set in environment variables');
-    }
-    _openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+/**
+ * Create OpenAI client with API key from Cloudflare env
+ * Must be called inside request handler with env from getRequestContext()
+ */
+export function createOpenAI(apiKey: string): OpenAI {
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is required');
   }
-  return _openai;
+  return new OpenAI({ apiKey });
 }
 
-// For backwards compatibility
-export const openai = new Proxy({} as OpenAI, {
-  get(_, prop) {
-    return getOpenAIClient()[prop as keyof OpenAI];
-  },
-});
-
-// Model configurations based on research
+// Model configurations
 export const MODELS = {
-  transcription: 'whisper-1', // GPT-4o-mini-transcribe alternative
-  chat: 'gpt-4o-mini',        // Best cost/performance for Q&A
-  tts: 'tts-1',               // Standard quality TTS
-  voice: 'echo',              // Professional, clear voice
+  transcription: 'whisper-1',
+  chat: 'gpt-4o-mini',
+  tts: 'tts-1',
+  voice: 'echo',
 } as const;
 
 // Rate limiting configuration
 export const RATE_LIMIT = {
   maxRequestsPerMinute: 10,
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
 };

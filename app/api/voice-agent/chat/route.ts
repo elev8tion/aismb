@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { openai, MODELS } from '@/lib/openai/config';
+import { getRequestContext } from '@cloudflare/next-on-pages';
+import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
 import { responseCache } from '@/lib/voiceAgent/responseCache';
 import { classifyQuestion, trackClassification } from '@/lib/voiceAgent/questionClassifier';
@@ -11,6 +12,10 @@ import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const clientIP = getClientIP(request);
+
+  // Get OpenAI API key from Cloudflare env
+  const { env } = getRequestContext();
+  const openai = createOpenAI(env.OPENAI_API_KEY);
 
   try {
     // 🛡️ SECURITY 1: Rate limiting
