@@ -34,3 +34,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 2a2fee374c8e9f16deaad22a8f287ce8
           command: pages deploy .vercel/output/static --project-name=kre8tion-app
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
