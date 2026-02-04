@@ -159,7 +159,7 @@
 ### ROI Messaging
 - "Most SMBs see 150-300% ROI within 3-6 months"
 - "Typical time savings: 10-35 hours/week (based on systems built)"
-- "After minimum term: Optional $500/month community vs $3K+/month consultant fees"
+- "After minimum term: You're independent! Optional month-to-month extensions for continued guidance on new projects"
 
 ---
 

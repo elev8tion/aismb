@@ -298,7 +298,7 @@
 - Monthly "partnership support" (not "service retainer")
 - Minimum terms ensure learning completion
 - Goal: Independent capability, not ongoing dependency
-- After minimum term: Optional community membership ($500/month) for continued learning
+- After minimum term: You're independent! Optional month-to-month extensions for continued guidance
 
 ---
 

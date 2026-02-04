@@ -57,12 +57,12 @@ export default function VoiceAgentFAB() {
 
       mediaRecorder.start();
 
-      // Auto-stop after 30 seconds
+      // Auto-stop after 60 seconds (security limit)
       setTimeout(() => {
         if (mediaRecorder.state === 'recording') {
           mediaRecorder.stop();
         }
-      }, 30000);
+      }, 60000);
 
     } catch (err) {
       setError('Failed to start recording. Please check microphone permissions.');
