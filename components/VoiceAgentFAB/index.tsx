@@ -1,8 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LiquidMorphLogo from '../LiquidMorphLogo';
+import { useVoiceRecording } from './useVoiceRecording';
+import {
+  checkBrowserCompatibility,
+  getErrorMessage,
+  BrowserNotSupportedError,
+} from './utils/browserCompatibility';
+import { AudioURLManager } from './utils/audioProcessor';
+import { getSessionId, clearSessionId } from '@/lib/utils/sessionId';
 
 type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking';
 
@@ -10,172 +18,237 @@ export default function VoiceAgentFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [displayError, setDisplayError] = useState<string | null>(null);
+  const [browserSupported, setBrowserSupported] = useState(true);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [showAutoClosePrompt, setShowAutoClosePrompt] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const audioURLManagerRef = useRef<AudioURLManager>(new AudioURLManager());
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check microphone permission
+  // Check browser compatibility on mount
   useEffect(() => {
-    if (isOpen && voiceState === 'idle') {
-      checkMicrophonePermission();
-    }
-  }, [isOpen, voiceState]);
-
-  const checkMicrophonePermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop()); // Stop immediately after checking
-    } catch (err) {
-      setError('Microphone access denied. Please allow microphone access to use voice assistant.');
-      console.error('Microphone permission error:', err);
+      checkBrowserCompatibility();
+      setBrowserSupported(true);
+    } catch (error) {
+      setBrowserSupported(false);
+      if (error instanceof BrowserNotSupportedError) {
+        setDisplayError(error.message);
+      } else {
+        setDisplayError('Voice recording is not supported in this browser.');
+      }
     }
-  };
+  }, []);
 
-  const startListening = async () => {
-    try {
-      setError(null);
-      setTranscript('');
-      setVoiceState('listening');
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      audioURLManagerRef.current.revokeAll();
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+      }
+    };
+  }, []);
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+  // Start auto-close countdown (30 seconds to give customer time to absorb)
+  const startAutoCloseCountdown = useCallback(() => {
+    setCountdown(30); // Increased from 15 to 30 seconds
+    setShowAutoClosePrompt(true);
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+    countdownTimerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          // Countdown finished, close the modal
+          clearInterval(countdownTimerRef.current!);
+          countdownTimerRef.current = null;
+          setIsOpen(false);
+          setVoiceState('idle');
+          setTranscript('');
+          setDisplayError(null);
+          setShowAutoClosePrompt(false);
+          setCountdown(null);
+          clearSessionId(); // Clear session when auto-closing
+          setSessionId(null);
+          return null;
         }
-      };
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
 
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        stream.getTracks().forEach(track => track.stop());
-        await processAudio(audioBlob);
-      };
-
-      mediaRecorder.start();
-
-      // Auto-stop after 60 seconds (security limit)
-      setTimeout(() => {
-        if (mediaRecorder.state === 'recording') {
-          mediaRecorder.stop();
-        }
-      }, 60000);
-
-    } catch (err) {
-      setError('Failed to start recording. Please check microphone permissions.');
-      setVoiceState('idle');
-      console.error('Recording error:', err);
+  // Clear auto-close countdown
+  const clearAutoCloseCountdown = useCallback(() => {
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
     }
-  };
+    setCountdown(null);
+    setShowAutoClosePrompt(false);
+  }, []);
 
-  const stopListening = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
-  };
-
-  const processAudio = async (audioBlob: Blob) => {
+  // Process full voice interaction flow
+  const processVoiceInteraction = useCallback(async (transcribedText: string) => {
+    setTranscript(transcribedText);
     setVoiceState('processing');
 
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
-      // Step 1: Transcribe audio with Whisper
-      const transcribeResponse = await transcribeAudio(audioBlob);
-      const userQuestion = transcribeResponse.text;
-      setTranscript(userQuestion);
+      // Ensure we have a session ID
+      const currentSessionId = sessionId || getSessionId();
+      if (!sessionId) {
+        setSessionId(currentSessionId);
+      }
 
-      // Step 2: Check voice cache or get response
-      const response = await getResponse(userQuestion);
+      // Step 1: Get response from chat API (with session ID for KV storage)
+      const response = await fetch('/api/voice-agent/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: transcribedText,
+          sessionId: currentSessionId, // Send session ID instead of full history
+        }),
+        signal: abortController.signal,
+      });
 
-      // Step 3: Speak response
-      await speakResponse(response);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(`Failed to get response: ${errorData.error || 'Unknown error'}`);
+      }
 
-    } catch (err) {
-      setError('Failed to process your question. Please try again.');
+      const data = await response.json() as { response: string };
+      const responseText = data.response;
+
+      // Step 2: Convert response to speech
+      setVoiceState('speaking');
+
+      const speechResponse = await fetch('/api/voice-agent/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: responseText }),
+        signal: abortController.signal,
+      });
+
+      if (!speechResponse.ok) {
+        throw new Error('Failed to generate speech');
+      }
+
+      const audioBlob = await speechResponse.blob();
+      const audioUrl = audioURLManagerRef.current.createURL(audioBlob);
+      const audio = new Audio(audioUrl);
+
+      // Handle audio playback
+      audio.onended = () => {
+        setVoiceState('idle');
+        audioURLManagerRef.current.revokeURL(audioUrl);
+        // Start auto-close countdown after response finishes
+        startAutoCloseCountdown();
+      };
+
+      audio.onerror = () => {
+        setDisplayError('Failed to play audio response');
+        setVoiceState('idle');
+        audioURLManagerRef.current.revokeURL(audioUrl);
+      };
+
+      await audio.play();
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        // User cancelled - silent return
+        setVoiceState('idle');
+        return;
+      }
+
+      console.error('Voice interaction error:', error);
+      setDisplayError('Failed to process your question. Please try again.');
       setVoiceState('idle');
-      console.error('Processing error:', err);
+    } finally {
+      abortControllerRef.current = null;
     }
-  };
+  }, [sessionId, startAutoCloseCountdown]);
 
-  const transcribeAudio = async (audioBlob: Blob): Promise<{ text: string }> => {
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'audio.webm');
+  // Handle transcription from recording hook
+  const handleTranscription = useCallback(
+    async (text: string) => {
+      await processVoiceInteraction(text);
+    },
+    [processVoiceInteraction]
+  );
 
-    const response = await fetch('/api/voice-agent/transcribe', {
-      method: 'POST',
-      body: formData,
+  // Handle recording errors
+  const handleRecordingError = useCallback((error: Error) => {
+    const message = getErrorMessage(error);
+    if (message) {
+      setDisplayError(message);
+    }
+    setVoiceState('idle');
+  }, []);
+
+  // Use voice recording hook
+  const { isRecording, isProcessing, error, startRecording, stopRecording, cancelRecording } =
+    useVoiceRecording({
+      onTranscription: handleTranscription,
+      onError: handleRecordingError,
+      maxDurationMs: 60000,
     });
 
-    if (!response.ok) {
-      throw new Error('Transcription failed');
+  // Sync voice state with recording state
+  useEffect(() => {
+    if (isRecording) {
+      setVoiceState('listening');
+    } else if (isProcessing) {
+      setVoiceState('processing');
     }
+  }, [isRecording, isProcessing]);
 
-    return response.json();
-  };
-
-  const getResponse = async (question: string): Promise<string> => {
-    console.log('Sending question to chat API:', question);
-
-    const response = await fetch('/api/voice-agent/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Chat API error:', errorData);
-      throw new Error(`Failed to get response: ${errorData.error || 'Unknown error'}`);
+  // Display hook errors
+  useEffect(() => {
+    if (error) {
+      const message = getErrorMessage(error);
+      if (message) {
+        setDisplayError(message);
+      }
     }
-
-    const data = await response.json();
-    return data.response;
-  };
-
-  const speakResponse = async (text: string) => {
-    setVoiceState('speaking');
-
-    const response = await fetch('/api/voice-agent/speak', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to generate speech');
-    }
-
-    const audioBlob = await response.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-
-    audio.onended = () => {
-      setVoiceState('idle');
-      URL.revokeObjectURL(audioUrl);
-    };
-
-    audio.onerror = () => {
-      setError('Failed to play audio response');
-      setVoiceState('idle');
-    };
-
-    await audio.play();
-  };
+  }, [error]);
 
   const handleFABClick = () => {
+    // Don't allow interaction if browser not supported
+    if (!browserSupported) {
+      return;
+    }
+
+    // Clear any auto-close countdown when user interacts
+    clearAutoCloseCountdown();
+
     if (!isOpen) {
       setIsOpen(true);
-      setTimeout(() => startListening(), 500); // Small delay for animation
+      setDisplayError(null);
+      setTranscript('');
+      setTimeout(() => {
+        startRecording();
+      }, 500); // Small delay for animation
     } else {
       if (voiceState === 'listening') {
-        stopListening();
+        stopRecording();
       } else {
+        // Cancel any ongoing operations
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+        cancelRecording();
         setIsOpen(false);
         setVoiceState('idle');
         setTranscript('');
-        setError(null);
+        setDisplayError(null);
+        clearSessionId(); // Clear session on manual close
+        setSessionId(null);
       }
     }
   };
@@ -186,11 +259,14 @@ export default function VoiceAgentFAB() {
       <motion.button
         onClick={handleFABClick}
         className="fixed bottom-6 right-6 z-50"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: browserSupported ? 1.05 : 1 }}
+        whileTap={{ scale: browserSupported ? 0.95 : 1 }}
+        disabled={!browserSupported}
         style={{
           width: isOpen ? 100 : 100,
           height: isOpen ? 100 : 100,
+          opacity: browserSupported ? 1 : 0.5,
+          cursor: browserSupported ? 'pointer' : 'not-allowed',
         }}
       >
         <div className="relative w-full h-full">
@@ -298,9 +374,9 @@ export default function VoiceAgentFAB() {
               )}
 
               {/* Error */}
-              {error && (
+              {displayError && (
                 <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-                  <p className="text-sm text-red-400">{error}</p>
+                  <p className="text-sm text-red-400">{displayError}</p>
                 </div>
               )}
 
@@ -325,11 +401,52 @@ export default function VoiceAgentFAB() {
                 </div>
               )}
 
+              {/* Auto-Close Countdown Prompt */}
+              {showAutoClosePrompt && countdown !== null && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/30"
+                >
+                  <div className="text-center">
+                    <p className="text-sm text-white/80 mb-3">
+                      Need more information or have another question?
+                    </p>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <div className="text-2xl font-bold text-blue-400">
+                        {countdown}
+                      </div>
+                      <p className="text-xs text-white/60">
+                        seconds until auto-close
+                      </p>
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={() => {
+                          clearAutoCloseCountdown();
+                          startRecording();
+                        }}
+                        className="px-3 py-1.5 text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
+                      >
+                        Ask Another Question
+                      </button>
+                      <button
+                        onClick={clearAutoCloseCountdown}
+                        className="px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 text-white/80 rounded-lg transition-colors"
+                      >
+                        Stay Open
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex gap-2 mt-4">
                 {voiceState === 'listening' && (
                   <button
-                    onClick={stopListening}
+                    onClick={stopRecording}
                     className="flex-1 btn-primary py-2 rounded-lg text-sm"
                   >
                     Stop
@@ -337,10 +454,17 @@ export default function VoiceAgentFAB() {
                 )}
                 <button
                   onClick={() => {
+                    if (abortControllerRef.current) {
+                      abortControllerRef.current.abort();
+                    }
+                    cancelRecording();
+                    clearAutoCloseCountdown();
                     setIsOpen(false);
                     setVoiceState('idle');
                     setTranscript('');
-                    setError(null);
+                    setDisplayError(null);
+                    clearSessionId(); // Clear session on close
+                    setSessionId(null);
                   }}
                   className="flex-1 btn-glass py-2 rounded-lg text-sm"
                 >

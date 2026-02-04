@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { text } = await request.json();
+    const { text } = await request.json() as { text: string };
 
     // 🛡️ SECURITY 2: Input validation
     const validation = validateText(text);

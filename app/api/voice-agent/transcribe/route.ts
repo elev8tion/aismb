@@ -62,7 +62,12 @@ export async function POST(request: NextRequest) {
 
     // Convert File to Buffer for OpenAI API
     const buffer = Buffer.from(await audioFile.arrayBuffer());
-    const file = new File([buffer], 'audio.webm', { type: audioFile.type });
+
+    // Use correct file extension based on MIME type
+    const extension = audioFile.type.includes('mp4') ? 'mp4' :
+                      audioFile.type.includes('webm') ? 'webm' :
+                      audioFile.type.includes('ogg') ? 'ogg' : 'audio';
+    const file = new File([buffer], `audio.${extension}`, { type: audioFile.type });
 
     // Call OpenAI Whisper API
     const transcription = await openai.audio.transcriptions.create({

@@ -6,6 +6,7 @@ import { classifyQuestion, trackClassification } from '@/lib/voiceAgent/question
 import { rateLimiter, getClientIP } from '@/lib/security/rateLimiter';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
 import { costMonitor } from '@/lib/security/costMonitor';
+import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -35,7 +36,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Chat API received:', body);
 
-    const { question } = body;
+    const { question, sessionId } = body as { question: string; sessionId: string };
+
+    if (!sessionId) {
+      console.warn(`⚠️ No session ID provided from ${clientIP}`);
+      return NextResponse.json(
+        { error: 'Session ID required' },
+        { status: 400 }
+      );
+    }
 
     // 🛡️ SECURITY 2: Input validation
     const validation = validateQuestion(question);
@@ -99,6 +108,13 @@ export async function POST(request: NextRequest) {
 
     console.log(`📊 Question classified as: ${classification.complexity} (${classification.maxTokens} tokens) - ${classification.reason}`);
 
+    // Get session storage (KV on Cloudflare, in-memory locally)
+    const sessionStorage = getSessionStorage();
+
+    // Get conversation history from session storage
+    const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
+    console.log(`💬 Session ${sessionId}: ${conversationHistory.length} previous messages`);
+
     // Call OpenAI Chat Completions API with knowledge base
     // ⚡ OPTIMIZATION 3: OpenAI automatically caches the system prompt (KNOWLEDGE_BASE)
     const completion = await openai.chat.completions.create({
@@ -108,6 +124,7 @@ export async function POST(request: NextRequest) {
           role: 'system',
           content: KNOWLEDGE_BASE, // Automatically cached by OpenAI
         },
+        ...conversationHistory, // Include conversation history from session storage
         {
           role: 'user',
           content: sanitizedQuestion,
@@ -121,6 +138,11 @@ export async function POST(request: NextRequest) {
     });
 
     const response = completion.choices[0]?.message?.content || 'I apologize, but I couldn\'t generate a response. Please try asking again.';
+
+    // Save the conversation to session storage
+    await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);
+    await sessionStorage.addMessage(sessionId, 'assistant', response);
+    console.log(`💾 Saved conversation to session ${sessionId}`);
 
     // Cache the response for future requests
     responseCache.set(sanitizedQuestion, response);

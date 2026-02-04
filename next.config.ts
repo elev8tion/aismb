@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
+  // Removed 'output: export' for Cloudflare Pages deployment with API routes
   images: {
     unoptimized: true,
   },

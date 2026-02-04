@@ -125,9 +125,11 @@ export function validateAudioFile(file: File): ValidationResult {
     };
   }
 
-  // Type check
+  // Type check - Allow base types with optional codecs parameter
   const validTypes = ['audio/webm', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg'];
-  if (!validTypes.includes(file.type)) {
+  const baseType = file.type.split(';')[0].trim(); // Extract base type (audio/webm;codecs=opus -> audio/webm)
+
+  if (!validTypes.includes(baseType)) {
     return {
       valid: false,
       error: `Invalid audio type (${file.type}). Allowed: ${validTypes.join(', ')}`,
