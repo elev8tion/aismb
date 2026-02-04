@@ -1,30 +1,20 @@
 import { NextResponse } from 'next/server';
-import { rateLimiter } from '@/lib/security/rateLimiter';
-import { costMonitor } from '@/lib/security/costMonitor';
-import { responseCache } from '@/lib/voiceAgent/responseCache';
-import { getClassificationStats } from '@/lib/voiceAgent/questionClassifier';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export async function GET() {
   try {
-    const rateLimitStats = rateLimiter.getStats();
-    const costStats = costMonitor.getStats();
-    const cacheStats = responseCache.getStats();
-    const classificationStats = getClassificationStats();
+    const { env } = getRequestContext();
 
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
-      rateLimiting: {
-        ...rateLimitStats,
-        limits: {
-          perMinute: 10,
-          perHour: 100,
-          blockDuration: '1 hour',
-        },
+      message: 'KV-backed security stats - use KV namespaces for detailed stats',
+      kvBindings: {
+        rateLimit: !!env.RATE_LIMIT_KV,
+        costMonitor: !!env.COST_MONITOR_KV,
+        responseCache: !!env.RESPONSE_CACHE_KV,
+        voiceSessions: !!env.VOICE_SESSIONS,
       },
-      costs: costStats,
-      cache: cacheStats,
-      classification: classificationStats,
     });
   } catch (error) {
     return NextResponse.json(

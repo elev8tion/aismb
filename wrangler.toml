@@ -5,11 +5,23 @@ compatibility_flags = ["nodejs_compat"]
 # Cloudflare Pages configuration
 pages_build_output_dir = ".vercel/output/static"
 
-# KV Namespace for voice agent sessions
+# KV Namespaces
 [[kv_namespaces]]
 binding = "VOICE_SESSIONS"
 id = "2afab9ebf67e4d12874cdaa464079816"
 preview_id = "f1161b244e974e6a8fe4690d35ca4da3"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "PLACEHOLDER_CREATE_IN_CLOUDFLARE"
+
+[[kv_namespaces]]
+binding = "COST_MONITOR_KV"
+id = "PLACEHOLDER_CREATE_IN_CLOUDFLARE"
+
+[[kv_namespaces]]
+binding = "RESPONSE_CACHE_KV"
+id = "PLACEHOLDER_CREATE_IN_CLOUDFLARE"
 
 # Production environment
 [env.production]

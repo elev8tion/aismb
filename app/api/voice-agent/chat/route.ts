@@ -2,24 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
-import { responseCache } from '@/lib/voiceAgent/responseCache';
-import { classifyQuestion, trackClassification } from '@/lib/voiceAgent/questionClassifier';
-import { rateLimiter, getClientIP } from '@/lib/security/rateLimiter';
+import { KVResponseCache } from '@/lib/voiceAgent/responseCache.kv';
+import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
+import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
-import { costMonitor } from '@/lib/security/costMonitor';
+import { KVCostMonitor } from '@/lib/security/costMonitor.kv';
 import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const clientIP = getClientIP(request);
 
-  // Get OpenAI API key and KV namespace from Cloudflare env
+  // Get OpenAI API key and KV namespaces from Cloudflare env
   const { env } = getRequestContext();
   const openai = createOpenAI(env.OPENAI_API_KEY);
 
+  // Initialize KV-backed utilities
+  const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+  const costMonitor = new KVCostMonitor(env.COST_MONITOR_KV);
+  const responseCache = new KVResponseCache(env.RESPONSE_CACHE_KV);
+
   try {
     // 🛡️ SECURITY 1: Rate limiting
-    const rateLimit = rateLimiter.check(clientIP);
+    const rateLimit = await rateLimiter.check(clientIP);
     if (!rateLimit.allowed) {
       console.warn(`🚫 Rate limit exceeded for IP: ${clientIP}`);
       return NextResponse.json(
@@ -71,13 +76,13 @@ export async function POST(request: NextRequest) {
     }
 
     // ⚡ OPTIMIZATION 1: Check cache first
-    const cached = responseCache.get(sanitizedQuestion);
+    const cached = await responseCache.get(sanitizedQuestion);
     if (cached) {
       const duration = Date.now() - startTime;
       console.log(`✅ Cache HIT! Response time: ${duration}ms (saved ~2000ms)`);
 
       // 💰 Track cost (cached = $0)
-      costMonitor.track({
+      await costMonitor.track({
         endpoint: 'chat',
         model: MODELS.chat,
         inputTokens: 0,
@@ -97,7 +102,7 @@ export async function POST(request: NextRequest) {
     console.log('❌ Cache MISS - Processing with OpenAI...');
 
     // 🛡️ SECURITY 4: Check daily cost limit
-    if (costMonitor.isOverDailyLimit()) {
+    if (await costMonitor.isOverDailyLimit()) {
       console.error(`🚨 DAILY COST LIMIT EXCEEDED for ${clientIP}`);
       return NextResponse.json(
         {
@@ -109,7 +114,6 @@ export async function POST(request: NextRequest) {
 
     // ⚡ OPTIMIZATION 2: Classify question complexity for smart token limits
     const classification = classifyQuestion(sanitizedQuestion);
-    trackClassification(classification.complexity);
 
     console.log(`📊 Question classified as: ${classification.complexity} (${classification.maxTokens} tokens) - ${classification.reason}`);
 
@@ -150,13 +154,13 @@ export async function POST(request: NextRequest) {
     console.log(`💾 Saved conversation to session ${sessionId}`);
 
     // Cache the response for future requests
-    responseCache.set(sanitizedQuestion, response);
+    await responseCache.set(sanitizedQuestion, response);
 
     // 💰 Track cost
     const inputTokens = completion.usage?.prompt_tokens || 0;
     const outputTokens = completion.usage?.completion_tokens || 0;
 
-    costMonitor.track({
+    await costMonitor.track({
       endpoint: 'chat',
       model: MODELS.chat,
       inputTokens,
