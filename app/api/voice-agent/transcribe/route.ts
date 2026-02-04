@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`📤 Transcribing audio: ${audioFile.size} bytes, type: ${audioFile.type}`);
 
-    // Convert File to Buffer for OpenAI API
-    const buffer = Buffer.from(await audioFile.arrayBuffer());
+    // Convert File to Uint8Array for OpenAI API (edge runtime compatible)
+    const buffer = new Uint8Array(await audioFile.arrayBuffer());
 
     // Use correct file extension based on MIME type
     const extension = audioFile.type.includes('mp4') ? 'mp4' :

@@ -203,7 +203,7 @@ export function containsProfanity(text: string): boolean {
  * Validate request body size
  */
 export function validateBodySize(body: string, maxSize: number = 10 * 1024): ValidationResult {
-  const size = Buffer.byteLength(body, 'utf8');
+  const size = new TextEncoder().encode(body).length;
 
   if (size > maxSize) {
     return {

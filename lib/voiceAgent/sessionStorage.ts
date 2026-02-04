@@ -36,7 +36,7 @@ export interface SessionStorage {
 class InMemorySessionStorage implements SessionStorage {
   private sessions: Map<string, VoiceSession> = new Map();
   private readonly SESSION_TTL = 3600000; // 1 hour in milliseconds
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     // Start cleanup interval (only in environments that support setInterval)

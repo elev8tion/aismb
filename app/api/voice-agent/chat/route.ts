@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const clientIP = getClientIP(request);
 
-  // Get OpenAI API key from Cloudflare env
+  // Get OpenAI API key and KV namespace from Cloudflare env
   const { env } = getRequestContext();
   const openai = createOpenAI(env.OPENAI_API_KEY);
 
@@ -113,8 +113,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`📊 Question classified as: ${classification.complexity} (${classification.maxTokens} tokens) - ${classification.reason}`);
 
-    // Get session storage (KV on Cloudflare, in-memory locally)
-    const sessionStorage = getSessionStorage();
+    // Get session storage with KV namespace from env
+    const sessionStorage = getSessionStorage(env.VOICE_SESSIONS);
 
     // Get conversation history from session storage
     const conversationHistory = await sessionStorage.getConversationHistory(sessionId);

@@ -109,8 +109,8 @@ export async function POST(request: NextRequest) {
       speed: 1.0,
     });
 
-    // Convert response to buffer
-    const buffer = Buffer.from(await mp3.arrayBuffer());
+    // Convert response to buffer (edge runtime compatible)
+    const buffer = new Uint8Array(await mp3.arrayBuffer());
 
     // Cache the audio buffer
     if (ttsCacheWithTimestamp.size >= TTS_CACHE_MAX_SIZE) {

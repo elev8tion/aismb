@@ -3,7 +3,7 @@
 
 interface CacheEntry {
   textResponse: string;
-  audioBuffer?: Buffer;
+  audioUint8Array?: Uint8Array;
   timestamp: number;
   hitCount: number;
 }
@@ -121,7 +121,7 @@ class ResponseCache {
   /**
    * Get cached response if available and not expired
    */
-  get(question: string): { textResponse: string; audioBuffer?: Buffer } | null {
+  get(question: string): { textResponse: string; audioUint8Array?: Uint8Array } | null {
     const key = this.normalizeQuestion(question);
     if (!key) return null;
 
@@ -141,14 +141,14 @@ class ResponseCache {
 
     return {
       textResponse: entry.textResponse,
-      audioBuffer: entry.audioBuffer,
+      audioUint8Array: entry.audioUint8Array,
     };
   }
 
   /**
    * Set cached response
    */
-  set(question: string, textResponse: string, audioBuffer?: Buffer): void {
+  set(question: string, textResponse: string, audioUint8Array?: Uint8Array): void {
     const key = this.normalizeQuestion(question);
     if (!key) {
       console.log(`⚠️ Question not cacheable: "${question}"`);
@@ -165,7 +165,7 @@ class ResponseCache {
 
     this.cache.set(key, {
       textResponse,
-      audioBuffer,
+      audioUint8Array,
       timestamp: Date.now(),
       hitCount: 0,
     });
