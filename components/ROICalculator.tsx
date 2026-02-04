@@ -30,6 +30,10 @@ export default function ROICalculator() {
     { id: 'architect', name: 'Systems Architect', cost: 30000, weeks: 24, systemsBuilt: 6 },
   ];
 
+  const [email, setEmail] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [sentSuccess, setSentSuccess] = useState(false);
+
   const selectedIndustry = industries.find(i => i.id === industry);
   const selectedSize = employeeSizes.find(s => s.id === employees);
   const selectedTier = tiers.find(t => t.id === tier);
@@ -42,6 +46,42 @@ export default function ROICalculator() {
   const investment = selectedTier?.cost || 9500;
   const roi = Math.round(((totalValue - investment) / investment) * 100);
   const paybackWeeks = Math.ceil(investment / weeklyValue);
+
+  const handleSendReport = async () => {
+    if (!email || !email.includes('@')) return;
+
+    setIsSending(true);
+    try {
+      const response = await fetch('/api/leads/roi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          industry: selectedIndustry?.name,
+          employees: selectedSize?.name,
+          hourlyValue,
+          tier: selectedTier?.name,
+          metrics: {
+            timeSaved: adjustedTimeSavings,
+            weeklyValue,
+            totalValue,
+            investment,
+            roi,
+            paybackWeeks
+          }
+        }),
+      });
+
+      if (response.ok) {
+        setSentSuccess(true);
+        setEmail('');
+      }
+    } catch (error) {
+      console.error('Failed to send report', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <section className="relative py-20 lg:py-32 px-4 sm:px-6" id="roi-calculator">
@@ -189,7 +229,7 @@ export default function ROICalculator() {
               </div>
 
               {/* ROI Highlight */}
-              <div className="p-4 md:p-5 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+              <div className="p-4 md:p-5 rounded-lg mb-6" style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-[#22C55E] font-semibold">Your ROI</span>
                   <div className="flex items-center gap-1">
@@ -203,6 +243,41 @@ export default function ROICalculator() {
                   Pays for itself in ~{paybackWeeks} weeks, then continues generating value
                 </div>
               </div>
+
+              {/* Email Capture Lead Magnet */}
+              {!sentSuccess ? (
+                <div className="pt-6 border-t border-white/10">
+                  <h4 className="text-sm font-semibold text-white mb-3">Email me this full report</h4>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#0EA5E9]"
+                    />
+                    <button
+                      onClick={handleSendReport}
+                      disabled={isSending || !email}
+                      className="px-4 py-2 bg-[#0EA5E9] hover:bg-[#0284C7] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
+                    >
+                      {isSending ? 'Sending...' : 'Send'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-white/40 mt-2">
+                    We&apos;ll send a detailed breakdown of your potential ROI. No spam.
+                  </p>
+                </div>
+              ) : (
+                <div className="pt-6 border-t border-white/10">
+                  <div className="flex items-center gap-2 p-3 bg-[#22C55E]/10 rounded-lg border border-[#22C55E]/30">
+                    <svg className="w-5 h-5 text-[#22C55E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-sm text-[#22C55E] font-medium">Report sent successfully! Check your inbox.</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Comparison Card */}

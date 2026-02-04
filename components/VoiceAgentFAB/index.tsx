@@ -127,7 +127,43 @@ export default function VoiceAgentFAB() {
       }
 
       const data = await response.json() as { response: string };
-      const responseText = data.response;
+      let responseText = data.response;
+
+      // Check for action tags
+      const actionMatch = responseText.match(/\[ACTION:([A-Z_]+)\]/);
+      if (actionMatch) {
+        const action = actionMatch[1];
+        responseText = responseText.replace(actionMatch[0], '').trim();
+
+        // Execute action (scroll to section)
+        let targetId = '';
+        switch (action) {
+          case 'SCROLL_TO_PRICING':
+            targetId = 'pricing';
+            break;
+          case 'SCROLL_TO_ROI':
+            targetId = 'roi-calculator';
+            break;
+          case 'SCROLL_TO_CASES':
+            targetId = 'case-studies';
+            break;
+          case 'SCROLL_TO_PROCESS':
+            targetId = 'how-it-works';
+            break;
+          case 'SCROLL_TO_BOOKING':
+            targetId = 'get-started'; // Updated to match FinalCTA section ID
+            break;
+        }
+
+        if (targetId) {
+          setTimeout(() => {
+            const element = document.getElementById(targetId);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 500); // Small delay to allow voice to start
+        }
+      }
 
       // Step 2: Convert response to speech
       setVoiceState('speaking');

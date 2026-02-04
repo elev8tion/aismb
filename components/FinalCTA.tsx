@@ -18,19 +18,19 @@ export default function FinalCTA() {
             Ready to get 30% of your time back?
           </h2>
           <p className="text-lg text-[#A1A1AA] max-w-2xl mx-auto mb-8">
-            Join 50+ SMBs already saving time with AI automation. Start with a free assessment—no commitment required.
+            Join 50+ SMBs already saving time with AI automation. Start with a comprehension meeting to identify your opportunities.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <a
-              href="#contact"
+              href="#pricing"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-semibold px-8 py-4 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              Book Free Assessment
+              Schedule Comprehension Meeting
             </a>
             <a
               href="#roi-calculator"

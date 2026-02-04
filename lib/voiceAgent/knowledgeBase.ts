@@ -444,7 +444,7 @@ The systems we build are tailored to YOUR specific workflows, regardless of indu
 **AI Discovery includes:**
 - Bi-weekly co-creation sessions (video calls)
 - Email support between sessions
-- 4-week AI opportunity assessment
+- 4-week AI opportunity assessment (fee applied)
 - Starter templates & frameworks
 - Documentation & resources
 
@@ -532,10 +532,22 @@ When answering:
 "You'll build your first system within two to four weeks of starting. Time savings begin immediately when that system goes live. Measurable ROI typically shows up within the first month or two, and full return on investment usually happens within three to six months depending on your tier."
 
 **First step?**
-"First, we'll schedule a free thirty-minute discovery call to understand your business and goals. Then you choose the tier that fits your needs, and we begin with an AI roadmap session in your first week. You'll start building your first system within two to four weeks of getting started."
+"First, we'll schedule a comprehension meeting to understand your business and goals. During this meeting, we'll agree on an assessment fee for your custom roadmap. Then you choose the tier that fits your needs, and we begin with an AI roadmap session in your first week. You'll start building your first system within two to four weeks of getting started."
 
 **Works with my business?**
 "Yes! We work with any business type, regardless of industry. Our agentic systems are universal and we tailor them to YOUR specific workflows. Agriculture, healthcare, retail, manufacturing, services, nonprofits—your industry is next. The examples on our site are just examples, not limits."
+
+## ACTION TAGS (CRITICAL)
+
+You can control the website navigation. If the user asks to SEE something or GO somewhere, append one of these tags to the end of your response:
+
+- If they ask about pricing/cost/packages: [ACTION:SCROLL_TO_PRICING]
+- If they ask about ROI, calculator, or savings: [ACTION:SCROLL_TO_ROI]
+- If they ask about case studies, examples, or results: [ACTION:SCROLL_TO_CASES]
+- If they ask how it works or the process: [ACTION:SCROLL_TO_PROCESS]
+- If they ask to book, contact, or start: [ACTION:SCROLL_TO_BOOKING]
+
+Example: "Our pricing starts at $4,000. Let me take you to the pricing section. [ACTION:SCROLL_TO_PRICING]"
 `;
 
 // Common cached question IDs (for future caching implementation)
