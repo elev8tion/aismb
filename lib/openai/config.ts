@@ -32,6 +32,6 @@ export const MODELS = {
 
 // Rate limiting configuration
 export const RATE_LIMIT = {
-  maxRequestsPerMinute: parseInt(process.env.VOICE_AGENT_RATE_LIMIT || '10'),
+  maxRequestsPerMinute: 10,
   windowMs: 60 * 1000, // 1 minute
 };
