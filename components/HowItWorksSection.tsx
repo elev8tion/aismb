@@ -62,7 +62,7 @@ export default function HowItWorksSection() {
         {/* Steps Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
           {steps.map((step, idx) => (
-            <div key={idx} className="glass glass-hover p-8 transition-all duration-300 flex flex-col">
+            <div key={idx} className="glass glass-hover p-4 md:p-6 lg:p-8 transition-all duration-300 flex flex-col">
               {/* Step Number */}
               <div className="text-6xl font-bold text-[#0EA5E9]/20 mb-4">
                 {step.step}
@@ -95,7 +95,7 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Bottom Features */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {[
             { icon: '🤝', label: 'Collaborative building' },
             { icon: '📚', label: 'Continuous learning' },

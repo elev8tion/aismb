@@ -104,11 +104,11 @@ export default function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-12">
           {pricingTiers.map((tier, idx) => (
             <div
               key={idx}
-              className={`relative glass p-8 transition-all duration-300 flex flex-col ${
+              className={`relative glass p-4 md:p-6 lg:p-8 transition-all duration-300 flex flex-col ${
                 tier.highlighted ? 'ring-2 ring-[#0EA5E9] lg:scale-105' : 'glass-hover'
               }`}
             >
@@ -192,7 +192,7 @@ export default function PricingSection() {
         </div>
 
         {/* Guarantee */}
-        <div className="glass p-8 lg:p-10 max-w-3xl mx-auto" style={{ borderColor: 'rgba(34, 197, 94, 0.3)' }}>
+        <div className="glass p-6 md:p-8 lg:p-10 max-w-3xl mx-auto" style={{ borderColor: 'rgba(34, 197, 94, 0.3)' }}>
           <div className="flex flex-col sm:flex-row items-center gap-5">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
               <svg className="w-8 h-8 text-[#22C55E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

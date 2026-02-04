@@ -63,10 +63,10 @@ export default function ProblemSection() {
         </div>
 
         {/* Pain Points Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {painPoints.map((point, idx) => (
-            <div key={idx} className="glass glass-hover p-8 transition-all duration-300">
-              <div className="flex items-start gap-5">
+            <div key={idx} className="glass glass-hover p-4 md:p-6 lg:p-8 transition-all duration-300">
+              <div className="flex items-start gap-3 md:gap-5">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-[#F97316]" style={{ background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
                   {point.icon}
                 </div>

@@ -125,7 +125,7 @@ export default function CaseStudiesSection() {
         </div>
 
         {/* Active Case Study */}
-        <div className="glass p-8 lg:p-10">
+        <div className="glass p-6 md:p-8 lg:p-10">
           {/* Company Info Header */}
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8 pb-8 border-b border-white/10">
             <div className="flex-1">
@@ -139,7 +139,7 @@ export default function CaseStudiesSection() {
                 <span className="font-semibold text-[#F97316]">Challenge:</span> {activeStudy.challenge}
               </p>
             </div>
-            <div className="glass p-5 lg:min-w-[200px] text-center">
+            <div className="glass p-4 md:p-5 lg:min-w-[200px] text-center">
               <div className="text-xs text-white/50 mb-1">Partnership Tier</div>
               <div className="text-lg font-bold text-[#0EA5E9] mb-2">{activeStudy.tier}</div>
               <div className="text-2xl font-bold text-white mb-1">{activeStudy.investment}</div>
@@ -173,20 +173,20 @@ export default function CaseStudiesSection() {
           {/* Results Grid */}
           <div className="mb-8">
             <h4 className="text-sm font-semibold text-[#22C55E] mb-4 uppercase tracking-wider">Measurable Results</h4>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="glass p-5 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="glass p-4 md:p-5 text-center">
                 <div className="text-3xl lg:text-4xl font-bold text-[#0EA5E9] mb-2">{activeStudy.results.timeSaved}</div>
                 <div className="text-xs text-white/60">Time Saved</div>
               </div>
-              <div className="glass p-5 text-center">
+              <div className="glass p-4 md:p-5 text-center">
                 <div className="text-3xl lg:text-4xl font-bold text-[#22C55E] mb-2">{activeStudy.results.roi}%</div>
                 <div className="text-xs text-white/60">ROI in {activeStudy.results.roiPeriod}</div>
               </div>
-              <div className="glass p-5 text-center">
+              <div className="glass p-4 md:p-5 text-center">
                 <div className="text-2xl lg:text-3xl font-bold text-white mb-2">{activeStudy.results.totalValue}</div>
                 <div className="text-xs text-white/60">Total Value Created</div>
               </div>
-              <div className="glass p-5 text-center">
+              <div className="glass p-4 md:p-5 text-center">
                 <div className="text-sm lg:text-base font-semibold text-white mb-2">{activeStudy.results.revenueImpact}</div>
                 <div className="text-xs text-white/60">Revenue Impact</div>
               </div>
@@ -214,12 +214,12 @@ export default function CaseStudiesSection() {
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="mt-12 glass p-6 lg:p-8">
+        <div className="mt-12 glass p-4 md:p-6 lg:p-8">
           <div className="text-center mb-6">
             <h3 className="text-xl font-bold text-white mb-2">Industry-Backed Results</h3>
             <p className="text-sm text-white/60">Based on documented AI automation outcomes and conservative ROI estimates across all business types</p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { stat: '10-35 hrs/week', label: 'Typical Time Savings' },
               { stat: '150-300%', label: 'Average ROI (3-6 months)' },

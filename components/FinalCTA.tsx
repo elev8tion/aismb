@@ -6,7 +6,7 @@ export default function FinalCTA() {
   return (
     <section id="get-started" className="bg-[#111113] py-16 lg:py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#18181B] border border-[#27272A] rounded-2xl p-8 lg:p-12 text-center">
+        <div className="bg-[#18181B] border border-[#27272A] rounded-2xl p-6 md:p-8 lg:p-12 text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#22C55E]/10 border border-[#22C55E]/20 rounded-full mb-6">
             <span className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse"></span>

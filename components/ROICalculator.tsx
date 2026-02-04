@@ -57,9 +57,9 @@ export default function ROICalculator() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Input Panel */}
-          <div className="glass p-8">
+          <div className="glass p-4 md:p-6 lg:p-8">
             <h3 className="text-xl font-bold text-white mb-6">Your Business Details</h3>
 
             {/* Industry Selection */}
@@ -88,7 +88,7 @@ export default function ROICalculator() {
             {/* Business Size */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-white/80 mb-3">Business Size</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {employeeSizes.map((size) => (
                   <button
                     key={size.id}
@@ -158,11 +158,11 @@ export default function ROICalculator() {
           {/* Results Panel */}
           <div className="flex flex-col gap-4">
             {/* Main ROI Card */}
-            <div className="glass p-8 flex-1">
+            <div className="glass p-4 md:p-6 lg:p-8 flex-1">
               <h3 className="text-lg font-bold text-white mb-6">Your Projected Results</h3>
 
               {/* Key Metrics Grid */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                   <div className="text-xs text-white/50 mb-1">Time Saved</div>
                   <div className="text-2xl font-bold text-[#0EA5E9]">{adjustedTimeSavings} hrs/week</div>
@@ -182,14 +182,14 @@ export default function ROICalculator() {
               </div>
 
               {/* Total Value */}
-              <div className="p-5 rounded-lg mb-4" style={{ background: 'rgba(14, 165, 233, 0.15)', border: '1px solid rgba(14, 165, 233, 0.3)' }}>
+              <div className="p-4 md:p-5 rounded-lg mb-4" style={{ background: 'rgba(14, 165, 233, 0.15)', border: '1px solid rgba(14, 165, 233, 0.3)' }}>
                 <div className="text-xs text-[#0EA5E9] font-semibold mb-1">Total Value Created</div>
                 <div className="text-4xl font-bold text-white mb-1">${totalValue.toLocaleString()}</div>
                 <div className="text-xs text-white/60">Over {selectedTier?.weeks} weeks</div>
               </div>
 
               {/* ROI Highlight */}
-              <div className="p-5 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+              <div className="p-4 md:p-5 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-[#22C55E] font-semibold">Your ROI</span>
                   <div className="flex items-center gap-1">

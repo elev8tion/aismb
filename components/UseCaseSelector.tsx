@@ -105,7 +105,7 @@ export default function UseCaseSelector() {
         </div>
 
         {/* Agentic Systems Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredSystems.map((system) => (
             <div key={system.id} className="glass glass-hover p-6 transition-all duration-300 flex flex-col">
               <div className="mb-4">
