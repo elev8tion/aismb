@@ -28,11 +28,16 @@ jobs:
       - name: Build for Cloudflare Pages
         run: npm run pages:build
 
+      - name: Set Cloudflare Pages Secrets
+        run: echo "$OPENAI_API_KEY" | npx wrangler pages secret put OPENAI_API_KEY --project-name=kre8tion-app
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 2a2fee374c8e9f16deaad22a8f287ce8
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 2a2fee374c8e9f16deaad22a8f287ce8
           command: pages deploy .vercel/output/static --project-name=kre8tion-app
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
