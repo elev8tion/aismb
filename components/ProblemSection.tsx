@@ -65,25 +65,29 @@ export default function ProblemSection() {
         {/* Pain Points Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {painPoints.map((point, idx) => (
-            <div key={idx} className="glass glass-hover p-4 md:p-6 lg:p-8 transition-all duration-300">
-              <div className="flex items-start gap-3 md:gap-5">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-[#F97316]" style={{ background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
-                  {point.icon}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <h3 className="text-lg font-semibold text-white">
-                      {point.title}
-                    </h3>
-                    <span className="text-sm font-bold text-[#F97316] shrink-0 px-3 py-1 rounded-full" style={{ background: 'rgba(249, 115, 22, 0.15)' }}>
-                      {point.stat}
-                    </span>
-                  </div>
-                  <p className="text-white/60 text-sm leading-relaxed">
-                    {point.description}
-                  </p>
-                </div>
+            <div key={idx} className="relative glass glass-hover p-4 md:p-6 lg:p-8 transition-all duration-300 group">
+              {/* Stat Badge - Positioned at top right */}
+              <div className="absolute top-4 right-4 md:top-6 md:right-6">
+                <span className="text-xs md:text-sm font-bold text-[#F97316] px-3 py-1.5 rounded-full whitespace-nowrap" style={{ background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
+                  {point.stat}
+                </span>
               </div>
+
+              {/* Icon */}
+              <div className="w-16 h-16 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-4 text-[#F97316] transition-transform duration-300 group-hover:scale-110" style={{ background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
+                {point.icon}
+              </div>
+
+              {/* Content */}
+              <div className="pr-16 md:pr-20">
+                <h3 className="text-lg md:text-xl font-semibold text-white mb-3 leading-tight">
+                  {point.title}
+                </h3>
+              </div>
+
+              <p className="text-white/60 text-sm md:text-base leading-relaxed">
+                {point.description}
+              </p>
             </div>
           ))}
         </div>

@@ -64,8 +64,12 @@ export class SafeMediaRecorder {
         this.handleError(error);
       };
 
-      // Start recording
-      this.mediaRecorder.start();
+      // Start recording with timeslice parameter
+      // Safari requires timeslice (1000ms) for Whisper API to properly transcribe
+      // Without this, Safari creates audio blobs with metadata issues that cause
+      // Whisper to only transcribe the first 1-3 seconds
+      // See: https://community.openai.com/t/whisper-problem-with-audio-mp4-blobs-from-safari/322252
+      this.mediaRecorder.start(1000);
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {

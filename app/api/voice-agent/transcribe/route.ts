@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Use correct file extension based on MIME type
     const getExtension = (mimeType: string): string => {
       if (mimeType.includes('webm')) return 'webm';
-      if (mimeType.includes('mp4')) return 'mp4';
+      if (mimeType.includes('mp4')) return 'm4a'; // Safari audio/mp4 needs m4a extension
       if (mimeType.includes('mpeg') || mimeType.includes('mp3')) return 'mp3';
       if (mimeType.includes('ogg')) return 'ogg';
       if (mimeType.includes('wav')) return 'wav';

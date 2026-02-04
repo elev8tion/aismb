@@ -54,7 +54,7 @@ export function getBrowserAudioFormat(): AudioFormat {
   const formats: AudioFormat[] = [
     { mimeType: 'audio/webm;codecs=opus', fileExtension: 'webm' },
     { mimeType: 'audio/webm', fileExtension: 'webm' },
-    { mimeType: 'audio/mp4', fileExtension: 'mp4' },
+    { mimeType: 'audio/mp4', fileExtension: 'm4a' },
     { mimeType: 'audio/ogg;codecs=opus', fileExtension: 'ogg' },
   ];
 
