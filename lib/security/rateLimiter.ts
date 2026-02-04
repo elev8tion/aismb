@@ -16,8 +16,10 @@ class RateLimiter {
   constructor() {
     this.limits = new Map();
 
-    // Clean up old entries every 5 minutes
-    setInterval(() => this.cleanup(), 5 * 60 * 1000);
+    // Clean up old entries every 5 minutes (only in environments that support setInterval)
+    if (typeof setInterval !== 'undefined') {
+      setInterval(() => this.cleanup(), 5 * 60 * 1000);
+    }
   }
 
   /**

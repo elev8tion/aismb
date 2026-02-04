@@ -39,10 +39,12 @@ class InMemorySessionStorage implements SessionStorage {
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    // Start cleanup interval
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup();
-    }, 300000); // Clean up every 5 minutes
+    // Start cleanup interval (only in environments that support setInterval)
+    if (typeof setInterval !== 'undefined') {
+      this.cleanupInterval = setInterval(() => {
+        this.cleanup();
+      }, 300000); // Clean up every 5 minutes
+    }
   }
 
   private cleanup(): void {
