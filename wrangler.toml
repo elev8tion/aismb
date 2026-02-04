@@ -13,15 +13,15 @@ preview_id = "f1161b244e974e6a8fe4690d35ca4da3"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "PLACEHOLDER_CREATE_IN_CLOUDFLARE"
+id = "3da863a3e1854b8f84c0066a37b6c847"
 
 [[kv_namespaces]]
 binding = "COST_MONITOR_KV"
-id = "PLACEHOLDER_CREATE_IN_CLOUDFLARE"
+id = "091326b587024f5d9ff870616992706e"
 
 [[kv_namespaces]]
 binding = "RESPONSE_CACHE_KV"
-id = "PLACEHOLDER_CREATE_IN_CLOUDFLARE"
+id = "88589fbf9e604e5f8564fb82849909bd"
 
 # Production environment
 [env.production]
