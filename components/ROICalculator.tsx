@@ -81,7 +81,7 @@ export default function ROICalculator() {
                 ))}
               </div>
               <p className="text-xs text-white/50 mt-2">
-                Don't see your industry? We work with all business types—select "Other" for general estimates.
+                Don&apos;t see your industry? We work with all business types—select &quot;Other&quot; for general estimates.
               </p>
             </div>
 

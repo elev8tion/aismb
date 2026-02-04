@@ -55,7 +55,7 @@ export default function HowItWorksSection() {
             A collaborative journey from discovering opportunities to mastering AI systems that transform your business for the future.
           </p>
           <p className="text-sm text-white/50 max-w-xl mx-auto">
-            Whether you want to build systems yourself, understand how AI works, or train your team—we'll guide and stick with you every step of the way.
+            Whether you want to build systems yourself, understand how AI works, or train your team—we&apos;ll guide and stick with you every step of the way.
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export default function HowItWorksSection() {
 
               {/* Deliverable */}
               <div className="mb-5 p-3 rounded-lg" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.2)' }}>
-                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">You'll Get:</p>
+                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">You&apos;ll Get:</p>
                 <p className="text-xs text-white/80">{step.deliverable}</p>
               </div>
 

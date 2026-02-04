@@ -99,7 +99,7 @@ export default function PricingSection() {
             One-time capability transfer fee + ongoing partnership support. Our goal is your independence, not your ongoing payments.
           </p>
           <p className="text-sm text-white/50 max-w-xl mx-auto">
-            After minimum term: You're independent! Extend sessions month-to-month if you want continued guidance on new projects.
+            After minimum term: You&apos;re independent! Extend sessions month-to-month if you want continued guidance on new projects.
           </p>
         </div>
 
@@ -202,7 +202,7 @@ export default function PricingSection() {
             <div className="text-center sm:text-left">
               <h3 className="text-xl font-bold text-white mb-2">30-Day Results Guarantee</h3>
               <p className="text-sm text-white/60">
-                If you don't see measurable time savings within 30 days, we work for free until you do.
+                If you don&apos;t see measurable time savings within 30 days, we work for free until you do.
               </p>
             </div>
           </div>

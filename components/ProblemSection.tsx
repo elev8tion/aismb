@@ -55,10 +55,10 @@ export default function ProblemSection() {
             The Real Challenge
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-            The opportunity isn't just efficiency—it's capability
+            The opportunity isn&apos;t just efficiency—it&apos;s capability
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            You don't just need AI tools. You need to understand where the opportunities are and how to build intelligent systems that transform your business for the future.
+            You don&apos;t just need AI tools. You need to understand where the opportunities are and how to build intelligent systems that transform your business for the future.
           </p>
         </div>
 

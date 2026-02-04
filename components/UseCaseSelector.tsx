@@ -139,7 +139,7 @@ export default function UseCaseSelector() {
               </div>
 
               <div className="p-3 rounded-lg" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.2)' }}>
-                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">You'll Learn:</p>
+                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">You&apos;ll Learn:</p>
                 <p className="text-xs text-white/70">{system.whatYouLearn}</p>
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function UseCaseSelector() {
         {/* Bottom Note */}
         <div className="mt-12 text-center">
           <p className="text-sm text-white/50 max-w-2xl mx-auto">
-            These are system types, not rigid templates. We'll work together to adapt them to your unique business needs and opportunities—no matter what industry you're in.
+            These are system types, not rigid templates. We&apos;ll work together to adapt them to your unique business needs and opportunities—no matter what industry you&apos;re in.
           </p>
         </div>
       </div>
