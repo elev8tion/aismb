@@ -7,12 +7,11 @@ import { costMonitor, estimateTTSCost } from '@/lib/security/costMonitor';
 
 // Simple TTS cache (text -> audio buffer)
 // Separate from responseCache since we cache by text, not question
-const ttsCache = new Map<string, Buffer>();
 const TTS_CACHE_MAX_SIZE = 50;
 const TTS_CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 
 interface TTSCacheEntry {
-  buffer: Buffer;
+  buffer: Uint8Array;
   timestamp: number;
 }
 
