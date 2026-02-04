@@ -2,7 +2,7 @@ name = "kre8tion-app"
 compatibility_date = "2024-01-01"
 
 # Cloudflare Pages configuration
-pages_build_output_dir = ".next"
+pages_build_output_dir = ".vercel/output/static"
 
 # KV Namespace for voice agent sessions
 [[kv_namespaces]]
