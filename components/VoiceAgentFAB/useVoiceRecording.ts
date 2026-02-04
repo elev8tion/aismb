@@ -115,9 +115,11 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
       abortControllerRef.current = abortController;
 
       try {
-        // Prepare form data
+        // Prepare form data with proper File object to preserve MIME type on iOS Safari
         const formData = new FormData();
-        formData.append('audio', audioBlob, `recording.${mimeType.split('/')[1]}`);
+        const extension = mimeType.split('/')[1].split(';')[0]; // Extract extension without codecs
+        const file = new File([audioBlob], `recording.${extension}`, { type: mimeType });
+        formData.append('audio', file);
 
         // Send to API for transcription
         const response = await fetch('/api/voice-agent/transcribe', {
