@@ -1,75 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from '@/contexts/LanguageContext';
 
 export default function UseCaseSelector() {
+  const { t } = useTranslations();
   const [selectedComplexity, setSelectedComplexity] = useState('all');
 
-  const complexityLevels = [
-    { id: 'all', name: 'All Systems' },
-    { id: 'beginner', name: 'Beginner' },
-    { id: 'intermediate', name: 'Intermediate' },
-    { id: 'advanced', name: 'Advanced' },
-  ];
-
-  const agenticSystems = [
-    {
-      id: 1,
-      complexity: 'beginner',
-      name: 'Customer Communication Agent',
-      description: 'Intelligent systems that handle inquiries, schedule appointments, send follow-ups, and maintain conversation context across channels.',
-      whatYouLearn: 'Natural language processing, calendar integration, CRM connections',
-      industries: 'Any customer-facing business',
-      capabilities: ['24/7 availability', 'Context retention', 'Multi-channel']
-    },
-    {
-      id: 2,
-      complexity: 'beginner',
-      name: 'Task Automation Agent',
-      description: 'Smart agents that automate repetitive workflows like data entry, email responses, and status updates based on triggers you define.',
-      whatYouLearn: 'Workflow automation, trigger design, API integrations',
-      industries: 'Operations-heavy businesses',
-      capabilities: ['Trigger-based', 'Rule learning', 'Error handling']
-    },
-    {
-      id: 3,
-      complexity: 'intermediate',
-      name: 'Intelligent Document Processor',
-      description: 'Advanced systems that read proposals, invoices, contracts; extract critical data; route for action; and learn from patterns over time.',
-      whatYouLearn: 'Document AI, data extraction, pattern recognition',
-      industries: 'Construction, legal, property management',
-      capabilities: ['OCR + Understanding', 'Smart routing', 'Learning system']
-    },
-    {
-      id: 4,
-      complexity: 'intermediate',
-      name: 'Predictive Business Analyst',
-      description: 'Data-driven agents that analyze sales patterns, forecast cash flow, identify opportunities, and alert you to trends before they become problems.',
-      whatYouLearn: 'Data analysis, forecasting models, business intelligence',
-      industries: 'Any data-driven business',
-      capabilities: ['Trend detection', 'Forecasting', 'Opportunity alerts']
-    },
-    {
-      id: 5,
-      complexity: 'advanced',
-      name: 'Multi-Agent Orchestration',
-      description: 'Coordinated systems where multiple specialized agents work together, delegating tasks and sharing information to handle complex workflows.',
-      whatYouLearn: 'Agent collaboration, task delegation, system architecture',
-      industries: 'Complex operations businesses',
-      capabilities: ['Agent coordination', 'Dynamic routing', 'Scalable']
-    },
-    {
-      id: 6,
-      complexity: 'advanced',
-      name: 'Adaptive Learning System',
-      description: 'Intelligent systems that continuously learn from your business operations, adapt to changes, and suggest optimizations based on what works.',
-      whatYouLearn: 'Machine learning integration, feedback loops, optimization',
-      industries: 'Future-focused businesses',
-      capabilities: ['Self-improving', 'Adaptive behavior', 'Optimization']
-    },
-  ];
-
-  const filteredSystems = selectedComplexity === 'all' ? agenticSystems : agenticSystems.filter(sys => sys.complexity === selectedComplexity);
+  const filteredSystems = selectedComplexity === 'all'
+    ? t.useCases.systems
+    : t.useCases.systems.filter(sys => sys.complexity === selectedComplexity);
 
   return (
     <section id="solutions" className="relative py-20 lg:py-32 px-4 sm:px-6">
@@ -77,19 +17,19 @@ export default function UseCaseSelector() {
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className="tag inline-flex mb-4" style={{ background: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#22C55E' }}>
-            Intelligent Systems
+            {t.useCases.tag}
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-            Agentic systems that learn and adapt
+            {t.useCases.heading}
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Build intelligent systems tailored to YOUR business—regardless of industry. Each system type teaches you new capabilities you can apply across your operations. These are examples, not limits.
+            {t.useCases.description}
           </p>
         </div>
 
         {/* Complexity Filter */}
         <div className="flex flex-wrap justify-center gap-2 mb-12">
-          {complexityLevels.map((level) => (
+          {t.useCases.complexityLevels.map((level) => (
             <button
               key={level.id}
               onClick={() => setSelectedComplexity(level.id)}
@@ -139,7 +79,7 @@ export default function UseCaseSelector() {
               </div>
 
               <div className="p-3 rounded-lg" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.2)' }}>
-                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">You&apos;ll Learn:</p>
+                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">{t.useCases.youllLearn}</p>
                 <p className="text-xs text-white/70">{system.whatYouLearn}</p>
               </div>
             </div>
@@ -149,7 +89,7 @@ export default function UseCaseSelector() {
         {/* Bottom Note */}
         <div className="mt-12 text-center">
           <p className="text-sm text-white/50 max-w-2xl mx-auto">
-            These are system types, not rigid templates. We&apos;ll work together to adapt them to your unique business needs and opportunities—no matter what industry you&apos;re in.
+            {t.useCases.bottomNote}
           </p>
         </div>
       </div>

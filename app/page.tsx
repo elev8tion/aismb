@@ -1,3 +1,4 @@
+import ClientLayout from '@/components/ClientLayout';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import SocialProofBar from '@/components/SocialProofBar';
@@ -14,22 +15,24 @@ import VoiceAgentFAB from '@/components/VoiceAgentFAB';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0A0A0B]">
-      <Header />
-      <HeroSection />
-      <SocialProofBar />
-      <ProblemSection />
-      <HowItWorksSection />
-      <UseCaseSelector />
-      <CaseStudiesSection />
-      <ROICalculator />
-      <PricingSection />
-      <FAQSection />
-      <FinalCTA />
-      <Footer />
+    <ClientLayout>
+      <main className="min-h-screen bg-[#0A0A0B]">
+        <Header />
+        <HeroSection />
+        <SocialProofBar />
+        <ProblemSection />
+        <HowItWorksSection />
+        <UseCaseSelector />
+        <CaseStudiesSection />
+        <ROICalculator />
+        <PricingSection />
+        <FAQSection />
+        <FinalCTA />
+        <Footer />
 
-      {/* Voice Agent FAB */}
-      <VoiceAgentFAB />
-    </main>
+        {/* Voice Agent FAB */}
+        <VoiceAgentFAB />
+      </main>
+    </ClientLayout>
   );
 }

@@ -1,111 +1,31 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from '@/contexts/LanguageContext';
 
 export default function PricingSection() {
-  const pricingTiers = [
-    {
-      name: 'AI Discovery',
-      subtitle: 'Perfect starter',
-      setupFee: '$2,500',
-      monthlyFee: '$750',
-      minimumTerm: '2 months',
-      description: 'Discover where AI can transform YOUR business and build your first intelligent system',
-      features: [
-        '4-week AI opportunity assessment',
-        'Build 1 core agentic system together',
-        'Bi-weekly co-creation sessions (video calls)',
-        'Email support between sessions',
-        'Starter templates & frameworks',
-        'Documentation & resources',
-        'You\'ll learn: AI fundamentals, system design basics',
-      ],
-      outcome: 'First working AI system + clear roadmap',
-      cta: 'Start Your Journey',
-      highlighted: false,
-    },
-    {
-      name: 'Foundation Builder',
-      subtitle: 'Most popular',
-      setupFee: '$5,000',
-      monthlyFee: '$1,500',
-      minimumTerm: '3 months',
-      description: 'Build multiple intelligent systems and master AI fundamentals',
-      features: [
-        'Everything in AI Discovery',
-        '8-week comprehensive AI training',
-        'Build 2-3 core agentic systems',
-        'Weekly co-creation sessions (video calls)',
-        'Priority email & messaging support',
-        'Full template library & tools',
-        'You\'ll learn: System design, deployment, integration',
-      ],
-      outcome: 'Independent with foundational systems',
-      cta: 'Build Your Foundation',
-      highlighted: true,
-    },
-    {
-      name: 'Systems Architect',
-      subtitle: 'Advanced capability',
-      setupFee: '$12,000',
-      monthlyFee: '$3,000',
-      minimumTerm: '6 months',
-      description: 'Transform your operations with advanced intelligent systems',
-      features: [
-        'Everything in Foundation Builder',
-        'Build 4-6 advanced agentic systems',
-        'Custom system architecture design',
-        'Advanced training: Multi-agent orchestration',
-        'Priority email & messaging support',
-        'Monthly strategy sessions (dedicated)',
-        'You\'ll learn: Advanced patterns, scaling, optimization',
-      ],
-      outcome: 'Master builder with production systems',
-      cta: 'Transform Your Business',
-      highlighted: false,
-    },
-    {
-      name: 'AI-Native Enterprise',
-      subtitle: 'Full transformation',
-      setupFee: 'Custom',
-      monthlyFee: 'Custom',
-      minimumTerm: 'Custom',
-      description: 'Become an AI-first organization with enterprise capabilities',
-      features: [
-        'Everything in Systems Architect',
-        'Unlimited agentic systems development',
-        'Dedicated partnership manager',
-        'Train your entire team as AI builders',
-        'White-glove implementation support',
-        'Multi-location/complex integration',
-        'You\'ll learn: Enterprise architecture, team training, governance',
-      ],
-      outcome: 'AI-native business with internal capability',
-      cta: 'Contact Us',
-      highlighted: false,
-    },
-  ];
+  const { t } = useTranslations();
 
   return (
     <section className="relative py-20 lg:py-32 px-4 sm:px-6" id="pricing">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="tag inline-flex mb-4">Partnership Investment</div>
+          <div className="tag inline-flex mb-4">{t.pricing.tag}</div>
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-            Invest in capability, not dependency
+            {t.pricing.heading}
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto mb-3">
-            One-time capability transfer fee + ongoing partnership support. Our goal is your independence, not your ongoing payments.
+            {t.pricing.description}
           </p>
           <p className="text-sm text-white/50 max-w-xl mx-auto">
-            After minimum term: You&apos;re independent! Extend sessions month-to-month if you want continued guidance on new projects.
+            {t.pricing.afterMinimum}
           </p>
         </div>
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-12">
-          {pricingTiers.map((tier, idx) => (
+          {t.pricing.tiers.slice(0, 3).map((tier, idx) => (
             <div
               key={idx}
               className={`relative glass p-4 md:p-6 lg:p-8 transition-all duration-300 flex flex-col ${
@@ -115,7 +35,7 @@ export default function PricingSection() {
               {tier.highlighted && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-[#0EA5E9] text-white text-xs font-bold px-4 py-1.5 rounded-full">
-                    RECOMMENDED
+                    {t.pricing.labels.recommended}
                   </span>
                 </div>
               )}
@@ -128,34 +48,30 @@ export default function PricingSection() {
 
               {/* Pricing */}
               <div className="mb-6 pb-6 border-b border-white/10">
-                <p className="text-sm text-white/50 mb-2">Capability Transfer</p>
+                <p className="text-sm text-white/50 mb-2">{t.pricing.labels.capabilityTransfer}</p>
                 <div className="text-4xl font-bold text-white mb-4">
                   {tier.setupFee}
                 </div>
                 <div className="flex items-baseline gap-2 mb-3">
                   <span className="text-xl font-semibold text-[#0EA5E9]">{tier.monthlyFee}</span>
-                  <span className="text-sm text-white/50">/month partnership</span>
+                  <span className="text-sm text-white/50">{t.pricing.labels.monthPartnership}</span>
                 </div>
-                <p className="text-xs text-white/40">{tier.minimumTerm} minimum for learning completion</p>
+                <p className="text-xs text-white/40">{tier.minimumTerm} {t.pricing.labels.minimumForLearning}</p>
               </div>
 
               {/* Description */}
               <p className="text-sm text-white/60 mb-4">{tier.description}</p>
 
               {/* ROI Indicator */}
-              {tier.name !== 'AI-Native Enterprise' && (
+              {tier.roiText && (
                 <div className="mb-6 p-3 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
                   <div className="flex items-center gap-2 mb-1">
                     <svg className="w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
-                    <span className="text-xs text-[#22C55E] font-semibold">Typical ROI</span>
+                    <span className="text-xs text-[#22C55E] font-semibold">{t.pricing.labels.typicalRoi}</span>
                   </div>
-                  <p className="text-sm text-white font-semibold">
-                    {tier.name === 'AI Discovery' && '200-450% in 2 months'}
-                    {tier.name === 'Foundation Builder' && '150-250% in 3 months'}
-                    {tier.name === 'Systems Architect' && '180-300% in 6 months'}
-                  </p>
+                  <p className="text-sm text-white font-semibold">{tier.roiText}</p>
                 </div>
               )}
 
@@ -173,7 +89,7 @@ export default function PricingSection() {
 
               {/* Outcome */}
               <div className="mb-6 p-4 rounded-lg" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.2)' }}>
-                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">Your Outcome</p>
+                <p className="text-xs text-[#0EA5E9] font-semibold mb-1">{t.pricing.labels.yourOutcome}</p>
                 <p className="text-sm text-white">{tier.outcome}</p>
               </div>
 
@@ -185,11 +101,38 @@ export default function PricingSection() {
               </button>
 
               <a href="#roi-calculator" className="block mt-4 text-center text-sm text-[#0EA5E9] hover:text-white transition-colors">
-                See Capability ROI
+                {t.pricing.labels.seeCapabilityRoi}
               </a>
             </div>
           ))}
         </div>
+
+        {/* Enterprise Tier - Full Width */}
+        {t.pricing.tiers[3] && (
+          <div className="glass p-6 md:p-8 mb-12">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex-1">
+                <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{t.pricing.tiers[3].subtitle}</p>
+                <h3 className="text-2xl font-bold text-white mb-2">{t.pricing.tiers[3].name}</h3>
+                <p className="text-sm text-white/60 mb-4">{t.pricing.tiers[3].description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {t.pricing.tiers[3].features.slice(0, 4).map((feature, idx) => (
+                    <span key={idx} className="text-xs px-3 py-1.5 rounded-full bg-white/5 text-white/60 border border-white/10">
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="text-center lg:text-right">
+                <p className="text-sm text-white/50 mb-2">{t.pricing.labels.capabilityTransfer}</p>
+                <p className="text-3xl font-bold text-white mb-4">{t.pricing.tiers[3].setupFee}</p>
+                <button className="btn-glass px-8 py-3 font-semibold">
+                  {t.pricing.tiers[3].cta}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Guarantee */}
         <div className="glass p-6 md:p-8 lg:p-10 max-w-3xl mx-auto" style={{ borderColor: 'rgba(34, 197, 94, 0.3)' }}>
@@ -200,15 +143,15 @@ export default function PricingSection() {
               </svg>
             </div>
             <div className="text-center sm:text-left">
-              <h3 className="text-xl font-bold text-white mb-2">30-Day Results Guarantee</h3>
+              <h3 className="text-xl font-bold text-white mb-2">{t.pricing.guarantee.title}</h3>
               <p className="text-sm text-white/60">
-                If you don&apos;t see measurable time savings within 30 days, we work for free until you do.
+                {t.pricing.guarantee.description}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-6 mt-8 pt-6 border-t border-white/10">
-            {['No long-term contracts', 'Cancel anytime', 'Your data stays yours'].map((item, idx) => (
+            {t.pricing.guarantee.items.map((item, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

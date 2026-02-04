@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from '@/contexts/LanguageContext';
 
 export default function FinalCTA() {
+  const { t } = useTranslations();
+
   return (
     <section id="get-started" className="bg-[#111113] py-16 lg:py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -10,15 +13,15 @@ export default function FinalCTA() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#22C55E]/10 border border-[#22C55E]/20 rounded-full mb-6">
             <span className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse"></span>
-            <span className="text-sm font-medium text-[#22C55E]">Limited availability</span>
+            <span className="text-sm font-medium text-[#22C55E]">{t.finalCta.badge}</span>
           </div>
 
           {/* Headline */}
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Ready to get 30% of your time back?
+            {t.finalCta.heading}
           </h2>
           <p className="text-lg text-[#A1A1AA] max-w-2xl mx-auto mb-8">
-            Join 50+ SMBs already saving time with AI automation. Start with a comprehension meeting to identify your opportunities.
+            {t.finalCta.description}
           </p>
 
           {/* CTA Buttons */}
@@ -30,7 +33,7 @@ export default function FinalCTA() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              Schedule Comprehension Meeting
+              {t.finalCta.ctaPrimary}
             </a>
             <a
               href="#roi-calculator"
@@ -39,17 +42,13 @@ export default function FinalCTA() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
-              Calculate Your ROI
+              {t.finalCta.ctaSecondary}
             </a>
           </div>
 
           {/* Trust Signals */}
           <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-[#27272A]">
-            {[
-              { icon: 'shield', label: '30-day guarantee' },
-              { icon: 'lock', label: 'No commitment' },
-              { icon: 'clock', label: '30-min call' },
-            ].map((item, idx) => (
+            {t.finalCta.trustSignals.map((item, idx) => (
               <div key={idx} className="flex items-center gap-2 text-[#71717A]">
                 {item.icon === 'shield' && (
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -12,10 +12,12 @@ import {
 import { AudioURLManager } from './utils/audioProcessor';
 import { getIOSAudioPlayer } from './utils/iosAudioUnlock';
 import { getSessionId, clearSessionId } from '@/lib/utils/sessionId';
+import { useTranslations } from '@/contexts/LanguageContext';
 
 type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking';
 
 export default function VoiceAgentFAB() {
+  const { t } = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
@@ -40,10 +42,10 @@ export default function VoiceAgentFAB() {
       if (error instanceof BrowserNotSupportedError) {
         setDisplayError(error.message);
       } else {
-        setDisplayError('Voice recording is not supported in this browser.');
+        setDisplayError(t.voiceAgent.errors.notSupported);
       }
     }
-  }, []);
+  }, [t.voiceAgent.errors.notSupported]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -397,23 +399,23 @@ export default function VoiceAgentFAB() {
               {/* Status */}
               <div className="text-center mb-4">
                 <h3 className="text-lg font-bold text-white mb-2">
-                  {voiceState === 'idle' && 'Ready to Help'}
-                  {voiceState === 'listening' && 'Listening...'}
-                  {voiceState === 'processing' && 'Processing...'}
-                  {voiceState === 'speaking' && 'Speaking...'}
+                  {voiceState === 'idle' && t.voiceAgent.states.idle.title}
+                  {voiceState === 'listening' && t.voiceAgent.states.listening.title}
+                  {voiceState === 'processing' && t.voiceAgent.states.processing.title}
+                  {voiceState === 'speaking' && t.voiceAgent.states.speaking.title}
                 </h3>
                 <p className="text-sm text-white/60">
-                  {voiceState === 'idle' && 'Click to ask a question'}
-                  {voiceState === 'listening' && 'Speak your question'}
-                  {voiceState === 'processing' && 'Thinking...'}
-                  {voiceState === 'speaking' && 'Playing response'}
+                  {voiceState === 'idle' && t.voiceAgent.states.idle.description}
+                  {voiceState === 'listening' && t.voiceAgent.states.listening.description}
+                  {voiceState === 'processing' && t.voiceAgent.states.processing.description}
+                  {voiceState === 'speaking' && t.voiceAgent.states.speaking.description}
                 </p>
               </div>
 
               {/* Transcript */}
               {transcript && (
                 <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
-                  <p className="text-xs text-white/50 mb-1">You asked:</p>
+                  <p className="text-xs text-white/50 mb-1">{t.voiceAgent.transcript}</p>
                   <p className="text-sm text-white">{transcript}</p>
                 </div>
               )}
@@ -456,14 +458,14 @@ export default function VoiceAgentFAB() {
                 >
                   <div className="text-center">
                     <p className="text-sm text-white/80 mb-3">
-                      Need more information or have another question?
+                      {t.voiceAgent.autoClose.prompt}
                     </p>
                     <div className="flex items-center justify-center gap-2 mb-3">
                       <div className="text-2xl font-bold text-blue-400">
                         {countdown}
                       </div>
                       <p className="text-xs text-white/60">
-                        seconds until auto-close
+                        {t.voiceAgent.autoClose.seconds}
                       </p>
                     </div>
                     <div className="flex gap-2 justify-center">
@@ -474,13 +476,13 @@ export default function VoiceAgentFAB() {
                         }}
                         className="px-3 py-1.5 text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
                       >
-                        Ask Another Question
+                        {t.voiceAgent.autoClose.askAnother}
                       </button>
                       <button
                         onClick={clearAutoCloseCountdown}
                         className="px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 text-white/80 rounded-lg transition-colors"
                       >
-                        Stay Open
+                        {t.voiceAgent.autoClose.stayOpen}
                       </button>
                     </div>
                   </div>
@@ -498,7 +500,7 @@ export default function VoiceAgentFAB() {
                     }}
                     className="flex-1 btn-primary py-2 rounded-lg text-sm"
                   >
-                    Stop
+                    {t.voiceAgent.buttons.stop}
                   </button>
                 )}
                 <button
@@ -517,7 +519,7 @@ export default function VoiceAgentFAB() {
                   }}
                   className="flex-1 btn-glass py-2 rounded-lg text-sm"
                 >
-                  Close
+                  {t.voiceAgent.buttons.close}
                 </button>
               </div>
             </div>

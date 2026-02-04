@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useTranslations } from '@/contexts/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
+  const { t } = useTranslations();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -17,10 +20,10 @@ export default function Header() {
   }, []);
 
   const navItems = [
-    { label: 'Solutions', href: '#solutions' },
-    { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'Case Studies', href: '#case-studies' },
+    { label: t.nav.solutions, href: '#solutions' },
+    { label: t.nav.howItWorks, href: '#how-it-works' },
+    { label: t.nav.pricing, href: '#pricing' },
+    { label: t.nav.caseStudies, href: '#case-studies' },
   ];
 
   return (
@@ -57,19 +60,20 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Desktop CTA */}
+            {/* Desktop CTA + Language Switcher */}
             <div className="hidden lg:flex items-center gap-4">
+              <LanguageSwitcher variant="compact" />
               <a
                 href="#contact"
                 className="text-sm font-medium text-white/70 hover:text-white transition-colors"
               >
-                Contact
+                {t.nav.contact}
               </a>
               <a
                 href="#get-started"
                 className="btn-fab text-sm px-6 py-2.5"
               >
-                Get Started
+                {t.nav.getStarted}
               </a>
             </div>
 
@@ -77,7 +81,7 @@ export default function Header() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-label={mobileMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
             >
               <div className="relative w-6 h-6">
                 <span
@@ -123,19 +127,22 @@ export default function Header() {
                   </a>
                 ))}
                 <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+                  <div className="px-4 py-2">
+                    <LanguageSwitcher variant="compact" />
+                  </div>
                   <a
                     href="#contact"
                     className="block px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Contact
+                    {t.nav.contact}
                   </a>
                   <a
                     href="#get-started"
                     className="btn-fab block text-center text-sm"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Get Started
+                    {t.nav.getStarted}
                   </a>
                 </div>
               </nav>

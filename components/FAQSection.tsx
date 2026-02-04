@@ -1,36 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from '@/contexts/LanguageContext';
 
 export default function FAQSection() {
+  const { t } = useTranslations();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-
-  const faqs = [
-    {
-      question: 'Do I need technical skills to use AI automation?',
-      answer: 'No. We handle all the technical implementation. Your team will use simple interfaces—most look like the tools you already use. We provide training and ongoing support.',
-    },
-    {
-      question: 'How long does it take to see results?',
-      answer: 'Most clients see measurable time savings within 2-4 weeks of their first workflow going live. Full ROI typically happens within 6-12 weeks depending on the package.',
-    },
-    {
-      question: 'What happens to my data?',
-      answer: 'Your data stays yours. We use enterprise-grade security and never share or sell your information. All data processing follows strict privacy standards.',
-    },
-    {
-      question: 'What if it doesn\'t work for my business?',
-      answer: 'We offer a 30-day results guarantee. If you don\'t see measurable time savings, we\'ll work for free until you do. Plus, you can cancel after the initial 3-month period.',
-    },
-    {
-      question: 'Can AI handle complex customer interactions?',
-      answer: 'Yes, with human oversight. Our AI handles routine tasks and escalates complex situations to your team. You stay in control of important decisions.',
-    },
-    {
-      question: 'What systems do you integrate with?',
-      answer: 'We integrate with most popular business tools including QuickBooks, ServiceTitan, Jobber, Google Workspace, Microsoft 365, and many more. Custom integrations are available for Enterprise clients.',
-    },
-  ];
 
   return (
     <section className="bg-[#0A0A0B] py-16 lg:py-24">
@@ -38,19 +13,19 @@ export default function FAQSection() {
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-full mb-4">
-            <span className="text-sm font-medium text-[#3B82F6]">FAQ</span>
+            <span className="text-sm font-medium text-[#3B82F6]">{t.faq.tag}</span>
           </div>
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Common questions
+            {t.faq.heading}
           </h2>
           <p className="text-lg text-[#A1A1AA]">
-            Everything you need to know about AI automation.
+            {t.faq.description}
           </p>
         </div>
 
         {/* FAQ Items */}
         <div className="space-y-3">
-          {faqs.map((faq, idx) => (
+          {t.faq.items.map((faq, idx) => (
             <div
               key={idx}
               className="bg-[#111113] border border-[#27272A] rounded-xl overflow-hidden"
@@ -82,12 +57,12 @@ export default function FAQSection() {
 
         {/* Contact CTA */}
         <div className="mt-10 text-center">
-          <p className="text-[#A1A1AA] mb-4">Still have questions?</p>
+          <p className="text-[#A1A1AA] mb-4">{t.faq.contact.question}</p>
           <a
             href="#contact"
             className="inline-flex items-center gap-2 text-[#0EA5E9] hover:text-white font-medium transition-colors"
           >
-            Get in touch
+            {t.faq.contact.cta}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>

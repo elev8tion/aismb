@@ -2,28 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { useTranslations } from '@/contexts/LanguageContext';
 
 export default function Footer() {
-  const footerLinks = {
-    solutions: [
-      { label: 'Customer Communication Agents', href: '#use-cases' },
-      { label: 'Intelligent Document Processing', href: '#use-cases' },
-      { label: 'Predictive Business Analytics', href: '#use-cases' },
-      { label: 'Multi-Agent Orchestration', href: '#use-cases' },
-    ],
-    company: [
-      { label: 'About', href: '#' },
-      { label: 'Case Studies', href: '#case-studies' },
-      { label: 'Pricing', href: '#pricing' },
-      { label: 'Contact', href: '#contact' },
-    ],
-    resources: [
-      { label: 'ROI Calculator', href: '#roi-calculator' },
-      { label: 'Blog', href: '#' },
-      { label: 'FAQ', href: '#' },
-      { label: 'Support', href: '#' },
-    ],
-  };
+  const { t } = useTranslations();
 
   return (
     <footer className="bg-[#0A0A0B] border-t border-[#27272A]">
@@ -41,7 +23,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-sm text-[#71717A] mb-6">
-              AI automation for SMBs. Get 30% of your time back in 30 days.
+              {t.footer.tagline}
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="text-[#71717A] hover:text-white transition-colors">
@@ -60,10 +42,10 @@ export default function Footer() {
           {/* Solutions */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Solutions
+              {t.footer.sections.solutions}
             </h4>
             <ul className="space-y-3">
-              {footerLinks.solutions.map((link, idx) => (
+              {t.footer.links.solutions.map((link, idx) => (
                 <li key={idx}>
                   <a href={link.href} className="text-sm text-[#71717A] hover:text-white transition-colors">
                     {link.label}
@@ -76,10 +58,10 @@ export default function Footer() {
           {/* Company */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Company
+              {t.footer.sections.company}
             </h4>
             <ul className="space-y-3">
-              {footerLinks.company.map((link, idx) => (
+              {t.footer.links.company.map((link, idx) => (
                 <li key={idx}>
                   <a href={link.href} className="text-sm text-[#71717A] hover:text-white transition-colors">
                     {link.label}
@@ -92,10 +74,10 @@ export default function Footer() {
           {/* Resources */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Resources
+              {t.footer.sections.resources}
             </h4>
             <ul className="space-y-3">
-              {footerLinks.resources.map((link, idx) => (
+              {t.footer.links.resources.map((link, idx) => (
                 <li key={idx}>
                   <a href={link.href} className="text-sm text-[#71717A] hover:text-white transition-colors">
                     {link.label}
@@ -109,14 +91,14 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-[#27272A] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-[#71717A]">
-            &copy; {new Date().getFullYear()} elev8tion. All rights reserved.
+            &copy; {new Date().getFullYear()} {t.footer.copyright}
           </p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-sm text-[#71717A] hover:text-white transition-colors">
-              Privacy Policy
+              {t.footer.privacyPolicy}
             </a>
             <a href="#" className="text-sm text-[#71717A] hover:text-white transition-colors">
-              Terms of Service
+              {t.footer.termsOfService}
             </a>
           </div>
         </div>
