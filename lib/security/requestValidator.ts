@@ -1,7 +1,7 @@
 // Request Validator - Input validation and sanitization
 
 export const LIMITS = {
-  MAX_QUESTION_LENGTH: 500, // characters
+  MAX_QUESTION_LENGTH: 2000, // characters - accommodates 60 seconds of natural speech
   MAX_TEXT_LENGTH: 1000, // characters
   MAX_AUDIO_SIZE: 5 * 1024 * 1024, // 5MB
   MAX_AUDIO_DURATION: 60, // seconds
