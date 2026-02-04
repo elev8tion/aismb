@@ -97,6 +97,132 @@ body {
     inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
 }
 
+/* ===== LIQUID GLASS EFFECT ===== */
+.liquid-glass {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Liquid shine layer - creates the refraction illusion */
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  border-radius: 24px 24px 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+/* Subtle border glow animation */
+.liquid-glass-glow {
+  position: relative;
+}
+
+.liquid-glass-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(14, 165, 233, 0.3),
+    rgba(125, 211, 252, 0.4),
+    rgba(14, 165, 233, 0.3),
+    transparent
+  );
+  border-radius: 25px;
+  opacity: 0;
+  z-index: -1;
+  animation: border-glow 4s ease-in-out infinite;
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.01);
+  }
+}
+
+/* Floating liquid orb background effect */
+@keyframes liquid-float {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+  25% {
+    transform: translate(10px, -10px) rotate(90deg);
+    border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
+  }
+  50% {
+    transform: translate(0, 10px) rotate(180deg);
+    border-radius: 50% 60% 30% 60% / 70% 40% 70% 30%;
+  }
+  75% {
+    transform: translate(-10px, -5px) rotate(270deg);
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+}
+
+.liquid-orb {
+  animation: liquid-float 15s ease-in-out infinite;
+  filter: blur(40px);
+}
+
+/* Liquid ripple effect on interaction */
+@keyframes liquid-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.liquid-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-ripple::after {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: scale(0);
+  pointer-events: none;
+  opacity: 0;
+}
+
+
 /* Tag/Badge Styling */
 .tag {
   background: var(--tag-bg);
@@ -122,6 +248,27 @@ body {
   background: var(--brand-secondary);
   transform: translateY(-2px);
   box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+}
+
+/* FAB-style Glassmorphic Button */
+.btn-fab {
+  background: rgba(14, 165, 233, 0.1);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 2px solid rgba(14, 165, 233, 0.3);
+  color: white;
+  font-weight: 600;
+  padding: 0.875rem 2rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+}
+
+.btn-fab:hover {
+  background: rgba(14, 165, 233, 0.2);
+  border-color: rgba(14, 165, 233, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(14, 165, 233, 0.25);
 }
 
 .btn-glass {
