@@ -31,7 +31,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`📤 Transcribing audio: ${audioFile.size} bytes, type: ${audioFile.type}`);
+    // Log received audio details for debugging
+    const audioInfo = {
+      size: audioFile.size,
+      type: audioFile.type,
+      name: audioFile.name,
+    };
+    console.log(`📤 Transcribing audio:`, JSON.stringify(audioInfo));
 
     // Convert File to Uint8Array for OpenAI API (edge runtime compatible)
     const buffer = new Uint8Array(await audioFile.arrayBuffer());
@@ -48,7 +54,9 @@ export async function POST(request: NextRequest) {
       return 'webm'; // Default fallback
     };
     const extension = getExtension(audioFile.type);
-    const file = new File([buffer], `audio.${extension}`, { type: audioFile.type });
+    const fileName = `audio.${extension}`;
+    console.log(`📁 Creating file: ${fileName} from MIME type: ${audioFile.type}`);
+    const file = new File([buffer], fileName, { type: audioFile.type });
 
     // Call OpenAI Whisper API
     const transcription = await openai.audio.transcriptions.create({
@@ -72,10 +80,20 @@ export async function POST(request: NextRequest) {
     console.error('Transcription error:', error);
     const duration = Date.now() - startTime;
 
+    // Extract detailed error info
+    let errorDetails = 'Unknown error';
+    if (error instanceof Error) {
+      errorDetails = error.message;
+      // Check for OpenAI API errors
+      if ('status' in error) {
+        errorDetails = `OpenAI API error (${(error as { status: number }).status}): ${error.message}`;
+      }
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to transcribe audio',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: errorDetails,
         duration,
       },
       { status: 500 }

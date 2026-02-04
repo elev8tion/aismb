@@ -128,12 +128,16 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
           signal: abortController.signal,
         });
 
-        // Check for network errors
+        // Check for network errors - include detailed error from API
         if (!response.ok) {
-          if (response.status >= 500) {
-            throw new NetworkError(`Server error: ${response.status}`);
+          let errorDetail = '';
+          try {
+            const errorData = await response.json() as { error?: string; details?: string };
+            errorDetail = errorData.details || errorData.error || response.statusText;
+          } catch {
+            errorDetail = response.statusText;
           }
-          throw new NetworkError(`Request failed: ${response.statusText}`);
+          throw new NetworkError(`Transcribe failed (${response.status}): ${errorDetail}`);
         }
 
         // Parse response

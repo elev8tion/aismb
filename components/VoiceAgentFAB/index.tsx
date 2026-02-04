@@ -167,7 +167,9 @@ export default function VoiceAgentFAB() {
       }
 
       console.error('Voice interaction error:', error);
-      setDisplayError('Failed to process your question. Please try again.');
+      // Show detailed error for debugging
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setDisplayError(`Error: ${errorMessage}`);
       setVoiceState('idle');
     } finally {
       abortControllerRef.current = null;
