@@ -10,6 +10,7 @@ import {
   BrowserNotSupportedError,
 } from './utils/browserCompatibility';
 import { AudioURLManager } from './utils/audioProcessor';
+import { getIOSAudioPlayer } from './utils/iosAudioUnlock';
 import { getSessionId, clearSessionId } from '@/lib/utils/sessionId';
 
 type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking';
@@ -27,6 +28,7 @@ export default function VoiceAgentFAB() {
   const audioURLManagerRef = useRef<AudioURLManager>(new AudioURLManager());
   const abortControllerRef = useRef<AbortController | null>(null);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const iosAudioPlayerRef = useRef(getIOSAudioPlayer());
 
   // Check browser compatibility on mount
   useEffect(() => {
@@ -53,6 +55,7 @@ export default function VoiceAgentFAB() {
       if (countdownTimerRef.current) {
         clearInterval(countdownTimerRef.current);
       }
+      iosAudioPlayerRef.current.stop();
     };
   }, []);
 
@@ -142,23 +145,24 @@ export default function VoiceAgentFAB() {
 
       const audioBlob = await speechResponse.blob();
       const audioUrl = audioURLManagerRef.current.createURL(audioBlob);
-      const audio = new Audio(audioUrl);
 
-      // Handle audio playback
-      audio.onended = () => {
-        setVoiceState('idle');
-        audioURLManagerRef.current.revokeURL(audioUrl);
-        // Start auto-close countdown after response finishes
-        startAutoCloseCountdown();
-      };
-
-      audio.onerror = () => {
-        setDisplayError('Failed to play audio response');
-        setVoiceState('idle');
-        audioURLManagerRef.current.revokeURL(audioUrl);
-      };
-
-      await audio.play();
+      // Use iOS-compatible audio player (pre-unlocked during user interaction)
+      await iosAudioPlayerRef.current.play(
+        audioUrl,
+        () => {
+          // onEnded
+          setVoiceState('idle');
+          audioURLManagerRef.current.revokeURL(audioUrl);
+          startAutoCloseCountdown();
+        },
+        (error) => {
+          // onError
+          console.error('Audio playback error:', error);
+          setDisplayError(`Audio error: ${error.message}`);
+          setVoiceState('idle');
+          audioURLManagerRef.current.revokeURL(audioUrl);
+        }
+      );
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         // User cancelled - silent return
@@ -238,6 +242,9 @@ export default function VoiceAgentFAB() {
       }, 500); // Small delay for animation
     } else {
       if (voiceState === 'listening') {
+        // CRITICAL: Unlock iOS audio during user tap BEFORE async operations
+        // This allows audio.play() to work after API calls complete
+        iosAudioPlayerRef.current.unlock();
         stopRecording();
       } else {
         // Cancel any ongoing operations
@@ -448,7 +455,11 @@ export default function VoiceAgentFAB() {
               <div className="flex gap-2 mt-4">
                 {voiceState === 'listening' && (
                   <button
-                    onClick={stopRecording}
+                    onClick={() => {
+                      // CRITICAL: Unlock iOS audio during user tap
+                      iosAudioPlayerRef.current.unlock();
+                      stopRecording();
+                    }}
                     className="flex-1 btn-primary py-2 rounded-lg text-sm"
                   >
                     Stop
