@@ -17,30 +17,32 @@ export async function POST(request: NextRequest) {
   const { env } = getRequestContext();
   const openai = createOpenAI(env.OPENAI_API_KEY);
 
-  // Initialize KV-backed utilities
-  const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
-  const costMonitor = new KVCostMonitor(env.COST_MONITOR_KV);
-  const responseCache = new KVResponseCache(env.RESPONSE_CACHE_KV);
+  // Initialize KV-backed utilities (with fallback if KV not available yet)
+  const rateLimiter = env.RATE_LIMIT_KV ? new KVRateLimiter(env.RATE_LIMIT_KV) : null;
+  const costMonitor = env.COST_MONITOR_KV ? new KVCostMonitor(env.COST_MONITOR_KV) : null;
+  const responseCache = env.RESPONSE_CACHE_KV ? new KVResponseCache(env.RESPONSE_CACHE_KV) : null;
 
   try {
-    // 🛡️ SECURITY 1: Rate limiting
-    const rateLimit = await rateLimiter.check(clientIP);
-    if (!rateLimit.allowed) {
-      console.warn(`🚫 Rate limit exceeded for IP: ${clientIP}`);
-      return NextResponse.json(
-        {
-          error: rateLimit.reason || 'Too many requests',
-          resetTime: new Date(rateLimit.resetTime).toISOString(),
-        },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+    // 🛡️ SECURITY 1: Rate limiting (skip if KV not available)
+    if (rateLimiter) {
+      const rateLimit = await rateLimiter.check(clientIP);
+      if (!rateLimit.allowed) {
+        console.warn(`🚫 Rate limit exceeded for IP: ${clientIP}`);
+        return NextResponse.json(
+          {
+            error: rateLimit.reason || 'Too many requests',
+            resetTime: new Date(rateLimit.resetTime).toISOString(),
           },
-        }
-      );
+          {
+            status: 429,
+            headers: {
+              'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+            },
+          }
+        );
+      }
     }
 
     const body = await request.json();
@@ -75,34 +77,38 @@ export async function POST(request: NextRequest) {
       // Log but continue - OpenAI has its own safety measures
     }
 
-    // ⚡ OPTIMIZATION 1: Check cache first
-    const cached = await responseCache.get(sanitizedQuestion);
-    if (cached) {
-      const duration = Date.now() - startTime;
-      console.log(`✅ Cache HIT! Response time: ${duration}ms (saved ~2000ms)`);
+    // ⚡ OPTIMIZATION 1: Check cache first (skip if KV not available)
+    if (responseCache) {
+      const cached = await responseCache.get(sanitizedQuestion);
+      if (cached) {
+        const duration = Date.now() - startTime;
+        console.log(`✅ Cache HIT! Response time: ${duration}ms (saved ~2000ms)`);
 
-      // 💰 Track cost (cached = $0)
-      await costMonitor.track({
-        endpoint: 'chat',
-        model: MODELS.chat,
-        inputTokens: 0,
-        outputTokens: 0,
-        cached: true,
-        ip: clientIP,
-      });
+        // 💰 Track cost (cached = $0)
+        if (costMonitor) {
+          await costMonitor.track({
+            endpoint: 'chat',
+            model: MODELS.chat,
+            inputTokens: 0,
+            outputTokens: 0,
+            cached: true,
+            ip: clientIP,
+          });
+        }
 
-      return NextResponse.json({
-        response: cached.textResponse,
-        success: true,
-        cached: true,
-        duration,
-      });
+        return NextResponse.json({
+          response: cached.textResponse,
+          success: true,
+          cached: true,
+          duration,
+        });
+      }
     }
 
     console.log('❌ Cache MISS - Processing with OpenAI...');
 
-    // 🛡️ SECURITY 4: Check daily cost limit
-    if (await costMonitor.isOverDailyLimit()) {
+    // 🛡️ SECURITY 4: Check daily cost limit (skip if KV not available)
+    if (costMonitor && await costMonitor.isOverDailyLimit()) {
       console.error(`🚨 DAILY COST LIMIT EXCEEDED for ${clientIP}`);
       return NextResponse.json(
         {
@@ -154,20 +160,24 @@ export async function POST(request: NextRequest) {
     console.log(`💾 Saved conversation to session ${sessionId}`);
 
     // Cache the response for future requests
-    await responseCache.set(sanitizedQuestion, response);
+    if (responseCache) {
+      await responseCache.set(sanitizedQuestion, response);
+    }
 
     // 💰 Track cost
     const inputTokens = completion.usage?.prompt_tokens || 0;
     const outputTokens = completion.usage?.completion_tokens || 0;
 
-    await costMonitor.track({
-      endpoint: 'chat',
-      model: MODELS.chat,
-      inputTokens,
-      outputTokens,
-      cached: false,
-      ip: clientIP,
-    });
+    if (costMonitor) {
+      await costMonitor.track({
+        endpoint: 'chat',
+        model: MODELS.chat,
+        inputTokens,
+        outputTokens,
+        cached: false,
+        ip: clientIP,
+      });
+    }
 
     const duration = Date.now() - startTime;
     console.log(`⏱️ Response generated in ${duration}ms`);
