@@ -77,30 +77,33 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
-              aria-label={mobileMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
-            >
-              <div className="relative w-6 h-6">
-                <span
-                  className={`absolute left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
-                    mobileMenuOpen ? 'top-3 rotate-45' : 'top-1'
-                  }`}
-                />
-                <span
-                  className={`absolute left-0 top-3 w-6 h-0.5 bg-current transition-all duration-300 ${
-                    mobileMenuOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
-                  }`}
-                />
-                <span
-                  className={`absolute left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
-                    mobileMenuOpen ? 'top-3 -rotate-45' : 'top-5'
-                  }`}
-                />
-              </div>
-            </button>
+            {/* Mobile Language Switcher + Menu Button */}
+            <div className="lg:hidden flex items-center gap-2">
+              <LanguageSwitcher variant="compact" />
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
+                aria-label={mobileMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
+              >
+                <div className="relative w-6 h-6">
+                  <span
+                    className={`absolute left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
+                      mobileMenuOpen ? 'top-3 rotate-45' : 'top-1'
+                    }`}
+                  />
+                  <span
+                    className={`absolute left-0 top-3 w-6 h-0.5 bg-current transition-all duration-300 ${
+                      mobileMenuOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+                    }`}
+                  />
+                  <span
+                    className={`absolute left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
+                      mobileMenuOpen ? 'top-3 -rotate-45' : 'top-5'
+                    }`}
+                  />
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Mobile Menu with Liquid Glass */}
