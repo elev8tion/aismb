@@ -59,17 +59,17 @@ export default function PricingSection() {
                 <p className="text-xs text-white/40">{tier.minimumTerm} {t.pricing.labels.minimumForLearning}</p>
               </div>
 
-              {/* Includes highlight */}
-              {tier.includes && (
-                <div className="mb-5 p-3 rounded-lg border" style={{ background: 'rgba(14, 165, 233, 0.12)', borderColor: 'rgba(14, 165, 233, 0.35)' }}>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-[#0EA5E9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-2v13M5 9h2m-2 4h2m-2 4h2" />
-                    </svg>
-                    <span className="text-sm text-white/90 font-semibold">{tier.includes}</span>
-                  </div>
-                </div>
-              )}
+              {/* Includes + Learning badges */}
+              <div className="mb-5 flex flex-wrap gap-2">
+                {tier.includes && (
+                  <span className="btn-fab text-xs px-3 py-1.5 whitespace-nowrap">
+                    {tier.includes}
+                  </span>
+                )}
+                <span className="btn-primary text-xs px-3 py-1.5 whitespace-nowrap">
+                  {t.pricing.labels.flexibleLearning}
+                </span>
+              </div>
 
               {/* Description */}
               <p className="text-sm text-white/60 mb-4">{tier.description}</p>
