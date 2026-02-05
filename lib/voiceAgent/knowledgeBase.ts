@@ -76,7 +76,7 @@ You don't just need AI tools. You need to understand where the opportunities are
 - Master the skills to identify and build new systems independently
 - Deliverable: Production systems + independent mastery
 
-**Important:** Whether you want to build systems yourself, understand how AI works, or train your team—we'll guide and stick with you every step of the way.
+**Important:** Learning is flexible. You can learn as little or as much as you want. We can teach you directly or train a member of your team—whatever fits your goals. Whether you want to build systems yourself, understand how AI works, or train your team—we'll guide and stick with you every step of the way.
 
 **Bottom Features:**
 - 🤝 Collaborative building
@@ -249,6 +249,7 @@ Managing 180 units with manual processes. Reactive maintenance. High tenant turn
 
 **Includes:**
 - 4-week AI opportunity assessment
+- Flexible learning: as little or as much as you want; we can train you or a team member
 - Starter templates & frameworks
 - Documentation & resources
 
@@ -284,6 +285,7 @@ Managing 180 units with manual processes. Reactive maintenance. High tenant turn
 - Everything in AI Discovery
 - 8-week comprehensive AI training
 - Full template library & tools
+- Flexible learning: as little or as much as you want; we can train you or a team member
 
 **You'll Learn:**
 - System design
@@ -319,6 +321,7 @@ Managing 180 units with manual processes. Reactive maintenance. High tenant turn
 - Everything in Foundation Builder
 - Custom system architecture design
 - Advanced training: Multi-agent orchestration
+- Flexible learning: as little or as much as you want; we can train you or a team member
 
 **You'll Learn:**
 - Advanced patterns
