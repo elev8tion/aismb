@@ -200,6 +200,8 @@ export interface Translations {
       yourOutcome: string;
       seeCapabilityRoi: string;
       flexibleLearning: string;
+      flexibleLearningText: string;
+      includes: string;
     };
     guarantee: {
       title: string;
