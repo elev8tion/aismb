@@ -61,22 +61,23 @@ export async function POST(request: NextRequest) {
     const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
     console.log(`💬 Session ${sessionId}: ${conversationHistory.length} previous messages`);
 
-    // Build messages with knowledge base and optional language preference
-    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-      {
-        role: 'system',
-        content: KNOWLEDGE_BASE, // Automatically cached by OpenAI
-      },
-    ];
+    // Build messages with language instruction FIRST (critical for Spanish compliance)
+    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
 
-    // If Spanish is selected, explicitly instruct the assistant to respond in Spanish
+    // Language instruction MUST come first to override English knowledge base context
     if (language === 'es') {
       messages.push({
         role: 'system',
         content:
-          'IMPORTANTE: El visitante prefiere español (es). Responde SIEMPRE en español natural, claro y conciso. Mantén el formato de etiquetas de acción exactamente así cuando corresponda: [ACTION:SCROLL_TO_...].',
+          'INSTRUCCIÓN OBLIGATORIA DE IDIOMA: Eres un asistente que SOLO responde en español. Sin excepciones. Toda tu comunicación debe ser en español natural, claro y profesional. El contenido de referencia está en inglés pero TÚ DEBES responder ÚNICAMENTE en español. Mantén el formato de etiquetas de acción exactamente así: [ACTION:SCROLL_TO_...].',
       });
     }
+
+    // Knowledge base (reference content - may be in English but response language is controlled above)
+    messages.push({
+      role: 'system',
+      content: KNOWLEDGE_BASE,
+    });
 
     // Include conversation history from session storage
     messages.push(...conversationHistory);
@@ -95,7 +96,10 @@ export async function POST(request: NextRequest) {
       presence_penalty: 0,
     });
 
-    const response = completion.choices[0]?.message?.content || 'I apologize, but I couldn\'t generate a response. Please try asking again.';
+    const fallbackMessage = language === 'es'
+      ? 'Lo siento, no pude generar una respuesta. Por favor, intenta de nuevo.'
+      : 'I apologize, but I couldn\'t generate a response. Please try asking again.';
+    const response = completion.choices[0]?.message?.content || fallbackMessage;
 
     // Save the conversation to session storage
     await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);
