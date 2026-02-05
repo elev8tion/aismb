@@ -30,6 +30,6 @@
     "typescript": "^5"
   },
   "overrides": {
-    "esbuild": "0.15.18"
+    "esbuild": "0.21.5"
   }
 }
