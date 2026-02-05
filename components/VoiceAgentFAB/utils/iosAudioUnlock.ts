@@ -37,6 +37,18 @@ export class IOSAudioPlayer {
     this.audio.setAttribute('playsinline', 'true');
     this.audio.setAttribute('webkit-playsinline', 'true');
 
+    // Initialize Web Audio graph and try to resume the context while in a user gesture
+    // so iOS allows it. If it fails, fall back to normal <audio> playback.
+    this.setupAudioContext();
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      try {
+        // Resume inside user gesture
+        void this.audioContext.resume();
+      } catch (err) {
+        console.warn('AudioContext resume during unlock failed (non-fatal):', err);
+      }
+    }
+
     // Play silent audio to unlock
     // Create a tiny silent audio data URL (smallest valid MP3)
     const silentAudioBase64 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRwmHAAAAAAD/+9DEAAAIAAJQAAAAgAADSAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
@@ -116,7 +128,12 @@ export class IOSAudioPlayer {
 
     // Resume AudioContext if suspended (required after user interaction)
     if (this.audioContext && this.audioContext.state === 'suspended') {
-      await this.audioContext.resume();
+      try {
+        await this.audioContext.resume();
+      } catch (err) {
+        // Non-fatal on iOS: proceed with direct HTML5 audio playback
+        console.warn('AudioContext resume failed during play (non-fatal):', err);
+      }
     }
 
     // Set up event handlers

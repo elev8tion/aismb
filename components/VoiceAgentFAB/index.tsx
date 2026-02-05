@@ -285,6 +285,8 @@ export default function VoiceAgentFAB() {
       setIsOpen(true);
       setDisplayError(null);
       setTranscript('');
+      // Unlock iOS audio on initial open (user gesture)
+      iosAudioPlayerRef.current.unlock();
       setTimeout(() => {
         startRecording();
       }, 500); // Small delay for animation
@@ -482,6 +484,8 @@ export default function VoiceAgentFAB() {
                       <button
                         onClick={() => {
                           clearAutoCloseCountdown();
+                          // Ensure iOS audio is unlocked on follow-up interaction
+                          iosAudioPlayerRef.current.unlock();
                           startRecording();
                         }}
                         className="px-3 py-1.5 text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
