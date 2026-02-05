@@ -15,6 +15,8 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audio') as File;
     const language = (formData.get('language') as string | null)?.toLowerCase();
 
+    console.log(`🌐 Transcribe language received: ${language || 'not set'}`);
+
     if (!audioFile) {
       return NextResponse.json(
         { error: 'No audio file provided' },

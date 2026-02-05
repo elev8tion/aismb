@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
       language?: 'en' | 'es';
     };
 
+    console.log(`🌐 Language received: ${language || 'not set (defaulting to English)'}`);
+
     if (!sessionId) {
       return NextResponse.json(
         { error: 'Session ID required' },

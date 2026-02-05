@@ -32,6 +32,12 @@ export default function VoiceAgentFAB() {
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const iosAudioPlayerRef = useRef(getIOSAudioPlayer());
 
+  // Use ref to always get latest language value (avoids stale closure issues)
+  const languageRef = useRef(language);
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
   // Check browser compatibility on mount
   useEffect(() => {
     try {
@@ -99,6 +105,8 @@ export default function VoiceAgentFAB() {
 
   // Process full voice interaction flow
   const processVoiceInteraction = useCallback(async (transcribedText: string) => {
+    const currentLanguage = languageRef.current;
+    console.log(`🌐 processVoiceInteraction called with language: ${currentLanguage}`);
     setTranscript(transcribedText);
     setVoiceState('processing');
 
@@ -118,8 +126,8 @@ export default function VoiceAgentFAB() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: transcribedText,
-          sessionId: currentSessionId, // Send session ID instead of full history
-          language,
+          sessionId: currentSessionId,
+          language: currentLanguage,
         }),
         signal: abortController.signal,
       });
@@ -174,7 +182,7 @@ export default function VoiceAgentFAB() {
       const speechResponse = await fetch('/api/voice-agent/speak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: responseText, language }),
+        body: JSON.stringify({ text: responseText, language: currentLanguage }),
         signal: abortController.signal,
       });
 
@@ -217,7 +225,7 @@ export default function VoiceAgentFAB() {
     } finally {
       abortControllerRef.current = null;
     }
-  }, [sessionId, startAutoCloseCountdown, language]);
+  }, [sessionId, startAutoCloseCountdown]);
 
   // Handle transcription from recording hook
   const handleTranscription = useCallback(

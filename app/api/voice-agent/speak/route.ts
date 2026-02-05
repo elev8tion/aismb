@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
   try {
     const { text, language } = await request.json() as { text: string; language?: 'en' | 'es' };
 
+    console.log(`🌐 Speak language received: ${language || 'not set'}`);
+
     // Input validation
     const validation = validateText(text);
     if (!validation.valid) {

@@ -45,6 +45,12 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
   const isRecordingRef = useRef(false);
   const audioURLManagerRef = useRef<AudioURLManager>(new AudioURLManager());
 
+  // Use ref to always get latest language value (avoids stale closure issues)
+  const languageRef = useRef(language);
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
   /**
    * Comprehensive cleanup function
    */
@@ -122,8 +128,10 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
         const extension = mimeType.split('/')[1].split(';')[0]; // Extract extension without codecs
         const file = new File([audioBlob], `recording.${extension}`, { type: mimeType });
         formData.append('audio', file);
-        if (language) {
-          formData.append('language', language);
+        const currentLanguage = languageRef.current;
+        console.log(`🌐 sendToAPI called with language: ${currentLanguage}`);
+        if (currentLanguage) {
+          formData.append('language', currentLanguage);
         }
 
         // Send to API for transcription
@@ -182,7 +190,7 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
         abortControllerRef.current = null;
       }
     },
-    [onTranscription, language]
+    [onTranscription]
   );
 
   /**
