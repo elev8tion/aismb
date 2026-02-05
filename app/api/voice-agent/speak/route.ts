@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   const openai = createOpenAI(env.OPENAI_API_KEY);
 
   try {
-    const { text } = await request.json() as { text: string };
+    const { text, language } = await request.json() as { text: string; language?: 'en' | 'es' };
 
     // Input validation
     const validation = validateText(text);
@@ -27,10 +27,15 @@ export async function POST(request: NextRequest) {
 
     console.log('🔊 Generating TTS audio...');
 
+    const selectedVoice = (() => {
+      if (language === 'es') return MODELS.voice; // keep current unless changed later
+      return MODELS.voice;
+    })();
+
     // Call OpenAI TTS API
     const mp3 = await openai.audio.speech.create({
       model: MODELS.tts,
-      voice: MODELS.voice,
+      voice: selectedVoice,
       input: sanitizedText,
       response_format: 'mp3',
       speed: 1.0,

@@ -14,6 +14,7 @@ export interface VoiceRecordingOptions {
   onTranscription?: (text: string) => void;
   onError?: (error: Error) => void;
   maxDurationMs?: number;
+  language?: 'en' | 'es';
 }
 
 export interface VoiceRecordingState {
@@ -27,6 +28,7 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
     onTranscription,
     onError,
     maxDurationMs = 60000, // 60 seconds default
+    language,
   } = options;
 
   // State
@@ -120,6 +122,9 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
         const extension = mimeType.split('/')[1].split(';')[0]; // Extract extension without codecs
         const file = new File([audioBlob], `recording.${extension}`, { type: mimeType });
         formData.append('audio', file);
+        if (language) {
+          formData.append('language', language);
+        }
 
         // Send to API for transcription
         const response = await fetch('/api/voice-agent/transcribe', {

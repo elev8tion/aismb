@@ -17,7 +17,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Chat API received:', body);
 
-    const { question, sessionId } = body as { question: string; sessionId: string };
+    const { question, sessionId, language } = body as {
+      question: string;
+      sessionId: string;
+      language?: 'en' | 'es';
+    };
 
     if (!sessionId) {
       return NextResponse.json(
@@ -55,21 +59,33 @@ export async function POST(request: NextRequest) {
     const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
     console.log(`💬 Session ${sessionId}: ${conversationHistory.length} previous messages`);
 
-    // Call OpenAI Chat Completions API with knowledge base
-    // ⚡ OPTIMIZATION 3: OpenAI automatically caches the system prompt (KNOWLEDGE_BASE)
+    // Build messages with knowledge base and optional language preference
+    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+      {
+        role: 'system',
+        content: KNOWLEDGE_BASE, // Automatically cached by OpenAI
+      },
+    ];
+
+    // If Spanish is selected, explicitly instruct the assistant to respond in Spanish
+    if (language === 'es') {
+      messages.push({
+        role: 'system',
+        content:
+          'IMPORTANTE: El visitante prefiere español (es). Responde SIEMPRE en español natural, claro y conciso. Mantén el formato de etiquetas de acción exactamente así cuando corresponda: [ACTION:SCROLL_TO_...].',
+      });
+    }
+
+    // Include conversation history from session storage
+    messages.push(...conversationHistory);
+
+    // Current user question
+    messages.push({ role: 'user', content: sanitizedQuestion });
+
+    // Call OpenAI Chat Completions API
     const completion = await openai.chat.completions.create({
       model: MODELS.chat,
-      messages: [
-        {
-          role: 'system',
-          content: KNOWLEDGE_BASE, // Automatically cached by OpenAI
-        },
-        ...conversationHistory, // Include conversation history from session storage
-        {
-          role: 'user',
-          content: sanitizedQuestion,
-        },
-      ],
+      messages,
       temperature: 0.7,
       max_tokens: classification.maxTokens,
       top_p: 1,

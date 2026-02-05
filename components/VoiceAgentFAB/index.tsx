@@ -17,7 +17,7 @@ import { useTranslations } from '@/contexts/LanguageContext';
 type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking';
 
 export default function VoiceAgentFAB() {
-  const { t } = useTranslations();
+  const { t, language } = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
@@ -119,6 +119,7 @@ export default function VoiceAgentFAB() {
         body: JSON.stringify({
           question: transcribedText,
           sessionId: currentSessionId, // Send session ID instead of full history
+          language,
         }),
         signal: abortController.signal,
       });
@@ -173,7 +174,7 @@ export default function VoiceAgentFAB() {
       const speechResponse = await fetch('/api/voice-agent/speak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: responseText }),
+        body: JSON.stringify({ text: responseText, language }),
         signal: abortController.signal,
       });
 
@@ -241,6 +242,7 @@ export default function VoiceAgentFAB() {
       onTranscription: handleTranscription,
       onError: handleRecordingError,
       maxDurationMs: 60000,
+      language,
     });
 
   // Sync voice state with recording state

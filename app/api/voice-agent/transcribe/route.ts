@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const audioFile = formData.get('audio') as File;
+    const language = (formData.get('language') as string | null)?.toLowerCase();
 
     if (!audioFile) {
       return NextResponse.json(
@@ -58,11 +59,12 @@ export async function POST(request: NextRequest) {
     console.log(`📁 Creating file: ${fileName} from MIME type: ${audioFile.type}`);
     const file = new File([buffer], fileName, { type: audioFile.type });
 
-    // Call OpenAI Whisper API
+    // Call OpenAI Whisper API (optionally hint language if provided)
     const transcription = await openai.audio.transcriptions.create({
       file: file,
       model: MODELS.transcription,
       response_format: 'json',
+      ...(language === 'es' || language === 'en' ? { language } : {}),
     });
 
     console.log('Transcription result:', transcription.text);
