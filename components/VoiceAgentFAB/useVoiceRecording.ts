@@ -182,7 +182,7 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
         abortControllerRef.current = null;
       }
     },
-    [onTranscription]
+    [onTranscription, language]
   );
 
   /**

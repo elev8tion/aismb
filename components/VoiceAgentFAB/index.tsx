@@ -217,7 +217,7 @@ export default function VoiceAgentFAB() {
     } finally {
       abortControllerRef.current = null;
     }
-  }, [sessionId, startAutoCloseCountdown]);
+  }, [sessionId, startAutoCloseCountdown, language]);
 
   // Handle transcription from recording hook
   const handleTranscription = useCallback(
