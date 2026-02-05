@@ -59,16 +59,29 @@ export default function PricingSection() {
                 <p className="text-xs text-white/40">{tier.minimumTerm} {t.pricing.labels.minimumForLearning}</p>
               </div>
 
-              {/* Includes + Learning badges */}
-              <div className="mb-5 flex flex-wrap gap-2">
+              {/* Includes + Learning badges (badge-style like ROI) */}
+              <div className="mb-5 flex flex-col gap-3">
                 {tier.includes && (
-                  <span className="btn-fab text-xs px-3 py-1.5 whitespace-nowrap">
-                    {tier.includes}
-                  </span>
+                  <div className="p-3 rounded-lg border" style={{ background: 'rgba(14, 165, 233, 0.12)', borderColor: 'rgba(14, 165, 233, 0.35)' }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <svg className="w-4 h-4 text-[#0EA5E9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-xs text-[#0EA5E9] font-semibold">{t.pricing.labels.includes}</span>
+                    </div>
+                    <p className="text-sm text-white/90 font-semibold">{tier.includes}</p>
+                  </div>
                 )}
-                <span className="btn-primary text-xs px-3 py-1.5 whitespace-nowrap">
-                  {t.pricing.labels.flexibleLearning}
-                </span>
+
+                <div className="p-3 rounded-lg border" style={{ background: 'rgba(249, 115, 22, 0.12)', borderColor: 'rgba(249, 115, 22, 0.35)' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <svg className="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2m0 14v2m9-9h-2M5 12H3m14.95 4.95l-1.414-1.414M7.464 7.464 6.05 6.05m12.9 0-1.414 1.414M7.464 16.536 6.05 17.95" />
+                    </svg>
+                    <span className="text-xs text-[#F97316] font-semibold">{t.pricing.labels.flexibleLearning}</span>
+                  </div>
+                  <p className="text-sm text-white/90 font-semibold">{t.pricing.labels.flexibleLearningText}</p>
+                </div>
               </div>
 
               {/* Description */}

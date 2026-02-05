@@ -199,6 +199,7 @@ export interface Translations {
       typicalRoi: string;
       yourOutcome: string;
       seeCapabilityRoi: string;
+      flexibleLearning: string;
     };
     guarantee: {
       title: string;
@@ -755,6 +756,8 @@ export const translations: Record<Language, Translations> = {
       yourOutcome: 'Your Outcome',
       seeCapabilityRoi: 'See Capability ROI',
       flexibleLearning: 'Flexible learning',
+      flexibleLearningText: 'Learn a lot or a little — we can train you or a team member',
+      includes: 'Includes',
     },
       guarantee: {
         title: '30-Day Results Guarantee',
@@ -1361,6 +1364,8 @@ export const translations: Record<Language, Translations> = {
       yourOutcome: 'Tu Resultado',
       seeCapabilityRoi: 'Ver ROI de Capacidad',
       flexibleLearning: 'Aprendizaje flexible',
+      flexibleLearningText: 'Aprende mucho o poco — podemos entrenarte a ti o a un miembro de tu equipo',
+      includes: 'Incluye',
     },
       guarantee: {
         title: 'Garantia de Resultados de 30 Dias',
