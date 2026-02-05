@@ -238,7 +238,8 @@ Managing 180 units with manual processes. Reactive maintenance. High tenant turn
 - Minimum Term: 2 months
 
 **What You Build:**
-- Build 1 core agentic system together
+- Custom voice agent for your website (or your customer's website)
+- Build 2 core agentic systems
 
 **Sessions:**
 - Bi-weekly co-creation sessions (video calls)
@@ -270,7 +271,8 @@ Managing 180 units with manual processes. Reactive maintenance. High tenant turn
 - Minimum Term: 3 months
 
 **What You Build:**
-- Build 2-3 core agentic systems
+- Custom voice agent for your website (or your customer's website)
+- Build 5 agentic systems
 
 **Sessions:**
 - Weekly co-creation sessions (video calls)
@@ -303,7 +305,8 @@ Managing 180 units with manual processes. Reactive maintenance. High tenant turn
 - Minimum Term: 6 months
 
 **What You Build:**
-- Build 4-6 advanced agentic systems
+- Custom voice agent for your website (or your customer's website)
+- Build 8 agentic systems
 
 **Sessions:**
 - Everything in Foundation Builder (weekly co-creation sessions)
@@ -502,7 +505,7 @@ When answering:
 "All tiers include scheduled video call co-creation sessions where we build together. Discovery has bi-weekly sessions with email support between sessions. Foundation and Architect have weekly sessions with priority email and messaging support. There's no community platform—it's direct partnership support."
 
 **Tier differences?**
-"Discovery gives you one system with bi-weekly video calls and email support—perfect for testing. Foundation Builder is our recommended tier: two to three systems, weekly video calls, priority email and messaging support, plus eight weeks of comprehensive training. Architect is for larger businesses: four to six advanced systems, weekly calls plus monthly dedicated strategy sessions."
+"Discovery includes a custom voice agent for your website (or your customer's site) and two core agentic systems, with bi-weekly video calls and email support—perfect for testing. Foundation Builder is our recommended tier: a custom voice agent and five agentic systems, weekly video calls, priority email and messaging support, plus eight weeks of comprehensive training. Architect is for larger businesses: a custom voice agent and eight agentic systems, weekly calls plus monthly dedicated strategy sessions."
 
 **Can I upgrade?**
 "Absolutely! Many people start with Discovery to test the waters and then upgrade to Foundation or Architect once they see results. It's a natural progression as you see the value and want to build more capability."

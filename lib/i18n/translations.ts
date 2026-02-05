@@ -661,7 +661,8 @@ export const translations: Record<Language, Translations> = {
           description: 'Discover where AI can transform YOUR business and build your first intelligent system',
           features: [
             '4-week AI opportunity assessment',
-            'Build 1 core agentic system together',
+            'Custom voice agent for your website (or your customer’s website)',
+            'Build 2 core agentic systems',
             'Bi-weekly co-creation sessions (video calls)',
             'Email support between sessions',
             'Starter templates & frameworks',
@@ -683,7 +684,8 @@ export const translations: Record<Language, Translations> = {
           features: [
             'Everything in AI Discovery',
             '8-week comprehensive AI training',
-            'Build 2-3 core agentic systems',
+            'Custom voice agent for your website (or your customer’s website)',
+            'Build 5 agentic systems',
             'Weekly co-creation sessions (video calls)',
             'Priority email & messaging support',
             'Full template library & tools',
@@ -703,7 +705,8 @@ export const translations: Record<Language, Translations> = {
           description: 'Transform your operations with advanced intelligent systems',
           features: [
             'Everything in Foundation Builder',
-            'Build 4-6 advanced agentic systems',
+            'Custom voice agent for your website (or your customer’s website)',
+            'Build 8 agentic systems',
             'Custom system architecture design',
             'Advanced training: Multi-agent orchestration',
             'Priority email & messaging support',
@@ -1257,7 +1260,8 @@ export const translations: Record<Language, Translations> = {
           description: 'Descubre donde la IA puede transformar TU negocio y construye tu primer sistema inteligente',
           features: [
             'Evaluacion de oportunidades de IA de 4 semanas',
-            'Construye 1 sistema agentico central juntos',
+            'Agente de voz personalizado para tu sitio web (o el de tu cliente)',
+            'Construye 2 sistemas agenticos centrales',
             'Sesiones de co-creacion quincenales (videollamadas)',
             'Soporte por email entre sesiones',
             'Plantillas y frameworks iniciales',
@@ -1279,7 +1283,8 @@ export const translations: Record<Language, Translations> = {
           features: [
             'Todo en Descubrimiento de IA',
             'Entrenamiento integral de IA de 8 semanas',
-            'Construye 2-3 sistemas agenticos centrales',
+            'Agente de voz personalizado para tu sitio web (o el de tu cliente)',
+            'Construye 5 sistemas agenticos',
             'Sesiones de co-creacion semanales (videollamadas)',
             'Soporte prioritario por email y mensajeria',
             'Biblioteca completa de plantillas y herramientas',
@@ -1299,7 +1304,8 @@ export const translations: Record<Language, Translations> = {
           description: 'Transforma tus operaciones con sistemas inteligentes avanzados',
           features: [
             'Todo en Constructor de Base',
-            'Construye 4-6 sistemas agenticos avanzados',
+            'Agente de voz personalizado para tu sitio web (o el de tu cliente)',
+            'Construye 8 sistemas agenticos',
             'Diseno de arquitectura de sistemas personalizado',
             'Entrenamiento avanzado: Orquestacion multi-agente',
             'Soporte prioritario por email y mensajeria',
