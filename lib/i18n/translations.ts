@@ -184,6 +184,7 @@ export interface Translations {
       monthlyFee: string;
       minimumTerm: string;
       description: string;
+      includes?: string;
       features: string[];
       outcome: string;
       cta: string;
@@ -659,6 +660,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$750',
           minimumTerm: '2 months',
           description: 'Discover where AI can transform YOUR business and build your first intelligent system',
+          includes: 'Includes custom voice agent + 2 core systems',
           features: [
             '4-week AI opportunity assessment',
             'Custom voice agent for your website (or your customer’s website)',
@@ -681,6 +683,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$1,500',
           minimumTerm: '3 months',
           description: 'Build multiple intelligent systems and master AI fundamentals',
+          includes: 'Includes custom voice agent + 5 systems',
           features: [
             'Everything in AI Discovery',
             '8-week comprehensive AI training',
@@ -703,6 +706,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$3,000',
           minimumTerm: '6 months',
           description: 'Transform your operations with advanced intelligent systems',
+          includes: 'Includes custom voice agent + 8 systems',
           features: [
             'Everything in Foundation Builder',
             'Custom voice agent for your website (or your customer’s website)',
@@ -1258,6 +1262,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$750',
           minimumTerm: '2 meses',
           description: 'Descubre donde la IA puede transformar TU negocio y construye tu primer sistema inteligente',
+          includes: 'Incluye agente de voz personalizado + 2 sistemas',
           features: [
             'Evaluacion de oportunidades de IA de 4 semanas',
             'Agente de voz personalizado para tu sitio web (o el de tu cliente)',
@@ -1280,6 +1285,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$1,500',
           minimumTerm: '3 meses',
           description: 'Construye multiples sistemas inteligentes y domina los fundamentos de IA',
+          includes: 'Incluye agente de voz personalizado + 5 sistemas',
           features: [
             'Todo en Descubrimiento de IA',
             'Entrenamiento integral de IA de 8 semanas',
@@ -1302,6 +1308,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$3,000',
           minimumTerm: '6 meses',
           description: 'Transforma tus operaciones con sistemas inteligentes avanzados',
+          includes: 'Incluye agente de voz personalizado + 8 sistemas',
           features: [
             'Todo en Constructor de Base',
             'Agente de voz personalizado para tu sitio web (o el de tu cliente)',
