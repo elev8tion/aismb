@@ -1,8 +1,8 @@
-# Custom CRM Specification for AI SMB Partners
+# Custom CRM Specification for AI KRE8TION Partners
 
 ## Executive Summary
 
-This document outlines the requirements for building a custom CRM tailored specifically for **AI SMB Partners (ELEV8TION)** — an AI partnership platform that helps small-medium businesses build custom agentic systems and automation solutions. The CRM must support the unique sales cycle of AI consulting services, track voice agent interactions, manage multi-tier partnership programs, and provide AI readiness scoring.
+This document outlines the requirements for building a custom CRM tailored specifically for **AI KRE8TION Partners (ELEV8TION)** — an AI partnership platform that helps small-medium businesses build custom agentic systems and automation solutions. The CRM must support the unique sales cycle of AI consulting services, track voice agent interactions, manage multi-tier partnership programs, and provide AI readiness scoring.
 
 ---
 
@@ -907,7 +907,7 @@ ROI calculation completed + email captured
 
 ### 11.3 Existing Integration Points
 
-Connect to current AI SMB Partners landing page:
+Connect to current AI KRE8TION Partners landing page:
 
 ```typescript
 // From landing page to CRM:
@@ -1674,4 +1674,4 @@ Start with **Option 1 (Custom Build)** given:
 
 *Document Version: 1.0*
 *Created: February 2026*
-*For: AI SMB Partners (ELEV8TION)*
+*For: AI KRE8TION Partners (ELEV8TION)*

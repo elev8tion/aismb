@@ -110,7 +110,7 @@
 - Comparison to alternatives:
   - Traditional Consultant: $125/hr
   - Done-for-you Service: $3,500/month
-  - AI SMB Partners: Your pricing
+  - AI KRE8TION Partners: Your pricing
 
 **Features:**
 - Real-time calculations as inputs change
@@ -207,7 +207,7 @@
 ## Competitive Positioning
 
 ### You vs Traditional Consulting
-| Aspect | Traditional Consulting | AI SMB Partners |
+| Aspect | Traditional Consulting | AI KRE8TION Partners |
 |--------|----------------------|-----------------|
 | **Cost** | $125/hr or $2,500-$3,500/mo | $4K-$30K one-time |
 | **Dependency** | Ongoing (disappears when you stop paying) | Capability transfer (you own it) |

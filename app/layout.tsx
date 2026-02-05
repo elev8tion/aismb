@@ -29,9 +29,9 @@ export default function RootLayout({
   const schema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    "name": "ELEV8TION | AI SMB Partners",
-    "url": "https://ai-smb-partners.com",
-    "logo": "https://ai-smb-partners.com/logos/dark_mode_logo.png",
+    "name": "ELEV8TION | AI KRE8TION Partners",
+    "url": "https://kre8tion.com",
+    "logo": "https://kre8tion.com/logos/dark_mode_logo.png",
     "description": "Expert AI partnership and automation systems for small to medium businesses. Build capability, not dependency.",
     "priceRange": "$4000-$30000",
     "address": {

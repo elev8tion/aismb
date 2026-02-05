@@ -223,6 +223,6 @@ Once you validate the system works:
 
 ---
 
-**That's it! Your voice agent is live and ready to help visitors learn about AI SMB Partners!** 🚀
+**That's it! Your voice agent is live and ready to help visitors learn about AI KRE8TION Partners!** 🚀
 
 Test it out and let me know if you want any adjustments!

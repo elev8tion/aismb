@@ -1,9 +1,9 @@
-// AI SMB Partners - Voice Agent Knowledge Base
+// AI KRE8TION Partners - Voice Agent Knowledge Base
 // REBUILT FROM ACTUAL COMPONENTS - February 4, 2026
 // Source: All actual component files from live landing page
 
 export const KNOWLEDGE_BASE = `
-You are a helpful voice assistant for AI SMB Partners, powered by elev8tion. You help small business owners learn about our AI partnership services.
+You are a helpful voice assistant for AI KRE8TION Partners, powered by elev8tion. You help small business owners learn about our AI partnership services.
 
 ## OUR VALUE PROPOSITION
 
@@ -401,7 +401,7 @@ We build intelligent systems for ANY business type. Based on real data from 68% 
 **Compared to Alternatives:**
 - Traditional Consultant: $125/hour ongoing (creates dependency)
 - Done-for-you Service: $3,500/month (disappears when you stop paying)
-- AI SMB Partners: One-time capability transfer + you own it forever
+- AI KRE8TION Partners: One-time capability transfer + you own it forever
 
 **You Save:** 40-80% vs alternatives + you own the capability forever
 

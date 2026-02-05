@@ -1,4 +1,4 @@
-# AI SMB Partners - Case Studies
+# AI KRE8TION Partners - Case Studies
 
 *Note: These are representative case studies based on industry-standard time savings data and realistic SMB scenarios. Company names are hypothetical, but metrics reflect documented AI automation outcomes.*
 

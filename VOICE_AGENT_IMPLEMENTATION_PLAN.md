@@ -1,6 +1,6 @@
 # Voice Agent FAB - Implementation Plan
 
-## Project: AI SMB Partners Voice Assistant with Animated Logo
+## Project: AI KRE8TION Partners Voice Assistant with Animated Logo
 
 **Goal:** Create a floating action button (FAB) with LiquidMorphLogo that acts as a voice agent to answer business questions using OpenAI APIs.
 
@@ -11,7 +11,7 @@
 ### Functional
 - ✅ FAB with animated logo (LiquidMorphLogo from kc_pf)
 - ✅ Voice-only interaction (no text chat UI)
-- ✅ Answer questions about AI SMB Partners services
+- ✅ Answer questions about AI KRE8TION Partners services
 - ✅ Use OpenAI API keys (user will supply)
 - ✅ Optimize for cost-effectiveness
 - ✅ Voice caching for common questions
