@@ -1,4 +1,21 @@
-# Cloudflare Deployment Guide
+# Cloudflare Deployment Guide - Landing Page
+
+## Multi-App Architecture
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                    KREATION PLATFORM                            │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   kre8tion.com (Landing Page)      app.kre8tion.com (CRM)      │
+│   ├── ai-smb-partners/             ├── ai_smb_crm_frontend/    │
+│   ├── Project: kre8tion-app        ├── Project: ai-smb-crm     │
+│   ├── Voice Agent                  ├── Dashboard               │
+│   ├── ROI Calculator               ├── Pipeline                │
+│   └── Lead Capture ────────────────└── Lead Management         │
+│                                                                 │
+└────────────────────────────────────────────────────────────────┘
+```
 
 ## Project Information
 
@@ -9,6 +26,7 @@
 | **Production URL** | https://kre8tion.com |
 | **Pages URL** | https://kre8tion-app.pages.dev |
 | **Git Auto-Deploy** | `kre8tion-app-v2` (connected to GitHub) |
+| **Related CRM** | https://app.kre8tion.com (ai-smb-crm project) |
 
 ---
 
@@ -113,3 +131,124 @@ npx wrangler pages deployment tail --project-name=kre8tion-app
 - **Cloudflare Dashboard:** https://dash.cloudflare.com
 - **Pages Project:** Workers & Pages → kre8tion-app
 - **GitHub Repo:** https://github.com/elev8tion/aismb
+
+---
+
+## CRM Integration
+
+The CRM is deployed separately at `app.kre8tion.com`:
+
+| Setting | Value |
+|---------|-------|
+| **CRM URL** | https://app.kre8tion.com |
+| **CRM Project** | `ai-smb-crm` |
+| **Database** | NoCodeBackend `36905_ai_smb_crm` |
+| **Local Path** | `/Users/kcdacre8tor/ai_smb_crm_frontend` |
+
+### Data Flow: Landing Page → CRM
+
+```
+Voice Agent Session ──┐
+                      │
+ROI Calculator   ─────┼──▶  CRM Database  ──▶  CRM Dashboard
+                      │     (NCB)              (app.kre8tion.com)
+Calendar Booking ─────┘
+```
+
+### Webhooks to Implement
+
+These endpoints in the CRM receive data from the landing page:
+
+| Endpoint | Trigger | Purpose |
+|----------|---------|---------|
+| `POST /api/webhooks/voice-agent` | Voice session ends | Sync transcript to CRM |
+| `POST /api/webhooks/roi-calculator` | ROI calc submitted | Create/update lead |
+| `POST /api/webhooks/calendar` | Booking created | Create activity |
+
+### Sending Data to CRM
+
+Example from landing page API route:
+
+```typescript
+// In landing page: app/api/leads/roi/route.ts
+// After capturing lead data, sync to CRM:
+
+await fetch('https://app.kre8tion.com/api/webhooks/roi-calculator', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': process.env.CRM_WEBHOOK_SECRET,
+  },
+  body: JSON.stringify({
+    email,
+    industry,
+    employeeCount,
+    calculations,
+    timestamp: new Date().toISOString(),
+  }),
+});
+```
+
+### CRM Development
+
+See `/Users/kcdacre8tor/ai_smb_crm_frontend/DEVELOPMENT.md` for full CRM development guide.
+
+---
+
+## NoCodeBackend API Reference
+
+### CRITICAL: Use Lowercase `instance` Parameter
+
+**NCB API requires lowercase `instance`, NOT `Instance`.**
+
+```bash
+# CORRECT
+?instance=36905_ai_smb_crm
+
+# WRONG - returns "Missing instance parameter"
+?Instance=36905_ai_smb_crm
+```
+
+### API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/user-auth/providers?instance=...` | GET | List enabled auth providers |
+| `/api/user-auth/sign-up/email?instance=...` | POST | Create new user |
+| `/api/user-auth/sign-in/email?instance=...` | POST | Sign in user |
+| `/api/user-auth/get-session?instance=...` | GET | Get current session |
+| `/api/user-auth/sign-out?instance=...` | POST | Sign out user |
+| `/api/data/read/<table>?instance=...` | GET | Read records |
+| `/api/data/create/<table>?instance=...` | POST | Create record |
+
+### Enable Auth Providers
+
+Before users can authenticate, enable the credential provider:
+
+```sql
+-- Via NCB MCP server
+INSERT INTO ncba_config (id, provider, enabled, created_at, updated_at)
+VALUES (UUID(), 'credential', 1, NOW(), NOW());
+```
+
+### Creating Users (Correct Way)
+
+**NEVER manually insert into ncba_user/ncba_account tables.**
+
+Use the sign-up API:
+
+```bash
+curl -X POST "https://app.nocodebackend.com/api/user-auth/sign-up/email?instance=36905_ai_smb_crm" \
+  -H "Content-Type: application/json" \
+  -H "X-Database-Instance: 36905_ai_smb_crm" \
+  -d '{"name":"User Name","email":"user@email.com","password":"Password123"}'
+```
+
+### Debugging NCB Issues
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| "Missing instance parameter" | Using `Instance` (capital I) | Use lowercase `instance` |
+| 500 on sign-up/sign-in | Auth provider not enabled | Insert into `ncba_config` |
+| Empty response | Missing env vars | Check Cloudflare Production env vars |
+| "Unexpected end of JSON" | API returning empty body | Check env vars and instance name |
