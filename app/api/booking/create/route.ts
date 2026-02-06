@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
       validatedData.notes
     );
 
-    // Send confirmation email via Cloudflare Email Routing (non-blocking)
+    // Send confirmation email via email worker (non-blocking)
     const { env } = getRequestContext();
     sendBookingConfirmation({
       to: booking.guest_email,
@@ -194,7 +194,8 @@ export async function POST(req: NextRequest) {
         google: calendarLinks.google,
         outlook: calendarLinks.outlook,
       },
-      sendEmail: env.SEND_EMAIL,
+      emailWorkerUrl: env.EMAIL_WORKER_URL,
+      emailWorkerSecret: env.EMAIL_WORKER_SECRET,
     }).catch(err => console.error('Email send failed:', err));
 
     return NextResponse.json({

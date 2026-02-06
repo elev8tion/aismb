@@ -23,10 +23,6 @@ id = "091326b587024f5d9ff870616992706e"
 binding = "RESPONSE_CACHE_KV"
 id = "88589fbf9e604e5f8564fb82849909bd"
 
-# Email Routing — send booking confirmations via Cloudflare
-[[send_email]]
-name = "SEND_EMAIL"
-
 # Production environment
 [env.production]
 vars = { ENVIRONMENT = "production" }

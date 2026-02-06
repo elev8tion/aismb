@@ -1,19 +1,15 @@
 /**
- * Cloudflare Workers Email Sender
- * Uses the native send_email binding via Cloudflare Email Routing.
- * No third-party services needed — emails go through Cloudflare's infrastructure.
+ * Cloudflare Email Sender
  *
- * Uses the builder overload of SendEmail.send() to avoid importing
- * cloudflare:email (which webpack cannot resolve at build time).
+ * Calls the kre8tion-email-worker (a standalone Cloudflare Worker with
+ * the send_email binding) via fetch. Pages cannot use send_email directly,
+ * so we delegate to the Worker.
  */
 
 import {
   bookingConfirmationTemplate,
   type BookingConfirmationData,
 } from './templates';
-
-const FROM_EMAIL = 'bookings@kre8tion.com';
-const FROM_NAME = 'AI KRE8TION Partners';
 
 export interface SendBookingConfirmationParams {
   to: string;
@@ -26,8 +22,10 @@ export interface SendBookingConfirmationParams {
     google: string;
     outlook: string;
   };
-  /** Cloudflare send_email binding from getRequestContext().env */
-  sendEmail?: SendEmail;
+  /** URL of the email worker */
+  emailWorkerUrl?: string;
+  /** Shared secret for authenticating with the email worker */
+  emailWorkerSecret?: string;
 }
 
 function formatSubjectDate(dateStr: string): string {
@@ -37,14 +35,14 @@ function formatSubjectDate(dateStr: string): string {
 }
 
 /**
- * Send a booking confirmation email via Cloudflare Workers send_email binding.
+ * Send a booking confirmation email via the email worker.
  * Fire-and-forget: logs errors but never throws.
  */
 export async function sendBookingConfirmation(
   params: SendBookingConfirmationParams
 ): Promise<void> {
-  if (!params.sendEmail) {
-    console.warn('[Email] SEND_EMAIL binding not available, skipping confirmation email');
+  if (!params.emailWorkerUrl || !params.emailWorkerSecret) {
+    console.warn('[Email] EMAIL_WORKER_URL or EMAIL_WORKER_SECRET not configured, skipping confirmation email');
     return;
   }
 
@@ -63,14 +61,26 @@ export async function sendBookingConfirmation(
     const subject = `Booking Confirmed \u2014 Strategy Call on ${formatSubjectDate(params.date)}`;
     const plainText = `Your strategy call has been confirmed for ${formatSubjectDate(params.date)}. Check your email client for the full details.`;
 
-    // Use the builder overload — no cloudflare:email import needed
-    await params.sendEmail.send({
-      from: { name: FROM_NAME, email: FROM_EMAIL },
-      to: params.to,
-      subject,
-      html,
-      text: plainText,
+    const res = await fetch(params.emailWorkerUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${params.emailWorkerSecret}`,
+      },
+      body: JSON.stringify({
+        to: params.to,
+        toName: params.guestName,
+        subject,
+        html,
+        text: plainText,
+      }),
     });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`[Email] Worker returned ${res.status}: ${err}`);
+      return;
+    }
 
     console.log(`[Email] Confirmation sent to ${params.to}`);
   } catch (error) {
