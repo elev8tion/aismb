@@ -26,10 +26,21 @@ export default function ROICalculator() {
     '25-50': 1.6,
   };
 
-  const tierData: Record<string, { cost: number; weeks: number; systemsBuilt: number }> = {
-    discovery: { cost: 4000, weeks: 8, systemsBuilt: 1 },
-    foundation: { cost: 9500, weeks: 12, systemsBuilt: 3 },
-    architect: { cost: 30000, weeks: 24, systemsBuilt: 6 },
+  // Pricing: setup + (monthly × months) = total
+  // Discovery: $2,500 + ($750 × 2) = $4,000, includes voice agent + 2 systems
+  // Foundation: $5,000 + ($1,500 × 3) = $9,500, includes voice agent + 5 systems
+  // Architect: $12,000 + ($3,000 × 6) = $30,000, includes voice agent + 8 systems
+  const tierData: Record<string, {
+    setupFee: number;
+    monthlyFee: number;
+    months: number;
+    cost: number;
+    weeks: number;
+    systemsBuilt: number
+  }> = {
+    discovery: { setupFee: 2500, monthlyFee: 750, months: 2, cost: 4000, weeks: 8, systemsBuilt: 3 },
+    foundation: { setupFee: 5000, monthlyFee: 1500, months: 3, cost: 9500, weeks: 12, systemsBuilt: 6 },
+    architect: { setupFee: 12000, monthlyFee: 3000, months: 6, cost: 30000, weeks: 24, systemsBuilt: 9 },
   };
 
   const [email, setEmail] = useState('');
@@ -178,22 +189,27 @@ export default function ROICalculator() {
             <div className="mb-6">
               <label className="block text-sm font-semibold text-white/80 mb-3">{t.roiCalculator.labels.partnershipTier}</label>
               <div className="grid grid-cols-1 gap-2">
-                {t.roiCalculator.tiers.map((ti) => (
-                  <button
-                    key={ti.id}
-                    onClick={() => setTier(ti.id)}
-                    className={`px-4 py-3 rounded-lg text-sm font-medium text-left transition-all ${
-                      tier === ti.id
-                        ? 'bg-[#0EA5E9] text-white'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span>{ti.name}</span>
-                      <span className="text-xs opacity-70">${tierData[ti.id]?.cost.toLocaleString()}</span>
-                    </div>
-                  </button>
-                ))}
+                {t.roiCalculator.tiers.map((ti) => {
+                  const tierInfo = tierData[ti.id];
+                  return (
+                    <button
+                      key={ti.id}
+                      onClick={() => setTier(ti.id)}
+                      className={`px-4 py-3 rounded-lg text-sm font-medium text-left transition-all ${
+                        tier === ti.id
+                          ? 'bg-[#0EA5E9] text-white'
+                          : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span>{ti.name}</span>
+                        <span className="text-xs opacity-70">
+                          ${tierInfo?.setupFee.toLocaleString()} + ${tierInfo?.monthlyFee.toLocaleString()}/mo × {tierInfo?.months}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -217,6 +233,9 @@ export default function ROICalculator() {
                 <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                   <div className="text-xs text-white/50 mb-1">{t.roiCalculator.results.investment}</div>
                   <div className="text-2xl font-bold text-white">${investment.toLocaleString()}</div>
+                  <div className="text-xs text-white/40 mt-1">
+                    ${selectedTier.setupFee?.toLocaleString()} + ${selectedTier.monthlyFee?.toLocaleString()}/mo × {selectedTier.months}
+                  </div>
                 </div>
                 <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                   <div className="text-xs text-white/50 mb-1">{t.roiCalculator.results.systemsBuilt}</div>

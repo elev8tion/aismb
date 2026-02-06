@@ -119,11 +119,14 @@ export default function PricingSection() {
               </div>
 
               {/* CTA */}
-              <button className={`w-full font-semibold py-3.5 rounded-2xl transition-all ${
-                tier.highlighted ? 'btn-primary' : 'btn-glass'
-              }`}>
+              <a
+                href="#get-started"
+                className={`w-full font-semibold py-3.5 rounded-2xl transition-all block text-center ${
+                  tier.highlighted ? 'btn-primary' : 'btn-glass'
+                }`}
+              >
                 {tier.cta}
-              </button>
+              </a>
 
               <a href="#roi-calculator" className="block mt-4 text-center text-sm text-[#0EA5E9] hover:text-white transition-colors">
                 {t.pricing.labels.seeCapabilityRoi}
@@ -151,9 +154,9 @@ export default function PricingSection() {
               <div className="text-center lg:text-right">
                 <p className="text-sm text-white/50 mb-2">{t.pricing.labels.capabilityTransfer}</p>
                 <p className="text-3xl font-bold text-white mb-4">{t.pricing.tiers[3].setupFee}</p>
-                <button className="btn-glass px-8 py-3 font-semibold">
+                <a href="#get-started" className="btn-glass px-8 py-3 font-semibold inline-block">
                   {t.pricing.tiers[3].cta}
-                </button>
+                </a>
               </div>
             </div>
           </div>
