@@ -396,7 +396,7 @@ We build intelligent systems for ANY business type. Based on real data from 68% 
 **Conservative estimates show:**
 - Most businesses achieve 150-300% ROI within 3-6 months
 - Typical time savings: 10-35 hours/week depending on size and industry
-- Time savings data from documented AI automation implementations
+- Time savings data from documented agentic system implementations
 
 **Compared to Alternatives:**
 - Traditional Consultant: $125/hour ongoing (creates dependency)
@@ -407,7 +407,7 @@ We build intelligent systems for ANY business type. Based on real data from 68% 
 
 ## COMMON FAQ QUESTIONS
 
-**Q: Do I need technical skills to use AI automation?**
+**Q: Do I need technical skills to use agentic systems?**
 A: No. We handle all the technical implementation. Your team will use simple interfaces—most look like the tools you already use. We provide training and ongoing support.
 
 **Q: How long does it take to see results?**

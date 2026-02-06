@@ -570,7 +570,7 @@ export const translations: Record<Language, Translations> = {
       bottomStats: {
         heading: 'Industry-Backed Results',
         description:
-          'Based on documented AI automation outcomes and conservative ROI estimates across all business types',
+          'Based on documented agentic system outcomes and conservative ROI estimates across all business types',
         stats: [
           { stat: '10-35 hrs/week', label: 'Typical Time Savings' },
           { stat: '150-300%', label: 'Average ROI (3-6 months)' },
@@ -645,7 +645,7 @@ export const translations: Record<Language, Translations> = {
       },
       cta: 'Start Building Your Systems',
       disclaimer:
-        'Calculations based on conservative estimates from industry data (McKinsey, Gartner, SBA reports). Actual results vary by business. Time savings data from documented AI automation implementations across 68% of SMBs currently using AI in 2025.',
+        'Calculations based on conservative estimates from industry data (McKinsey, Gartner, SBA reports). Actual results vary by business. Time savings data from documented agentic system implementations across 68% of SMBs currently using AI in 2025.',
     },
 
     pricing: {
@@ -771,10 +771,10 @@ export const translations: Record<Language, Translations> = {
     faq: {
       tag: 'FAQ',
       heading: 'Common questions',
-      description: 'Everything you need to know about AI automation.',
+      description: 'Everything you need to know about agentic systems.',
       items: [
         {
-          question: 'Do I need technical skills to use AI automation?',
+          question: 'Do I need technical skills to use agentic systems?',
           answer:
             "No. We handle all the technical implementation. Your team will use simple interfaces—most look like the tools you already use. We provide training and ongoing support.",
         },
@@ -814,7 +814,7 @@ export const translations: Record<Language, Translations> = {
       badge: 'Limited availability',
       heading: 'Ready to get 30% of your time back?',
       description:
-        'Join 50+ SMBs already saving time with AI automation. Start with a comprehension meeting to identify your opportunities.',
+        'Join 50+ SMBs already saving time with agentic systems. Start with a comprehension meeting to identify your opportunities.',
       ctaPrimary: 'Schedule Comprehension Meeting',
       ctaSecondary: 'Calculate Your ROI',
       trustSignals: [
@@ -825,7 +825,7 @@ export const translations: Record<Language, Translations> = {
     },
 
     footer: {
-      tagline: 'AI automation for SMBs. Get 30% of your time back in 30 days.',
+      tagline: 'Agentic systems for SMBs. Get 30% of your time back in 30 days.',
       sections: {
         solutions: 'Solutions',
         company: 'Company',
@@ -1177,7 +1177,7 @@ export const translations: Record<Language, Translations> = {
       bottomStats: {
         heading: 'Resultados Respaldados por la Industria',
         description:
-          'Basado en resultados documentados de automatizacion con IA y estimaciones conservadoras de ROI en todos los tipos de negocios',
+          'Basado en resultados documentados de sistemas agenticos y estimaciones conservadoras de ROI en todos los tipos de negocios',
         stats: [
           { stat: '10-35 hrs/semana', label: 'Ahorro de Tiempo Tipico' },
           { stat: '150-300%', label: 'ROI Promedio (3-6 meses)' },
@@ -1253,7 +1253,7 @@ export const translations: Record<Language, Translations> = {
       },
       cta: 'Comienza a Construir Tus Sistemas',
       disclaimer:
-        'Calculos basados en estimaciones conservadoras de datos de la industria (McKinsey, Gartner, reportes SBA). Los resultados reales varian por negocio. Datos de ahorro de tiempo de implementaciones documentadas de automatizacion con IA en el 68% de PYMEs que actualmente usan IA en 2025.',
+        'Calculos basados en estimaciones conservadoras de datos de la industria (McKinsey, Gartner, reportes SBA). Los resultados reales varian por negocio. Datos de ahorro de tiempo de implementaciones documentadas de sistemas agenticos en el 68% de PYMEs que actualmente usan IA en 2025.',
     },
 
     pricing: {
@@ -1379,10 +1379,10 @@ export const translations: Record<Language, Translations> = {
     faq: {
       tag: 'Preguntas Frecuentes',
       heading: 'Preguntas comunes',
-      description: 'Todo lo que necesitas saber sobre automatizacion con IA.',
+      description: 'Todo lo que necesitas saber sobre sistemas agenticos.',
       items: [
         {
-          question: 'Necesito habilidades tecnicas para usar automatizacion con IA?',
+          question: 'Necesito habilidades tecnicas para usar sistemas agenticos?',
           answer:
             'No. Nosotros manejamos toda la implementacion tecnica. Tu equipo usara interfaces simples, la mayoria se parecen a las herramientas que ya usas. Proporcionamos entrenamiento y soporte continuo.',
         },
@@ -1433,7 +1433,7 @@ export const translations: Record<Language, Translations> = {
     },
 
     footer: {
-      tagline: 'Automatizacion con IA para PYMEs. Recupera el 30% de tu tiempo en 30 dias.',
+      tagline: 'Sistemas agenticos para PYMEs. Recupera el 30% de tu tiempo en 30 dias.',
       sections: {
         solutions: 'Soluciones',
         company: 'Empresa',

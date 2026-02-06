@@ -42,7 +42,7 @@ export default function TermsOfService() {
           <section className="space-y-4">
             <h2 className="text-xl font-semibold text-white">2. Services Description</h2>
             <p className="text-[#A1A1AA]">
-              We provide AI automation consulting and implementation services for small and
+              We provide agentic system consulting and implementation services for small and
               medium-sized businesses. Our services include AI system design, development,
               training, and ongoing support.
             </p>
