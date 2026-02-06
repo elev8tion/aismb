@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { syncROICalcToCRM } from '@/lib/voiceAgent/leadManager';
 
 interface ROILeadBody {
   email: string;
@@ -7,8 +8,12 @@ interface ROILeadBody {
   hourlyValue: number;
   tier: string;
   metrics: {
+    timeSaved: number;
+    weeklyValue: number;
     totalValue: number;
+    investment: number;
     roi: number;
+    paybackWeeks: number;
   };
 }
 
@@ -24,16 +29,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SIMULATION: Log the lead to console (Replace with DB/Email service in production)
-    console.log('📝 NEW ROI LEAD CAPTURED:');
-    console.log('------------------------------------------------');
-    console.log(`Email: ${email}`);
-    console.log(`Business: ${industry}, ${employees}`);
-    console.log(`Hourly Value: $${hourlyValue}`);
-    console.log(`Tier Interest: ${tier}`);
-    console.log(`Est. Value: ${metrics?.totalValue}`);
-    console.log(`Est. ROI: ${metrics?.roi}%`);
-    console.log('------------------------------------------------');
+    // 🔄 SYNC TO CRM: Save lead and ROI calculation
+    console.log(`🎯 Syncing ROI Lead to CRM: ${email}`);
+    
+    // Non-blocking sync to CRM
+    syncROICalcToCRM({
+      email,
+      industry,
+      employeeCount: employees,
+      hourlyRate: hourlyValue,
+      selectedTier: tier,
+      calculations: metrics
+    }).catch(err => console.error('Failed to sync ROI lead to CRM:', err));
+
+    // SIMULATION: Log to console for visibility in logs
+    console.log('📝 ROI LEAD PROCESSED:', {
+      email,
+      industry,
+      employees,
+      tier,
+      roi: `${metrics?.roi}%`
+    });
 
     // Return success
     return NextResponse.json({ 

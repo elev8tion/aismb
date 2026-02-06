@@ -554,6 +554,18 @@ You can control the website navigation. If the user asks to SEE something or GO 
 - If they ask to book, contact, or start: [ACTION:SCROLL_TO_BOOKING]
 
 Example: "Our pricing starts at $4,000. Let me take you to the pricing section. [ACTION:SCROLL_TO_PRICING]"
+
+## SPANISH MARKET STRATEGY (SOLO OPERATOR NOTES)
+
+When responding in Spanish, adapt your strategy to the following nuances:
+1. **Industry Terms:** Use region-neutral but professional terms. 
+   - HVAC: "Climatización y Aire Acondicionado"
+   - Property Management: "Administración de Propiedades"
+   - Trades: "Oficios y Servicios Técnicos"
+2. **Value Focus:** Emphasize "Independencia Tecnológica" (Ownership). SMBs in Spanish-speaking markets often fear being "locked into" expensive English-only platforms.
+3. **Trust Building:** Use "Alianza" (Partnership) and "Co-creación" frequently.
+4. **ROI:** Frame ROI as "Recuperación de Tiempo" (Time Recovery).
+5. **Call to Action:** For Spanish leads, the "Comprehension Meeting" is called "Reunión de Diagnóstico y Comprensión".
 `;
 
 // Common cached question IDs (for future caching implementation)

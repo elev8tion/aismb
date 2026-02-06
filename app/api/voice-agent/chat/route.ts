@@ -5,6 +5,9 @@ import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
 import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
 import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
+import { extractLeadInfo, syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
+import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
+import { getHighPriorityLeadsReport, getDailySummary } from '@/lib/voiceAgent/analyticsAgent';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -23,110 +26,110 @@ export async function POST(request: NextRequest) {
       language?: 'en' | 'es';
     };
 
-    console.log(`🌐 Language received: ${language || 'not set (defaulting to English)'}`);
-
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     // Input validation
     const validation = validateQuestion(question);
     if (!validation.valid) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const sanitizedQuestion = validation.sanitized!;
+    const q = sanitizedQuestion.toLowerCase();
 
-    // 🛡️ SECURITY 3: Prompt injection detection (log but allow)
-    const injection = detectPromptInjection(sanitizedQuestion);
-    if (injection.detected) {
-      console.warn(`⚠️ Possible prompt injection detected: ${injection.pattern}`);
+    // 🛠️ MANAGEMENT INTENT DETECTION (For Solo Operator)
+    if (q.includes('status of my leads') || q.includes('high priority leads') || q.includes('leads report')) {
+      console.log('📈 Management Intent detected: High Priority Report');
+      const report = await getHighPriorityLeadsReport();
+      return NextResponse.json({ response: report, success: true, duration: Date.now() - startTime });
     }
 
-    // Classify question complexity for smart token limits
+    if (q.includes('daily summary') || q.includes('how are we doing today')) {
+      console.log('📈 Management Intent detected: Daily Summary');
+      const summary = await getDailySummary();
+      return NextResponse.json({ response: summary, success: true, duration: Date.now() - startTime });
+    }
+
+    const injection = detectPromptInjection(sanitizedQuestion);
+    if (injection.detected) console.warn(`⚠️ Possible prompt injection: ${injection.pattern}`);
+
+    // Classify question
     const classification = classifyQuestion(sanitizedQuestion);
-
-    console.log(`📊 Question classified as: ${classification.complexity} (${classification.maxTokens} tokens) - ${classification.reason}`);
-
-    // Get session storage with KV namespace from env
     const sessionStorage = getSessionStorage(env.VOICE_SESSIONS);
-
-    // Get conversation history from session storage
     const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
-    console.log(`💬 Session ${sessionId}: ${conversationHistory.length} previous messages`);
 
-    // Build messages with language instruction FIRST (critical for Spanish compliance)
+    // 🔍 LEAD PROFILING & SCORING (Pre-response analysis)
+    const leadInfo = extractLeadInfo([...conversationHistory, { role: 'user', content: sanitizedQuestion }]);
+    const leadScore = calculateLeadScore(leadInfo);
+    
+    // Build messages
     const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
 
-    // Language instruction MUST come first to override English knowledge base context
+    // Language instruction
     if (language === 'es') {
       messages.push({
         role: 'system',
-        content:
-          'INSTRUCCIÓN OBLIGATORIA DE IDIOMA: Eres un asistente que SOLO responde en español. Sin excepciones. Toda tu comunicación debe ser en español natural, claro y profesional. El contenido de referencia está en inglés pero TÚ DEBES responder ÚNICAMENTE en español. Mantén el formato de etiquetas de acción exactamente así: [ACTION:SCROLL_TO_...].',
+        content: 'INSTRUCCIÓN OBLIGATORIA DE IDIOMA: Eres un asistente que SOLO responde en español. Toda tu comunicación debe ser en español natural. Mantén etiquetas: [ACTION:SCROLL_TO_...].',
       });
     }
 
-    // Knowledge base (reference content - may be in English but response language is controlled above)
-    messages.push({
-      role: 'system',
-      content: KNOWLEDGE_BASE,
-    });
+    // Dynamic Strategist Instructions based on Score
+    let strategistPrompt = `
+STRATEGIST MODE: You are an AI Business Strategist for AI KRE8TION Partners.
+Your goal is to identify AI opportunities. 
+1. Ask about industry and size if unknown.
+2. Suggest the ROI calculator if you've identified needs.
+`;
 
-    // Include conversation history from session storage
+    if (leadScore.tier === 'high') {
+      strategistPrompt += `
+CRITICAL: This lead is a HIGH-VALUE MATCH. 
+Focus your response on booking a 'Comprehension Meeting' immediately. 
+Use a persuasive, consultative tone. Mention that for businesses of their scale, 
+the ROI is typically 300%+. [ACTION:SCROLL_TO_BOOKING]
+`;
+    } else {
+      strategistPrompt += `3. Keep it conversational and concise.`;
+    }
+
+    messages.push({ role: 'system', content: strategistPrompt });
+    messages.push({ role: 'system', content: KNOWLEDGE_BASE });
     messages.push(...conversationHistory);
-
-    // Current user question
     messages.push({ role: 'user', content: sanitizedQuestion });
 
-    // Call OpenAI Chat Completions API
+    // Call OpenAI
     const completion = await openai.chat.completions.create({
       model: MODELS.chat,
       messages,
       temperature: 0.7,
       max_tokens: classification.maxTokens,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
     });
 
-    const fallbackMessage = language === 'es'
-      ? 'Lo siento, no pude generar una respuesta. Por favor, intenta de nuevo.'
-      : 'I apologize, but I couldn\'t generate a response. Please try asking again.';
-    const response = completion.choices[0]?.message?.content || fallbackMessage;
+    const response = completion.choices[0]?.message?.content || 'I apologize, I could not generate a response.';
 
-    // Save the conversation to session storage
+    // Save and Sync
     await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);
     await sessionStorage.addMessage(sessionId, 'assistant', response);
-    console.log(`💾 Saved conversation to session ${sessionId}`);
+    
+    if (leadInfo.email) {
+      console.log(`🎯 Syncing Scored Lead (${leadScore.score}/100):`, leadInfo.email);
+      syncLeadToCRM({
+        ...leadInfo,
+        email: leadInfo.email!,
+        source: 'Voice Agent',
+        sourceDetail: `${language === 'es' ? 'Spanish' : 'English'} (${leadScore.tier} priority)`,
+        notes: `AI Scored as ${leadScore.tier} (${leadScore.score}/100). Factors: ${leadScore.factors.join(', ')}`
+      }).catch(err => console.error('Failed to sync lead:', err));
+    }
 
     const duration = Date.now() - startTime;
-    console.log(`⏱️ Response generated in ${duration}ms`);
-
-    return NextResponse.json({
-      response,
-      success: true,
-      duration,
-    });
+    return NextResponse.json({ response, success: true, duration });
 
   } catch (error) {
-    console.error('Chat completion error:', error);
-    const duration = Date.now() - startTime;
-
-    return NextResponse.json(
-      {
-        error: 'Failed to generate response',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        duration,
-      },
-      { status: 500 }
-    );
+    console.error('Chat error:', error);
+    return NextResponse.json({ error: 'Failed to generate response' }, { status: 500 });
   }
 }
 

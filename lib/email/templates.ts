@@ -179,3 +179,81 @@ export function bookingConfirmationTemplate(data: BookingConfirmationData): stri
 </body>
 </html>`;
 }
+
+export interface LeadDossierData {
+  guestName: string;
+  guestEmail: string;
+  industry: string;
+  employeeCount: string;
+  roiScore: number;
+  priority: string;
+  painPoints: string[];
+  summary: string;
+  appointmentTime: string;
+}
+
+export function leadDossierTemplate(data: LeadDossierData): string {
+  const priorityColor = data.priority === 'high' ? '#EF4444' : data.priority === 'medium' ? '#F59E0B' : '#10B981';
+  const year = new Date().getFullYear();
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: sans-serif; line-height: 1.5; color: #1a1a2e; background: #f4f6f9; margin: 0; padding: 20px; }
+    .card { background: white; border-radius: 12px; padding: 32px; max-width: 600px; margin: 0 auto; border: 1px solid #e8eaf0; }
+    .header { border-bottom: 2px solid #f0f2f5; padding-bottom: 20px; margin-bottom: 24px; }
+    .priority-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; color: white; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .stat-item { background: #f8f9fc; padding: 12px; border-radius: 8px; border: 1px solid #e8eaf0; }
+    .stat-label { font-size: 11px; color: #8a8aaa; text-transform: uppercase; font-weight: bold; }
+    .stat-value { font-size: 15px; font-weight: bold; }
+    .section-title { font-size: 14px; font-weight: bold; color: #0066FF; margin-top: 24px; margin-bottom: 8px; text-transform: uppercase; }
+    .pain-point { background: #FFF5F5; color: #C53030; padding: 4px 8px; border-radius: 4px; display: inline-block; margin: 2px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="priority-badge" style="background-color: ${priorityColor};">${data.priority} Priority Lead</div>
+      <h1 style="margin: 8px 0 0; font-size: 24px;">New Booking: ${data.guestName}</h1>
+      <p style="color: #6a6a8a; margin: 4px 0;">${data.appointmentTime}</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-item">
+        <div class="stat-label">Industry</div>
+        <div class="stat-value">${data.industry}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Business Size</div>
+        <div class="stat-value">${data.employeeCount} Employees</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">ROI Score</div>
+        <div class="stat-value" style="color: #10B981;">${data.roiScore}/100</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Email</div>
+        <div class="stat-value">${data.guestEmail}</div>
+      </div>
+    </div>
+
+    <div class="section-title">Detected Pain Points</div>
+    <div>
+      ${data.painPoints.map(p => `<span class="pain-point">${p}</span>`).join('')}
+    </div>
+
+    <div class="section-title">AI Strategist Summary</div>
+    <p style="font-size: 15px; background: #F0F7FF; padding: 16px; border-radius: 8px; border-left: 4px solid #0066FF;">
+      ${data.summary}
+    </p>
+
+    <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-size: 12px; color: #aaa;">
+      Sent automatically by AI KRE8TION Partners Agentic CRM.
+    </div>
+  </div>
+</body>
+</html>`;
+}

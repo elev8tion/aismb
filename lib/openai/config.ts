@@ -14,8 +14,8 @@ export function createOpenAI(apiKey: string): OpenAI {
 // Model configurations
 export const MODELS = {
   transcription: 'whisper-1',
-  chat: 'gpt-4o-mini',
-  tts: 'tts-1',
+  chat: 'gpt-4.1-nano',
+  tts: 'gpt-4o-mini-tts',
   voice: 'echo',
 } as const;
 

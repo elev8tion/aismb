@@ -21,18 +21,18 @@ interface DailyCost {
 
 // OpenAI Pricing (as of Feb 2026)
 const PRICING = {
-  // GPT-4o-mini
-  'gpt-4o-mini': {
-    input: 0.15 / 1_000_000, // $0.15 per 1M tokens
-    output: 0.60 / 1_000_000, // $0.60 per 1M tokens
+  // GPT-4.1-nano
+  'gpt-4.1-nano': {
+    input: 0.10 / 1_000_000, // $0.10 per 1M tokens
+    output: 0.40 / 1_000_000, // $0.40 per 1M tokens
   },
   // Whisper
   'whisper-1': {
     perMinute: 0.006, // $0.006 per minute
   },
-  // TTS
-  'tts-1': {
-    perCharacter: 15 / 1_000_000, // $15 per 1M characters
+  // GPT-4o-mini-tts (token-based pricing)
+  'gpt-4o-mini-tts': {
+    perCharacter: 12 / 1_000_000, // $12 per 1M characters
   },
 } as const;
 
@@ -86,10 +86,10 @@ class CostMonitor {
     let cost = 0;
 
     switch (entry.model) {
-      case 'gpt-4o-mini':
+      case 'gpt-4.1-nano':
         cost =
-          (entry.inputTokens * PRICING['gpt-4o-mini'].input) +
-          (entry.outputTokens * PRICING['gpt-4o-mini'].output);
+          (entry.inputTokens * PRICING['gpt-4.1-nano'].input) +
+          (entry.outputTokens * PRICING['gpt-4.1-nano'].output);
         break;
 
       case 'whisper-1':
@@ -99,9 +99,9 @@ class CostMonitor {
         cost = estimatedMinutes * PRICING['whisper-1'].perMinute;
         break;
 
-      case 'tts-1':
+      case 'gpt-4o-mini-tts':
         // Output tokens represent characters for TTS
-        cost = entry.outputTokens * PRICING['tts-1'].perCharacter;
+        cost = entry.outputTokens * PRICING['gpt-4o-mini-tts'].perCharacter;
         break;
 
       default:
@@ -262,8 +262,8 @@ export function estimateWhisperCost(durationSeconds: number): number {
  */
 export function estimateGPTCost(inputTokens: number, outputTokens: number): number {
   return (
-    inputTokens * PRICING['gpt-4o-mini'].input +
-    outputTokens * PRICING['gpt-4o-mini'].output
+    inputTokens * PRICING['gpt-4.1-nano'].input +
+    outputTokens * PRICING['gpt-4.1-nano'].output
   );
 }
 
@@ -271,5 +271,5 @@ export function estimateGPTCost(inputTokens: number, outputTokens: number): numb
  * Helper to estimate TTS cost from text length
  */
 export function estimateTTSCost(textLength: number): number {
-  return textLength * PRICING['tts-1'].perCharacter;
+  return textLength * PRICING['gpt-4o-mini-tts'].perCharacter;
 }

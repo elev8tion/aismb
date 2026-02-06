@@ -14,7 +14,9 @@ import {
 } from '@/lib/booking/types';
 import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
 import { generateAllCalendarLinks } from '@/lib/booking/calendarLinks';
-import { sendBookingConfirmation } from '@/lib/email/sendEmail';
+import { sendBookingConfirmation, sendLeadDossierToAdmin } from '@/lib/email/sendEmail';
+import { syncBookingToCRM, getLeadByEmail } from '@/lib/voiceAgent/leadManager';
+import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
 
 export const runtime = 'edge';
 
@@ -168,6 +170,46 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // 🔄 SYNC TO CRM: Link booking to lead
+    console.log(`🎯 Syncing Booking to CRM Lead: ${booking.guest_email}`);
+    syncBookingToCRM({
+      email: booking.guest_email,
+      name: booking.guest_name,
+      phone: booking.guest_phone,
+      date: booking.booking_date,
+      time: booking.start_time,
+      notes: booking.notes,
+      timezone: booking.timezone
+    }).catch(err => console.error('Failed to sync booking to CRM:', err));
+
+    // 📬 ADMIN DOSSIER: Send briefing to you
+    (async () => {
+      try {
+        const { env } = getRequestContext();
+        const lead = await getLeadByEmail(booking.guest_email);
+        const leadScore = calculateLeadScore(lead || { email: booking.guest_email });
+        
+        await sendLeadDossierToAdmin({
+          adminEmail: process.env.ADMIN_EMAIL || 'admin@kre8tion.com',
+          lead: {
+            guestName: booking.guest_name,
+            guestEmail: booking.guest_email,
+            industry: lead?.industry || 'Unknown',
+            employeeCount: lead?.employeeCount || 'Unknown',
+            roiScore: leadScore.score,
+            priority: leadScore.tier,
+            painPoints: leadScore.factors,
+            summary: lead?.notes || 'No conversation summary available.',
+            appointmentTime: `${booking.booking_date} at ${booking.start_time}`
+          },
+          emailWorkerUrl: env.EMAIL_WORKER_URL,
+          emailWorkerSecret: env.EMAIL_WORKER_SECRET,
+        });
+      } catch (err) {
+        console.error('Failed to send admin dossier:', err);
+      }
+    })();
 
     // Generate calendar links for easy addition to any calendar
     const calendarLinks = generateAllCalendarLinks(
