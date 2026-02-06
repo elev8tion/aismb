@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 import {
   CreateBookingRequest,
   Booking,
@@ -13,6 +14,7 @@ import {
 } from '@/lib/booking/types';
 import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
 import { generateAllCalendarLinks } from '@/lib/booking/calendarLinks';
+import { sendBookingConfirmation } from '@/lib/email/sendEmail';
 
 export const runtime = 'edge';
 
@@ -178,6 +180,22 @@ export async function POST(req: NextRequest) {
       booking.timezone,
       validatedData.notes
     );
+
+    // Send confirmation email via Cloudflare Email Routing (non-blocking)
+    const { env } = getRequestContext();
+    sendBookingConfirmation({
+      to: booking.guest_email,
+      guestName: booking.guest_name,
+      date: booking.booking_date,
+      startTime: booking.start_time,
+      endTime: booking.end_time,
+      timezone: booking.timezone,
+      calendarLinks: {
+        google: calendarLinks.google,
+        outlook: calendarLinks.outlook,
+      },
+      sendEmail: env.SEND_EMAIL,
+    }).catch(err => console.error('Email send failed:', err));
 
     return NextResponse.json({
       success: true,
