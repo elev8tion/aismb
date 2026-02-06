@@ -25,32 +25,13 @@
 | **Cloudflare Project** | `kre8tion-app` |
 | **Production URL** | https://kre8tion.com |
 | **Pages URL** | https://kre8tion-app.pages.dev |
-| **Git Auto-Deploy** | `kre8tion-app-v2` (connected to GitHub) |
 | **Related CRM** | https://app.kre8tion.com (ai-smb-crm project) |
 
 ---
 
-## Deployment Methods
+## Deployment Method
 
-### Method 1: GitHub Auto-Deploy (Recommended)
-
-The `kre8tion-app-v2` project is connected to GitHub. Simply push to main:
-
-```bash
-git add .
-git commit -m "your message"
-git push origin main
-```
-
-Cloudflare automatically builds and deploys on push.
-
-**Check deployment status:** https://dash.cloudflare.com → Workers & Pages → kre8tion-app-v2 → Deployments
-
----
-
-### Method 2: Manual CLI Deploy
-
-Use when auto-deploy is not working or for immediate deployment:
+### Manual CLI Deploy (Required)
 
 ```bash
 # 1. Build for Cloudflare

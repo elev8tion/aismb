@@ -70,7 +70,7 @@ async function getSessionUser(
   });
 
   if (res.ok) {
-    const data = await res.json();
+    const data: { user?: { id: string } } = await res.json();
     return data.user || null;
   }
   return null;
