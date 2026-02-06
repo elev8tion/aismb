@@ -2,6 +2,9 @@
  * Cloudflare Workers Email Sender
  * Uses the native send_email binding via Cloudflare Email Routing.
  * No third-party services needed — emails go through Cloudflare's infrastructure.
+ *
+ * Uses the builder overload of SendEmail.send() to avoid importing
+ * cloudflare:email (which webpack cannot resolve at build time).
  */
 
 import {
@@ -34,45 +37,6 @@ function formatSubjectDate(dateStr: string): string {
 }
 
 /**
- * Build a raw MIME email message string.
- * Cloudflare's EmailMessage requires the raw RFC 5322 message format.
- */
-function buildMimeMessage(
-  from: string,
-  fromName: string,
-  to: string,
-  toName: string,
-  subject: string,
-  html: string
-): string {
-  const boundary = `----=_Part_${Date.now().toString(36)}`;
-
-  return [
-    `From: ${fromName} <${from}>`,
-    `To: ${toName} <${to}>`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    `Date: ${new Date().toUTCString()}`,
-    `Message-ID: <${Date.now()}.${Math.random().toString(36).slice(2)}@kre8tion.com>`,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/plain; charset=utf-8`,
-    `Content-Transfer-Encoding: quoted-printable`,
-    ``,
-    `Your strategy call has been confirmed. Check your email client for the full details.`,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/html; charset=utf-8`,
-    `Content-Transfer-Encoding: quoted-printable`,
-    ``,
-    html,
-    ``,
-    `--${boundary}--`,
-  ].join('\r\n');
-}
-
-/**
  * Send a booking confirmation email via Cloudflare Workers send_email binding.
  * Fire-and-forget: logs errors but never throws.
  */
@@ -97,21 +61,16 @@ export async function sendBookingConfirmation(
 
     const html = bookingConfirmationTemplate(templateData);
     const subject = `Booking Confirmed \u2014 Strategy Call on ${formatSubjectDate(params.date)}`;
+    const plainText = `Your strategy call has been confirmed for ${formatSubjectDate(params.date)}. Check your email client for the full details.`;
 
-    const rawMessage = buildMimeMessage(
-      FROM_EMAIL,
-      FROM_NAME,
-      params.to,
-      params.guestName,
+    // Use the builder overload — no cloudflare:email import needed
+    await params.sendEmail.send({
+      from: { name: FROM_NAME, email: FROM_EMAIL },
+      to: params.to,
       subject,
-      html
-    );
-
-    // Use Cloudflare's EmailMessage class from cloudflare:email
-    const { EmailMessage } = await import('cloudflare:email');
-    const message = new EmailMessage(FROM_EMAIL, params.to, rawMessage);
-
-    await params.sendEmail.send(message);
+      html,
+      text: plainText,
+    });
 
     console.log(`[Email] Confirmation sent to ${params.to}`);
   } catch (error) {
