@@ -1,0 +1,211 @@
+'use client';
+
+import { useState } from 'react';
+import { BookingFormData } from '@/lib/booking/types';
+
+interface BookingFormProps {
+  date: string;
+  time: string;
+  onSubmit: (data: BookingFormData) => void;
+  loading?: boolean;
+  translations: {
+    name: string;
+    namePlaceholder: string;
+    email: string;
+    emailPlaceholder: string;
+    phone: string;
+    phonePlaceholder: string;
+    notes: string;
+    notesPlaceholder: string;
+    submit: string;
+    submitting: string;
+    required: string;
+  };
+}
+
+export default function BookingForm({
+  date,
+  time,
+  onSubmit,
+  loading = false,
+  translations,
+}: BookingFormProps) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [notes, setNotes] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Format date and time for display
+  const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const formattedTime = (() => {
+    const [hours, mins] = time.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+  })();
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!name.trim() || name.trim().length < 2) {
+      newErrors.name = 'Please enter your full name';
+    }
+
+    if (!email.trim() || !email.includes('@') || !email.includes('.')) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    onSubmit({
+      date,
+      time,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone.trim() || undefined,
+      notes: notes.trim() || undefined,
+      timezone,
+    });
+  };
+
+  return (
+    <div className="w-full">
+      {/* Booking Summary */}
+      <div className="mb-6 p-4 bg-[#0EA5E9]/10 border border-[#0EA5E9]/20 rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#0EA5E9]/20 flex items-center justify-center">
+            <svg className="w-5 h-5 text-[#0EA5E9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium">{formattedDate}</p>
+            <p className="text-sm text-white/60">{formattedTime} (30 min)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Name Field */}
+        <div>
+          <label htmlFor="booking-name" className="block text-sm font-medium mb-2">
+            {translations.name} <span className="text-[#F97316]">*</span>
+          </label>
+          <input
+            id="booking-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={translations.namePlaceholder}
+            disabled={loading}
+            className={`
+              w-full input-glass
+              ${errors.name ? 'border-[#EF4444]' : ''}
+              disabled:opacity-50 disabled:cursor-not-allowed
+            `}
+          />
+          {errors.name && (
+            <p className="mt-1 text-sm text-[#EF4444]">{errors.name}</p>
+          )}
+        </div>
+
+        {/* Email Field */}
+        <div>
+          <label htmlFor="booking-email" className="block text-sm font-medium mb-2">
+            {translations.email} <span className="text-[#F97316]">*</span>
+          </label>
+          <input
+            id="booking-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={translations.emailPlaceholder}
+            disabled={loading}
+            className={`
+              w-full input-glass
+              ${errors.email ? 'border-[#EF4444]' : ''}
+              disabled:opacity-50 disabled:cursor-not-allowed
+            `}
+          />
+          {errors.email && (
+            <p className="mt-1 text-sm text-[#EF4444]">{errors.email}</p>
+          )}
+        </div>
+
+        {/* Phone Field (Optional) */}
+        <div>
+          <label htmlFor="booking-phone" className="block text-sm font-medium mb-2">
+            {translations.phone}
+          </label>
+          <input
+            id="booking-phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder={translations.phonePlaceholder}
+            disabled={loading}
+            className="w-full input-glass disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        {/* Notes Field (Optional) */}
+        <div>
+          <label htmlFor="booking-notes" className="block text-sm font-medium mb-2">
+            {translations.notes}
+          </label>
+          <textarea
+            id="booking-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={translations.notesPlaceholder}
+            disabled={loading}
+            rows={3}
+            className="w-full input-glass resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        {/* Required Fields Note */}
+        <p className="text-xs text-white/40">
+          <span className="text-[#F97316]">*</span> {translations.required}
+        </p>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              {translations.submitting}
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {translations.submit}
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+}

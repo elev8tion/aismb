@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from '@/contexts/LanguageContext';
+import { BookingModal } from './Booking';
 
 export default function FinalCTA() {
   const { t } = useTranslations();
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
     <section id="get-started" className="bg-[#111113] py-16 lg:py-24">
@@ -26,15 +28,15 @@ export default function FinalCTA() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-            <a
-              href="#pricing"
+            <button
+              onClick={() => setBookingOpen(true)}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-semibold px-8 py-4 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               {t.finalCta.ctaPrimary}
-            </a>
+            </button>
             <a
               href="#roi-calculator"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0A0A0B] hover:bg-[#27272A] border border-[#27272A] text-white font-medium px-8 py-4 rounded-lg transition-colors"
@@ -71,6 +73,9 @@ export default function FinalCTA() {
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
     </section>
   );
 }

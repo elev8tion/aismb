@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from '@/contexts/LanguageContext';
+import { BookingModal } from './Booking';
 
 export default function PricingSection() {
   const { t } = useTranslations();
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
     <section className="relative py-20 lg:py-32 px-4 sm:px-6" id="pricing">
@@ -119,14 +121,14 @@ export default function PricingSection() {
               </div>
 
               {/* CTA */}
-              <a
-                href="#get-started"
+              <button
+                onClick={() => setBookingOpen(true)}
                 className={`w-full font-semibold py-3.5 rounded-2xl transition-all block text-center ${
                   tier.highlighted ? 'btn-primary' : 'btn-glass'
                 }`}
               >
                 {tier.cta}
-              </a>
+              </button>
 
               <a href="#roi-calculator" className="block mt-4 text-center text-sm text-[#0EA5E9] hover:text-white transition-colors">
                 {t.pricing.labels.seeCapabilityRoi}
@@ -154,9 +156,12 @@ export default function PricingSection() {
               <div className="text-center lg:text-right">
                 <p className="text-sm text-white/50 mb-2">{t.pricing.labels.capabilityTransfer}</p>
                 <p className="text-3xl font-bold text-white mb-4">{t.pricing.tiers[3].setupFee}</p>
-                <a href="#get-started" className="btn-glass px-8 py-3 font-semibold inline-block">
+                <button
+                  onClick={() => setBookingOpen(true)}
+                  className="btn-glass px-8 py-3 font-semibold inline-block"
+                >
                   {t.pricing.tiers[3].cta}
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -189,6 +194,9 @@ export default function PricingSection() {
             ))}
           </div>
         </div>
+
+        {/* Booking Modal */}
+        <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
       </div>
     </section>
   );

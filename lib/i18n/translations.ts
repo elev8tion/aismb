@@ -276,6 +276,40 @@ export interface Translations {
   languageSwitcher: {
     label: string;
   };
+
+  booking: {
+    title: string;
+    selectDate: string;
+    selectTime: string;
+    enterDetails: string;
+    form: {
+      name: string;
+      namePlaceholder: string;
+      email: string;
+      emailPlaceholder: string;
+      phone: string;
+      phonePlaceholder: string;
+      notes: string;
+      notesPlaceholder: string;
+      submit: string;
+      submitting: string;
+      required: string;
+    };
+    confirmation: {
+      title: string;
+      subtitle: string;
+      date: string;
+      time: string;
+      duration: string;
+      email: string;
+      addToCalendar: string;
+      googleCalendar: string;
+      appleCalendar: string;
+      outlookCalendar: string;
+      done: string;
+      confirmationSent: string;
+    };
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -881,6 +915,40 @@ export const translations: Record<Language, Translations> = {
 
     languageSwitcher: {
       label: 'Language',
+    },
+
+    booking: {
+      title: 'Book a Call',
+      selectDate: 'Select a date for your strategy call',
+      selectTime: 'Choose your preferred time',
+      enterDetails: 'Enter your details to confirm',
+      form: {
+        name: 'Full Name',
+        namePlaceholder: 'John Smith',
+        email: 'Email Address',
+        emailPlaceholder: 'john@company.com',
+        phone: 'Phone Number (optional)',
+        phonePlaceholder: '+1 (555) 123-4567',
+        notes: 'Anything you want us to know? (optional)',
+        notesPlaceholder: 'Tell us about your business or what you hope to discuss...',
+        submit: 'Confirm Booking',
+        submitting: 'Booking...',
+        required: 'Required fields',
+      },
+      confirmation: {
+        title: 'Booking Confirmed!',
+        subtitle: "You're all set. We look forward to speaking with you.",
+        date: 'Date',
+        time: 'Time',
+        duration: '30 minutes',
+        email: 'Confirmation sent to',
+        addToCalendar: 'Add to your calendar',
+        googleCalendar: 'Google',
+        appleCalendar: 'Apple',
+        outlookCalendar: 'Outlook',
+        done: 'Done',
+        confirmationSent: "A confirmation email has been sent to your inbox.",
+      },
     },
   },
 
@@ -1489,6 +1557,40 @@ export const translations: Record<Language, Translations> = {
 
     languageSwitcher: {
       label: 'Idioma',
+    },
+
+    booking: {
+      title: 'Agenda una Llamada',
+      selectDate: 'Selecciona una fecha para tu llamada estrategica',
+      selectTime: 'Elige tu horario preferido',
+      enterDetails: 'Ingresa tus datos para confirmar',
+      form: {
+        name: 'Nombre Completo',
+        namePlaceholder: 'Juan Garcia',
+        email: 'Correo Electronico',
+        emailPlaceholder: 'juan@empresa.com',
+        phone: 'Numero de Telefono (opcional)',
+        phonePlaceholder: '+52 (55) 1234-5678',
+        notes: 'Algo que quieras que sepamos? (opcional)',
+        notesPlaceholder: 'Cuentanos sobre tu negocio o que te gustaria discutir...',
+        submit: 'Confirmar Reserva',
+        submitting: 'Reservando...',
+        required: 'Campos requeridos',
+      },
+      confirmation: {
+        title: 'Reserva Confirmada!',
+        subtitle: 'Todo listo. Esperamos hablar contigo pronto.',
+        date: 'Fecha',
+        time: 'Hora',
+        duration: '30 minutos',
+        email: 'Confirmacion enviada a',
+        addToCalendar: 'Agregar a tu calendario',
+        googleCalendar: 'Google',
+        appleCalendar: 'Apple',
+        outlookCalendar: 'Outlook',
+        done: 'Listo',
+        confirmationSent: 'Se ha enviado un correo de confirmacion a tu bandeja de entrada.',
+      },
     },
   },
 };
