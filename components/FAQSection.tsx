@@ -8,7 +8,7 @@ export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="bg-[#0A0A0B] py-16 lg:py-24">
+    <section id="faq" className="bg-[#0A0A0B] py-16 lg:py-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -59,7 +59,7 @@ export default function FAQSection() {
         <div className="mt-10 text-center">
           <p className="text-[#A1A1AA] mb-4">{t.faq.contact.question}</p>
           <a
-            href="#contact"
+            href="#get-started"
             className="inline-flex items-center gap-2 text-[#0EA5E9] hover:text-white font-medium transition-colors"
           >
             {t.faq.contact.cta}
