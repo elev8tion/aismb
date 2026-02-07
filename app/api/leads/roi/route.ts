@@ -86,61 +86,73 @@ export async function POST(request: NextRequest) {
       console.warn('[Email] Cloudflare context unavailable (local dev), skipping emails');
     }
 
+    console.log('[ROI] Email API key available:', !!emailitApiKey);
+
+    if (!emailitApiKey) {
+      console.error('[ROI] EMAILIT_API_KEY missing — cannot send emails');
+      return NextResponse.json({
+        success: false,
+        error: 'Email service not configured',
+      }, { status: 500 });
+    }
+
     // Await emails before returning — Cloudflare edge runtime kills the context
     // after the response is sent, so fire-and-forget promises never complete.
-    await Promise.all([
-      sendROIReport({
-        to: email,
-        report: {
-          industry,
-          employees,
-          hourlyLaborCost: hourlyValue,
-          tier: tierName,
-          taskBreakdown: taskBreakdown.map((t) => ({
-            name: t.name,
-            hoursPerWeek: t.hoursPerWeek,
-            automationRate: t.automationRate,
-            weeklySavings: t.weeklySavings,
-            automated: automatedIds.has(t.id),
-          })),
-          totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
-          weeklyLaborSavings: metrics.weeklyLaborSavings,
-          recoveredLeads: metrics.lostLeadsPerMonth ? Math.round(metrics.lostLeadsPerMonth * 0.6 * 10) / 10 : 0,
-          monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
-          annualBenefit: metrics.annualBenefit,
-          investment: metrics.investment,
-          roi: metrics.roi,
-          paybackWeeks: metrics.paybackWeeks,
-          consultantCost: Math.round(metrics.totalWeeklyHoursSaved * 175 * 52),
-          agencyCost: 6500 * 12,
-        },
-        emailitApiKey,
-      }).catch((err) => console.error('[Email] Failed to send ROI report:', err)),
+    const reportData = {
+      industry,
+      employees,
+      hourlyLaborCost: hourlyValue,
+      tier: tierName,
+      taskBreakdown: taskBreakdown.map((t) => ({
+        name: t.name,
+        hoursPerWeek: t.hoursPerWeek,
+        automationRate: t.automationRate,
+        weeklySavings: t.weeklySavings,
+        automated: automatedIds.has(t.id),
+      })),
+      totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
+      weeklyLaborSavings: metrics.weeklyLaborSavings,
+      recoveredLeads: metrics.lostLeadsPerMonth ? Math.round(metrics.lostLeadsPerMonth * 0.6 * 10) / 10 : 0,
+      monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
+      annualBenefit: metrics.annualBenefit,
+      investment: metrics.investment,
+      roi: metrics.roi,
+      paybackWeeks: metrics.paybackWeeks,
+      consultantCost: Math.round(metrics.totalWeeklyHoursSaved * 175 * 52),
+      agencyCost: 6500 * 12,
+    };
 
-      sendROILeadDossierToAdmin({
-        adminEmail: 'connect@elev8tion.one',
-        lead: {
-          email,
-          industry,
-          employees,
-          hourlyLaborCost: hourlyValue,
-          tier: tierName,
-          totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
-          weeklyLaborSavings: metrics.weeklyLaborSavings,
-          monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
-          annualBenefit: metrics.annualBenefit,
-          investment: metrics.investment,
-          roi: metrics.roi,
-          paybackWeeks: metrics.paybackWeeks,
-          taskBreakdown: taskBreakdown.map((t) => ({
-            name: t.name,
-            hoursPerWeek: t.hoursPerWeek,
-            weeklySavings: t.weeklySavings,
-          })),
-        },
-        emailitApiKey,
-      }).catch((err) => console.error('[Email] Failed to send ROI dossier:', err)),
-    ]);
+    // Send user report — this is the critical email the user expects
+    await sendROIReport({
+      to: email,
+      report: reportData,
+      emailitApiKey,
+    });
+
+    // Admin dossier is secondary — don't block response if it fails
+    sendROILeadDossierToAdmin({
+      adminEmail: 'connect@elev8tion.one',
+      lead: {
+        email,
+        industry,
+        employees,
+        hourlyLaborCost: hourlyValue,
+        tier: tierName,
+        totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
+        weeklyLaborSavings: metrics.weeklyLaborSavings,
+        monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
+        annualBenefit: metrics.annualBenefit,
+        investment: metrics.investment,
+        roi: metrics.roi,
+        paybackWeeks: metrics.paybackWeeks,
+        taskBreakdown: taskBreakdown.map((t) => ({
+          name: t.name,
+          hoursPerWeek: t.hoursPerWeek,
+          weeklySavings: t.weeklySavings,
+        })),
+      },
+      emailitApiKey,
+    }).catch((err) => console.error('[Email] Failed to send ROI dossier:', err));
 
     console.log('ROI LEAD PROCESSED:', { email, industry, employees, tier, roi: `${metrics?.roi}%` });
 
