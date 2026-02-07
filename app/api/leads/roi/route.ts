@@ -4,14 +4,25 @@ import { syncROICalcToCRM } from '@/lib/voiceAgent/leadManager';
 import { sendROIReport, sendROILeadDossierToAdmin } from '@/lib/email/sendEmail';
 import { TASK_CATEGORIES, TIER_DATA } from '@/components/ROICalculator/types';
 
-const TASK_NAMES: Record<string, string> = {
-  scheduling: 'Scheduling & Appointments',
-  communication: 'Customer Communication & Follow-up',
-  dataEntry: 'Data Entry, Invoicing & Bookkeeping',
-  leadResponse: 'Lead Response & Qualification',
-  reporting: 'Reporting & Analytics',
-  inventory: 'Inventory / Supply Tracking',
-  socialMedia: 'Social Media & Marketing',
+const TASK_NAMES: Record<string, Record<string, string>> = {
+  en: {
+    scheduling: 'Scheduling & Appointments',
+    communication: 'Customer Communication & Follow-up',
+    dataEntry: 'Data Entry, Invoicing & Bookkeeping',
+    leadResponse: 'Lead Response & Qualification',
+    reporting: 'Reporting & Analytics',
+    inventory: 'Inventory / Supply Tracking',
+    socialMedia: 'Social Media & Marketing',
+  },
+  es: {
+    scheduling: 'Programaci\u00f3n y Citas',
+    communication: 'Comunicaci\u00f3n con Clientes y Seguimiento',
+    dataEntry: 'Entrada de Datos, Facturaci\u00f3n y Contabilidad',
+    leadResponse: 'Respuesta y Calificaci\u00f3n de Prospectos',
+    reporting: 'Reportes y An\u00e1lisis',
+    inventory: 'Seguimiento de Inventario / Suministros',
+    socialMedia: 'Redes Sociales y Marketing',
+  },
 };
 
 interface TaskBreakdownItem {
@@ -27,6 +38,7 @@ interface ROILeadBody {
   employees: string;
   hourlyValue: number;
   tier: string;
+  locale?: string;
   metrics: {
     taskHours?: Record<string, number>;
     monthlyRevenue?: number;
@@ -51,7 +63,9 @@ interface ROILeadBody {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as ROILeadBody;
-    const { email, industry, employees, hourlyValue, tier, metrics } = body;
+    const { email, industry, employees, hourlyValue, tier, locale, metrics } = body;
+    const lang = locale === 'es' ? 'es' : 'en';
+    const taskNames = TASK_NAMES[lang];
 
     if (!email || !email.includes('@')) {
       return NextResponse.json(
@@ -61,7 +75,11 @@ export async function POST(request: NextRequest) {
     }
 
     const selectedTier = TIER_DATA[tier] || TIER_DATA.foundation;
-    const tierName = tier === 'discovery' ? 'AI Discovery' : tier === 'foundation' ? 'Foundation Builder' : 'Systems Architect';
+    const tierNameMap: Record<string, Record<string, string>> = {
+      en: { discovery: 'AI Discovery', foundation: 'Foundation Builder', architect: 'Systems Architect' },
+      es: { discovery: 'AI Discovery', foundation: 'Constructor de Base', architect: 'Arquitecto de Sistemas' },
+    };
+    const tierName = tierNameMap[lang][tier] || tierNameMap.en[tier] || tier;
 
     // Use frontend-calculated task breakdown directly so email matches what user sees.
     // Fall back to server-side recalculation only for legacy requests missing the data.
@@ -75,7 +93,7 @@ export async function POST(request: NextRequest) {
       // Use exact frontend values
       taskBreakdown = metrics.taskBreakdown.map((t) => ({
         id: t.taskId,
-        name: TASK_NAMES[t.taskId] || t.taskId,
+        name: taskNames[t.taskId] || t.taskId,
         hoursPerWeek: t.hoursPerWeek,
         automationRate: t.automationRate,
         weeklySavings: t.weeklySavings,
@@ -86,7 +104,7 @@ export async function POST(request: NextRequest) {
         const hours = metrics.taskHours?.[cat.id] ?? cat.defaultHoursPerWeek;
         return {
           id: cat.id,
-          name: TASK_NAMES[cat.id] || cat.id,
+          name: taskNames[cat.id] || cat.id,
           hoursPerWeek: hours,
           automationRate: cat.automationRate,
           weeklySavings: Math.round(hours * cat.automationRate * hourlyValue),
@@ -133,6 +151,7 @@ export async function POST(request: NextRequest) {
       employees,
       hourlyLaborCost: hourlyValue,
       tier: tierName,
+      locale: lang,
       taskBreakdown: taskBreakdown.map((t) => ({
         name: t.name,
         hoursPerWeek: t.hoursPerWeek,

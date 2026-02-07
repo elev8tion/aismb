@@ -241,8 +241,13 @@ export async function sendROIReport(
 
   try {
     const html = roiReportTemplate(params.report);
-    const subject = `Your ROI Report \u2014 ${params.report.roi}% return with ${params.report.tier}`;
-    const plainText = `Your personalized ROI analysis: ${params.report.roi}% ROI, $${params.report.annualBenefit.toLocaleString()} annual benefit, payback in ~${params.report.paybackWeeks} weeks. Visit https://kre8tion.com/#pricing to get started.`;
+    const isEs = params.report.locale === 'es';
+    const subject = isEs
+      ? `Tu Informe de ROI \u2014 ${params.report.roi}% retorno con ${params.report.tier}`
+      : `Your ROI Report \u2014 ${params.report.roi}% return with ${params.report.tier}`;
+    const plainText = isEs
+      ? `Tu an\u00e1lisis de ROI personalizado: ${params.report.roi}% ROI, $${params.report.annualBenefit.toLocaleString()} beneficio anual, recuperaci\u00f3n en ~${params.report.paybackWeeks} semanas. Visita https://kre8tion.com/#pricing para comenzar.`
+      : `Your personalized ROI analysis: ${params.report.roi}% ROI, $${params.report.annualBenefit.toLocaleString()} annual benefit, payback in ~${params.report.paybackWeeks} weeks. Visit https://kre8tion.com/#pricing to get started.`;
 
     await sendViaEmailIt({
       apiKey: params.emailitApiKey,

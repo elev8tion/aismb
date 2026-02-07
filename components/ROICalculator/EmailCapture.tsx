@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function EmailCapture({ basics, taskHours, revenue, tier, results }: Props) {
-  const { t } = useTranslations();
+  const { t, language } = useTranslations();
   const rc = t.roiCalculator;
 
   const [email, setEmail] = useState('');
@@ -38,6 +38,7 @@ export default function EmailCapture({ basics, taskHours, revenue, tier, results
           employees: selectedSize?.name,
           hourlyValue: basics.hourlyLaborCost,
           tier: selectedTier?.id,
+          locale: language,
           metrics: {
             taskHours,
             monthlyRevenue: revenue.monthlyRevenue,
