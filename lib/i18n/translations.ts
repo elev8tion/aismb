@@ -284,6 +284,8 @@ export interface Translations {
     enterDetails: string;
     typeSelection: {
       heading: string;
+      orDivider: string;
+      alreadyCertain: string;
       consultation: {
         title: string;
         description: string;
@@ -296,6 +298,9 @@ export interface Translations {
         price: string;
         duration: string;
         includes: string;
+        process: string[];
+        whyPaid: string;
+        cta: string;
       };
     };
     form: {
@@ -959,6 +964,8 @@ export const translations: Record<Language, Translations> = {
       enterDetails: 'Enter your details to confirm',
       typeSelection: {
         heading: 'How would you like to connect?',
+        orDivider: 'or',
+        alreadyCertain: 'Already certain you want AI for your business?',
         consultation: {
           title: 'Free Strategy Call',
           description: 'A 30-minute video call to discuss your business goals and explore AI opportunities.',
@@ -966,11 +973,19 @@ export const translations: Record<Language, Translations> = {
           duration: '30 min video call',
         },
         assessment: {
-          title: 'Onsite Assessment',
-          description: 'An in-person walkthrough of your business operations to identify AI opportunities.',
+          title: 'On-Site Operations Assessment',
+          description: 'Skip the call. I come to your place of business to shadow you or a staff member and understand your operations firsthand.',
           price: '$250',
-          duration: '60 min onsite visit',
-          includes: 'Includes strategy document',
+          duration: '3-hour on-site visit',
+          includes: 'Full strategy report included',
+          process: [
+            'I shadow you or a team member for 3 hours — ride-alongs, workflows, daily operations',
+            'I identify where agentic AI systems can streamline and grow your business',
+            'We sit down together to review a synopsis of opportunities I\'ve identified',
+            'You decide if you\'d like to invest in implementation and choose a partnership tier',
+          ],
+          whyPaid: 'The $250 fee ensures my expertise and time are compensated regardless of outcome. If you choose not to proceed, you still receive a complete written strategy report with all recommendations — it\'s yours to keep.',
+          cta: 'Book On-Site Assessment — $250',
         },
       },
       form: {
@@ -987,7 +1002,7 @@ export const translations: Record<Language, Translations> = {
         submitAssessment: 'Continue to Payment ($250)',
         submittingAssessment: 'Redirecting to payment...',
         assessmentNotesPlaceholder: 'Tell us about your business operations, team size, and what challenges you face...',
-        assessmentDuration: '60 min',
+        assessmentDuration: '3 hrs',
         required: 'Required fields',
       },
       confirmation: {
@@ -1006,16 +1021,16 @@ export const translations: Record<Language, Translations> = {
       },
       paymentSuccess: {
         title: 'Assessment Confirmed & Paid!',
-        subtitle: 'Your onsite AI assessment has been booked. We look forward to visiting your business.',
+        subtitle: 'Your on-site operations assessment has been booked. We look forward to visiting your business.',
         amount: 'Amount Paid',
         whatToExpect: 'What to Expect',
         expectItems: [
-          'A 60-minute walkthrough of your business operations',
-          'Identification of specific AI automation opportunities',
-          'Discussion of agentic systems tailored to your workflows',
-          'A detailed strategy document delivered after the visit',
+          'A 3-hour on-site visit — I\'ll shadow you or a staff member to understand your day-to-day operations',
+          'Ride-alongs, workflow observation, and hands-on time with your team',
+          'A sit-down review of the AI opportunities I\'ve identified for your business',
+          'Discussion of partnership tiers if you choose to move forward with implementation',
         ],
-        strategyDocNote: 'After the assessment, you will receive a detailed strategy document with all implementation recommendations, whether or not you proceed with our services.',
+        strategyDocNote: 'After the assessment, you will receive a complete written strategy report with all recommendations — whether or not you choose to proceed with our services. It\'s yours to keep.',
         addToCalendar: 'Add to your calendar',
         googleCalendar: 'Google',
         appleCalendar: 'Apple',
@@ -1641,6 +1656,8 @@ export const translations: Record<Language, Translations> = {
       enterDetails: 'Ingresa tus datos para confirmar',
       typeSelection: {
         heading: 'Como te gustaria conectar?',
+        orDivider: 'o',
+        alreadyCertain: 'Ya estas seguro de que quieres IA para tu negocio?',
         consultation: {
           title: 'Llamada Estrategica Gratuita',
           description: 'Una videollamada de 30 minutos para discutir tus objetivos de negocio y explorar oportunidades de IA.',
@@ -1648,11 +1665,19 @@ export const translations: Record<Language, Translations> = {
           duration: 'Videollamada de 30 min',
         },
         assessment: {
-          title: 'Evaluacion en Sitio',
-          description: 'Un recorrido presencial de las operaciones de tu negocio para identificar oportunidades de IA.',
+          title: 'Evaluacion de Operaciones en Sitio',
+          description: 'Salta la llamada. Voy a tu lugar de negocio para acompanar a ti o a un miembro de tu equipo y entender tus operaciones de primera mano.',
           price: '$250',
-          duration: 'Visita presencial de 60 min',
-          includes: 'Incluye documento de estrategia',
+          duration: 'Visita presencial de 3 horas',
+          includes: 'Reporte estrategico completo incluido',
+          process: [
+            'Te acompano a ti o a un miembro de tu equipo durante 3 horas — recorridos, flujos de trabajo, operaciones diarias',
+            'Identifico donde los sistemas de IA agentica pueden optimizar y hacer crecer tu negocio',
+            'Nos sentamos juntos a revisar un resumen de las oportunidades que identifique',
+            'Tu decides si deseas invertir en la implementacion y eliges un nivel de asociacion',
+          ],
+          whyPaid: 'La tarifa de $250 asegura que mi experiencia y tiempo sean compensados sin importar el resultado. Si decides no continuar, igual recibes un reporte estrategico completo con todas las recomendaciones — es tuyo.',
+          cta: 'Reservar Evaluacion en Sitio — $250',
         },
       },
       form: {
@@ -1669,7 +1694,7 @@ export const translations: Record<Language, Translations> = {
         submitAssessment: 'Continuar al Pago ($250)',
         submittingAssessment: 'Redirigiendo al pago...',
         assessmentNotesPlaceholder: 'Cuentanos sobre las operaciones de tu negocio, tamano del equipo y que desafios enfrentas...',
-        assessmentDuration: '60 min',
+        assessmentDuration: '3 hrs',
         required: 'Campos requeridos',
       },
       confirmation: {
@@ -1688,16 +1713,16 @@ export const translations: Record<Language, Translations> = {
       },
       paymentSuccess: {
         title: 'Evaluacion Confirmada y Pagada!',
-        subtitle: 'Tu evaluacion presencial de IA ha sido reservada. Esperamos visitar tu negocio.',
+        subtitle: 'Tu evaluacion de operaciones en sitio ha sido reservada. Esperamos visitar tu negocio.',
         amount: 'Monto Pagado',
         whatToExpect: 'Que Esperar',
         expectItems: [
-          'Un recorrido de 60 minutos por las operaciones de tu negocio',
-          'Identificacion de oportunidades especificas de automatizacion con IA',
-          'Discusion de sistemas agenticos adaptados a tus flujos de trabajo',
-          'Un documento de estrategia detallado entregado despues de la visita',
+          'Una visita presencial de 3 horas — acompanare a ti o a un miembro de tu equipo para entender las operaciones del dia a dia',
+          'Recorridos, observacion de flujos de trabajo y tiempo practico con tu equipo',
+          'Una revision en persona de las oportunidades de IA que identifique para tu negocio',
+          'Discusion de niveles de asociacion si decides avanzar con la implementacion',
         ],
-        strategyDocNote: 'Despues de la evaluacion, recibiras un documento de estrategia detallado con todas las recomendaciones de implementacion, ya sea que procedas con nuestros servicios o no.',
+        strategyDocNote: 'Despues de la evaluacion, recibiras un reporte estrategico completo con todas las recomendaciones — ya sea que decidas continuar con nuestros servicios o no. Es tuyo.',
         addToCalendar: 'Agregar a tu calendario',
         googleCalendar: 'Google',
         appleCalendar: 'Apple',

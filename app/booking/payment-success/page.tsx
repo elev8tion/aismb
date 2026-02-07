@@ -210,7 +210,7 @@ function PaymentSuccessContent() {
             </div>
             <div>
               <p className="font-medium">{formattedDate}</p>
-              <p className="text-sm text-white/60">{formattedTime} (60 min)</p>
+              <p className="text-sm text-white/60">{formattedTime} (3 hrs)</p>
             </div>
           </div>
           {session?.metadata?.name && (

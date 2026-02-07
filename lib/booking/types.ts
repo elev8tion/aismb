@@ -6,7 +6,7 @@ export type BookingType = 'consultation' | 'assessment';
 
 // Assessment pricing constants
 export const ASSESSMENT_FEE_CENTS = 25000; // $250.00
-export const ASSESSMENT_DURATION = 60; // minutes
+export const ASSESSMENT_DURATION = 180; // minutes (3 hours)
 
 export interface Booking {
   id: string;

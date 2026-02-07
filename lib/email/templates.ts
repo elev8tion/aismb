@@ -327,8 +327,9 @@ export function assessmentConfirmationTemplate(data: AssessmentConfirmationData)
                 <tr>
                   <td style="padding: 28px 40px 36px;">
                     <h2 style="margin: 0 0 12px; font-size: 17px; font-weight: 600; color: #1a1a2e;">What to Expect</h2>
-                    <p style="margin: 0; font-size: 15px; color: #4a4a6a; line-height: 1.7;">During your 60-minute onsite assessment, we will walk through your operations and identify specific opportunities for agentic AI systems tailored to your business workflows.</p>
-                    <p style="margin: 16px 0 0; font-size: 15px; color: #4a4a6a; line-height: 1.7;">After the assessment, you will receive a detailed strategy document with all implementation recommendations &mdash; whether or not you proceed with our services.</p>
+                    <p style="margin: 0; font-size: 15px; color: #4a4a6a; line-height: 1.7;">During your 3-hour on-site assessment, I will shadow you or a staff member to understand your day-to-day operations firsthand &mdash; including ride-alongs, workflow observation, and hands-on time with your team.</p>
+                    <p style="margin: 16px 0 0; font-size: 15px; color: #4a4a6a; line-height: 1.7;">Afterward, we will sit down together to review a synopsis of the AI opportunities I&rsquo;ve identified. You&rsquo;ll decide if you&rsquo;d like to invest in implementation and choose a partnership tier.</p>
+                    <p style="margin: 16px 0 0; font-size: 15px; color: #4a4a6a; line-height: 1.7;">If you choose not to proceed, you will receive a complete written strategy report with all recommendations &mdash; it&rsquo;s yours to keep.</p>
                   </td>
                 </tr>
               </table>
