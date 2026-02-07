@@ -34,6 +34,7 @@ export async function sendViaEmailIt(params: {
   html: string;
   text?: string;
   from?: string;
+  tags?: string[];
 }): Promise<void> {
   const res = await fetch(EMAILIT_API_URL, {
     method: 'POST',
@@ -49,7 +50,7 @@ export async function sendViaEmailIt(params: {
       ...(params.text ? { text: params.text } : {}),
       track_opens: true,
       track_clicks: true,
-      tags: ['kre8tion'],
+      tags: params.tags || ['kre8tion', 'landing'],
     }),
   });
 
@@ -114,6 +115,7 @@ export async function sendBookingConfirmation(
       subject,
       html,
       text: plainText,
+      tags: ['kre8tion', 'landing', 'booking'],
     });
 
     console.log(`[Email] Confirmation sent to ${params.to}`);
@@ -172,6 +174,7 @@ export async function sendAssessmentConfirmation(
       subject,
       html,
       text: plainText,
+      tags: ['kre8tion', 'landing', 'assessment'],
     });
 
     console.log(`[Email] Assessment confirmation sent to ${params.to}`);
@@ -211,6 +214,7 @@ export async function sendLeadDossierToAdmin(
       html,
       text: plainText,
       from: FROM_ADDRESS,
+      tags: ['kre8tion', 'landing', 'lead-dossier'],
     });
 
     console.log(`[Email] Lead dossier sent to admin for ${params.lead.guestEmail}`);
@@ -256,6 +260,7 @@ export async function sendROIReport(
       html,
       text: plainText,
       from: FROM_ADDRESS,
+      tags: ['kre8tion', 'landing', 'roi-report'],
     });
 
     console.log(`[Email] ROI report sent to ${params.to}`);
@@ -296,6 +301,7 @@ export async function sendROILeadDossierToAdmin(
       html,
       text: plainText,
       from: FROM_ADDRESS,
+      tags: ['kre8tion', 'landing', 'roi-dossier'],
     });
 
     console.log(`[Email] ROI lead dossier sent to admin for ${params.lead.email}`);
