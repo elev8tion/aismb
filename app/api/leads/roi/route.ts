@@ -14,6 +14,13 @@ const TASK_NAMES: Record<string, string> = {
   socialMedia: 'Social Media & Marketing',
 };
 
+interface TaskBreakdownItem {
+  taskId: string;
+  hoursPerWeek: number;
+  automationRate: number;
+  weeklySavings: number;
+}
+
 interface ROILeadBody {
   email: string;
   industry: string;
@@ -29,10 +36,15 @@ interface ROILeadBody {
     totalWeeklyHoursSaved: number;
     weeklyLaborSavings: number;
     monthlyRevenueRecovery?: number;
+    recoveredLeads?: number;
     annualBenefit: number;
     investment: number;
     roi: number;
     paybackWeeks: number;
+    consultantCost?: number;
+    agencyCost?: number;
+    automatedTasks?: TaskBreakdownItem[];
+    taskBreakdown?: TaskBreakdownItem[];
   };
 }
 
@@ -49,23 +61,41 @@ export async function POST(request: NextRequest) {
     }
 
     const selectedTier = TIER_DATA[tier] || TIER_DATA.foundation;
-
-    // Build task breakdown from client-provided taskHours
     const tierName = tier === 'discovery' ? 'AI Discovery' : tier === 'foundation' ? 'Foundation Builder' : 'Systems Architect';
-    const taskBreakdown = TASK_CATEGORIES.map((cat) => {
-      const hours = metrics.taskHours?.[cat.id] ?? cat.defaultHoursPerWeek;
-      return {
-        id: cat.id,
-        name: TASK_NAMES[cat.id] || cat.id,
-        hoursPerWeek: hours,
-        automationRate: cat.automationRate,
-        weeklySavings: Math.round(hours * cat.automationRate * hourlyValue),
-      };
-    }).sort((a, b) => b.weeklySavings - a.weeklySavings);
 
+    // Use frontend-calculated task breakdown directly so email matches what user sees.
+    // Fall back to server-side recalculation only for legacy requests missing the data.
     const automatedIds = new Set(
-      taskBreakdown.slice(0, selectedTier.tasksAutomated).map((t) => t.id)
+      (metrics.automatedTasks || []).map((t) => t.taskId)
     );
+
+    let taskBreakdown: { id: string; name: string; hoursPerWeek: number; automationRate: number; weeklySavings: number }[];
+
+    if (metrics.taskBreakdown && metrics.taskBreakdown.length > 0) {
+      // Use exact frontend values
+      taskBreakdown = metrics.taskBreakdown.map((t) => ({
+        id: t.taskId,
+        name: TASK_NAMES[t.taskId] || t.taskId,
+        hoursPerWeek: t.hoursPerWeek,
+        automationRate: t.automationRate,
+        weeklySavings: t.weeklySavings,
+      }));
+    } else {
+      // Legacy fallback: recalculate from taskHours
+      taskBreakdown = TASK_CATEGORIES.map((cat) => {
+        const hours = metrics.taskHours?.[cat.id] ?? cat.defaultHoursPerWeek;
+        return {
+          id: cat.id,
+          name: TASK_NAMES[cat.id] || cat.id,
+          hoursPerWeek: hours,
+          automationRate: cat.automationRate,
+          weeklySavings: Math.round(hours * cat.automationRate * hourlyValue),
+        };
+      }).sort((a, b) => b.weeklySavings - a.weeklySavings);
+
+      // Recalculate automatedIds from tier for legacy path
+      taskBreakdown.slice(0, selectedTier.tasksAutomated).forEach((t) => automatedIds.add(t.id));
+    }
 
     // Sync to CRM (awaited — edge runtime kills unawaited promises)
     await syncROICalcToCRM({
@@ -112,14 +142,14 @@ export async function POST(request: NextRequest) {
       })),
       totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
       weeklyLaborSavings: metrics.weeklyLaborSavings,
-      recoveredLeads: metrics.lostLeadsPerMonth ? Math.round(metrics.lostLeadsPerMonth * 0.6 * 10) / 10 : 0,
+      recoveredLeads: metrics.recoveredLeads ?? (metrics.lostLeadsPerMonth ? Math.round(metrics.lostLeadsPerMonth * 0.6 * 10) / 10 : 0),
       monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
       annualBenefit: metrics.annualBenefit,
       investment: metrics.investment,
       roi: metrics.roi,
       paybackWeeks: metrics.paybackWeeks,
-      consultantCost: Math.round(metrics.totalWeeklyHoursSaved * 175 * 52),
-      agencyCost: 6500 * 12,
+      consultantCost: metrics.consultantCost ?? Math.round(metrics.totalWeeklyHoursSaved * 175 * 52),
+      agencyCost: metrics.agencyCost ?? 6500 * 12,
     };
 
     // Send user report — this is the critical email the user expects
