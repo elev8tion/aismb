@@ -134,37 +134,28 @@ body {
 }
 
 
-/* Subtle border glow animation */
+/* Subtle border glow animation — uses box-shadow so it isn't clipped by overflow:hidden */
 .liquid-glass-glow {
-  position: relative;
-}
-
-.liquid-glass-glow::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(14, 165, 233, 0.3),
-    rgba(125, 211, 252, 0.4),
-    rgba(14, 165, 233, 0.3),
-    transparent
-  );
-  border-radius: 25px;
-  opacity: 0;
-  z-index: -1;
   animation: border-glow 4s ease-in-out infinite;
 }
 
 @keyframes border-glow {
   0%, 100% {
-    opacity: 0;
-    transform: scale(1);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.1);
   }
   50% {
-    opacity: 0.6;
-    transform: scale(1.01);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+      0 0 15px rgba(14, 165, 233, 0.3),
+      0 0 30px rgba(14, 165, 233, 0.15),
+      0 0 45px rgba(125, 211, 252, 0.1);
   }
 }
 

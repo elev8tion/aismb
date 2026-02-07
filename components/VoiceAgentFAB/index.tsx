@@ -26,6 +26,8 @@ export default function VoiceAgentFAB() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showAutoClosePrompt, setShowAutoClosePrompt] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [showHint, setShowHint] = useState(false);
+  const [hintDismissed, setHintDismissed] = useState(false);
 
   const audioURLManagerRef = useRef<AudioURLManager>(new AudioURLManager());
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -37,6 +39,36 @@ export default function VoiceAgentFAB() {
   useEffect(() => {
     languageRef.current = language;
   }, [language]);
+
+  // Periodically show hint tooltip until user first interacts with the FAB.
+  // First appearance at 3s, then every 45s. Each appearance lasts 5s.
+  const hintCycleRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (hintDismissed || isOpen) {
+      setShowHint(false);
+      if (hintCycleRef.current) clearInterval(hintCycleRef.current);
+      return;
+    }
+
+    // Initial appearance
+    const initialTimer = setTimeout(() => {
+      setShowHint(true);
+      setTimeout(() => setShowHint(false), 5000);
+    }, 3000);
+
+    // Recurring appearances
+    hintCycleRef.current = setInterval(() => {
+      if (!hintDismissed) {
+        setShowHint(true);
+        setTimeout(() => setShowHint(false), 5000);
+      }
+    }, 45000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      if (hintCycleRef.current) clearInterval(hintCycleRef.current);
+    };
+  }, [hintDismissed, isOpen]);
 
   // Check browser compatibility on mount
   useEffect(() => {
@@ -281,6 +313,10 @@ export default function VoiceAgentFAB() {
     // Clear any auto-close countdown when user interacts
     clearAutoCloseCountdown();
 
+    // Dismiss hint on any interaction
+    setShowHint(false);
+    setHintDismissed(true);
+
     if (!isOpen) {
       setIsOpen(true);
       setDisplayError(null);
@@ -314,6 +350,40 @@ export default function VoiceAgentFAB() {
 
   return (
     <>
+      {/* Hint Tooltip */}
+      <AnimatePresence>
+        {showHint && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: 10, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 10, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="fixed bottom-14 right-28 z-50 pointer-events-none"
+          >
+            <div
+              className="px-4 py-2.5 rounded-xl text-sm font-medium text-white/90 whitespace-nowrap"
+              style={{
+                background: 'rgba(14, 165, 233, 0.15)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+                boxShadow: '0 4px 20px rgba(14, 165, 233, 0.15)',
+              }}
+            >
+              {t.voiceAgent.hint}
+              {/* Arrow pointing right toward FAB */}
+              <div
+                className="absolute top-1/2 -right-2 -translate-y-1/2 w-0 h-0"
+                style={{
+                  borderTop: '6px solid transparent',
+                  borderBottom: '6px solid transparent',
+                  borderLeft: '8px solid rgba(14, 165, 233, 0.3)',
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* FAB Button */}
       <motion.button
         onClick={handleFABClick}

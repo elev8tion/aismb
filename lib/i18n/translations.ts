@@ -295,6 +295,7 @@ export interface Translations {
       stop: string;
       close: string;
     };
+    hint: string;
     errors: {
       notSupported: string;
     };
@@ -1023,6 +1024,7 @@ export const translations: Record<Language, Translations> = {
         stop: 'Stop',
         close: 'Close',
       },
+      hint: 'Ask me anything!',
       errors: {
         notSupported: 'Voice recording is not supported in this browser.',
       },
@@ -1762,6 +1764,7 @@ export const translations: Record<Language, Translations> = {
         stop: 'Detener',
         close: 'Cerrar',
       },
+      hint: 'Preguntame lo que sea!',
       errors: {
         notSupported: 'La grabacion de voz no es compatible con este navegador.',
       },
