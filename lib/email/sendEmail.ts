@@ -1,9 +1,8 @@
 /**
- * Cloudflare Email Sender
+ * EmailIt Transactional Email Sender
  *
- * Calls the kre8tion-email-worker (a standalone Cloudflare Worker with
- * the send_email binding) via fetch. Pages cannot use send_email directly,
- * so we delegate to the Worker.
+ * Sends emails via the EmailIt REST API (https://api.emailit.com).
+ * Replaces the previous Cloudflare send_email worker approach.
  */
 
 import {
@@ -19,6 +18,44 @@ import {
   type ROILeadDossierData,
 } from './templates';
 
+const EMAILIT_API_URL = 'https://api.emailit.com/v1/emails';
+const FROM_EMAIL = 'AI KRE8TION Partners <bookings@kre8tion.com>';
+
+/**
+ * Low-level helper: send an email via EmailIt API.
+ * Throws on failure so callers can handle/log.
+ */
+async function sendViaEmailIt(params: {
+  apiKey: string;
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}): Promise<void> {
+  const res = await fetch(EMAILIT_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${params.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+      ...(params.text ? { text: params.text } : {}),
+      tags: ['kre8tion'],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`EmailIt API returned ${res.status}: ${err}`);
+  }
+}
+
+// ─── Booking Confirmation ─────────────────────────────────────────────────
+
 export interface SendBookingConfirmationParams {
   to: string;
   guestName: string;
@@ -30,10 +67,7 @@ export interface SendBookingConfirmationParams {
     google: string;
     outlook: string;
   };
-  /** URL of the email worker */
-  emailWorkerUrl?: string;
-  /** Shared secret for authenticating with the email worker */
-  emailWorkerSecret?: string;
+  emailitApiKey?: string;
 }
 
 function formatSubjectDate(dateStr: string): string {
@@ -43,14 +77,14 @@ function formatSubjectDate(dateStr: string): string {
 }
 
 /**
- * Send a booking confirmation email via the email worker.
+ * Send a booking confirmation email via EmailIt.
  * Fire-and-forget: logs errors but never throws.
  */
 export async function sendBookingConfirmation(
   params: SendBookingConfirmationParams
 ): Promise<void> {
-  if (!params.emailWorkerUrl || !params.emailWorkerSecret) {
-    console.warn('[Email] EMAIL_WORKER_URL or EMAIL_WORKER_SECRET not configured, skipping confirmation email');
+  if (!params.emailitApiKey) {
+    console.warn('[Email] EMAILIT_API_KEY not configured, skipping confirmation email');
     return;
   }
 
@@ -69,32 +103,21 @@ export async function sendBookingConfirmation(
     const subject = `Booking Confirmed \u2014 Strategy Call on ${formatSubjectDate(params.date)}`;
     const plainText = `Your strategy call has been confirmed for ${formatSubjectDate(params.date)}. Check your email client for the full details.`;
 
-    const res = await fetch(params.emailWorkerUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${params.emailWorkerSecret}`,
-      },
-      body: JSON.stringify({
-        to: params.to,
-        toName: params.guestName,
-        subject,
-        html,
-        text: plainText,
-      }),
+    await sendViaEmailIt({
+      apiKey: params.emailitApiKey,
+      to: params.to,
+      subject,
+      html,
+      text: plainText,
     });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`[Email] Worker returned ${res.status}: ${err}`);
-      return;
-    }
 
     console.log(`[Email] Confirmation sent to ${params.to}`);
   } catch (error) {
     console.error('[Email] Failed to send confirmation email:', error);
   }
 }
+
+// ─── Assessment Confirmation ──────────────────────────────────────────────
 
 export interface SendAssessmentConfirmationParams {
   to: string;
@@ -108,18 +131,17 @@ export interface SendAssessmentConfirmationParams {
     google: string;
     outlook: string;
   };
-  emailWorkerUrl?: string;
-  emailWorkerSecret?: string;
+  emailitApiKey?: string;
 }
 
 /**
- * Send an assessment confirmation email via the email worker.
+ * Send an assessment confirmation email via EmailIt.
  */
 export async function sendAssessmentConfirmation(
   params: SendAssessmentConfirmationParams
 ): Promise<void> {
-  if (!params.emailWorkerUrl || !params.emailWorkerSecret) {
-    console.warn('[Email] EMAIL_WORKER_URL or EMAIL_WORKER_SECRET not configured, skipping assessment email');
+  if (!params.emailitApiKey) {
+    console.warn('[Email] EMAILIT_API_KEY not configured, skipping assessment email');
     return;
   }
 
@@ -139,26 +161,13 @@ export async function sendAssessmentConfirmation(
     const subject = `Assessment Confirmed & Paid \u2014 Onsite Visit on ${formatSubjectDate(params.date)}`;
     const plainText = `Your onsite AI assessment has been confirmed for ${formatSubjectDate(params.date)}. Amount paid: $${(params.paymentAmountCents / 100).toFixed(2)}.`;
 
-    const res = await fetch(params.emailWorkerUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${params.emailWorkerSecret}`,
-      },
-      body: JSON.stringify({
-        to: params.to,
-        toName: params.guestName,
-        subject,
-        html,
-        text: plainText,
-      }),
+    await sendViaEmailIt({
+      apiKey: params.emailitApiKey,
+      to: params.to,
+      subject,
+      html,
+      text: plainText,
     });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`[Email] Assessment Worker returned ${res.status}: ${err}`);
-      return;
-    }
 
     console.log(`[Email] Assessment confirmation sent to ${params.to}`);
   } catch (error) {
@@ -166,11 +175,12 @@ export async function sendAssessmentConfirmation(
   }
 }
 
+// ─── Lead Dossier (admin) ─────────────────────────────────────────────────
+
 export interface SendLeadDossierParams {
   adminEmail: string;
   lead: LeadDossierData;
-  emailWorkerUrl?: string;
-  emailWorkerSecret?: string;
+  emailitApiKey?: string;
 }
 
 /**
@@ -179,8 +189,8 @@ export interface SendLeadDossierParams {
 export async function sendLeadDossierToAdmin(
   params: SendLeadDossierParams
 ): Promise<void> {
-  if (!params.emailWorkerUrl || !params.emailWorkerSecret) {
-    console.warn('[Email] EMAIL_WORKER_URL or EMAIL_WORKER_SECRET not configured, skipping dossier');
+  if (!params.emailitApiKey) {
+    console.warn('[Email] EMAILIT_API_KEY not configured, skipping dossier');
     return;
   }
 
@@ -189,26 +199,13 @@ export async function sendLeadDossierToAdmin(
     const subject = `${params.lead.priority.toUpperCase()} Priority: New Booking from ${params.lead.guestName}`;
     const plainText = `You have a new booking from ${params.lead.guestName} (${params.lead.guestEmail}). Priority: ${params.lead.priority}. Summary: ${params.lead.summary}`;
 
-    const res = await fetch(params.emailWorkerUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${params.emailWorkerSecret}`,
-      },
-      body: JSON.stringify({
-        to: params.adminEmail,
-        toName: 'AI KRE8TION Consultant',
-        subject,
-        html,
-        text: plainText,
-      }),
+    await sendViaEmailIt({
+      apiKey: params.emailitApiKey,
+      to: params.adminEmail,
+      subject,
+      html,
+      text: plainText,
     });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`[Email] Dossier Worker returned ${res.status}: ${err}`);
-      return;
-    }
 
     console.log(`[Email] Lead dossier sent to admin for ${params.lead.guestEmail}`);
   } catch (error) {
@@ -216,13 +213,12 @@ export async function sendLeadDossierToAdmin(
   }
 }
 
-// ─── ROI Report Email ──────────────────────────────────────────────────────
+// ─── ROI Report Email ─────────────────────────────────────────────────────
 
 export interface SendROIReportParams {
   to: string;
   report: ROIReportData;
-  emailWorkerUrl?: string;
-  emailWorkerSecret?: string;
+  emailitApiKey?: string;
 }
 
 /**
@@ -232,8 +228,8 @@ export interface SendROIReportParams {
 export async function sendROIReport(
   params: SendROIReportParams
 ): Promise<void> {
-  if (!params.emailWorkerUrl || !params.emailWorkerSecret) {
-    console.warn('[Email] EMAIL_WORKER_URL or EMAIL_WORKER_SECRET not configured, skipping ROI report');
+  if (!params.emailitApiKey) {
+    console.warn('[Email] EMAILIT_API_KEY not configured, skipping ROI report');
     return;
   }
 
@@ -242,26 +238,13 @@ export async function sendROIReport(
     const subject = `Your ROI Report \u2014 ${params.report.roi}% return with ${params.report.tier}`;
     const plainText = `Your personalized ROI analysis: ${params.report.roi}% ROI, $${params.report.annualBenefit.toLocaleString()} annual benefit, payback in ~${params.report.paybackWeeks} weeks. Visit https://kre8tion.com/#pricing to get started.`;
 
-    const res = await fetch(params.emailWorkerUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${params.emailWorkerSecret}`,
-      },
-      body: JSON.stringify({
-        to: params.to,
-        toName: '',
-        subject,
-        html,
-        text: plainText,
-      }),
+    await sendViaEmailIt({
+      apiKey: params.emailitApiKey,
+      to: params.to,
+      subject,
+      html,
+      text: plainText,
     });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`[Email] ROI Report Worker returned ${res.status}: ${err}`);
-      return;
-    }
 
     console.log(`[Email] ROI report sent to ${params.to}`);
   } catch (error) {
@@ -269,13 +252,12 @@ export async function sendROIReport(
   }
 }
 
-// ─── ROI Lead Dossier (admin) ──────────────────────────────────────────────
+// ─── ROI Lead Dossier (admin) ─────────────────────────────────────────────
 
 export interface SendROILeadDossierParams {
   adminEmail: string;
   lead: ROILeadDossierData;
-  emailWorkerUrl?: string;
-  emailWorkerSecret?: string;
+  emailitApiKey?: string;
 }
 
 /**
@@ -284,8 +266,8 @@ export interface SendROILeadDossierParams {
 export async function sendROILeadDossierToAdmin(
   params: SendROILeadDossierParams
 ): Promise<void> {
-  if (!params.emailWorkerUrl || !params.emailWorkerSecret) {
-    console.warn('[Email] EMAIL_WORKER_URL or EMAIL_WORKER_SECRET not configured, skipping ROI dossier');
+  if (!params.emailitApiKey) {
+    console.warn('[Email] EMAILIT_API_KEY not configured, skipping ROI dossier');
     return;
   }
 
@@ -294,26 +276,13 @@ export async function sendROILeadDossierToAdmin(
     const subject = `ROI Lead: ${params.lead.email} \u2014 ${params.lead.roi}% ROI (${params.lead.tier})`;
     const plainText = `New ROI report request from ${params.lead.email}. Industry: ${params.lead.industry}, Tier: ${params.lead.tier}, ROI: ${params.lead.roi}%, Annual benefit: $${params.lead.annualBenefit.toLocaleString()}.`;
 
-    const res = await fetch(params.emailWorkerUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${params.emailWorkerSecret}`,
-      },
-      body: JSON.stringify({
-        to: params.adminEmail,
-        toName: 'AI KRE8TION Consultant',
-        subject,
-        html,
-        text: plainText,
-      }),
+    await sendViaEmailIt({
+      apiKey: params.emailitApiKey,
+      to: params.adminEmail,
+      subject,
+      html,
+      text: plainText,
     });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`[Email] ROI Dossier Worker returned ${res.status}: ${err}`);
-      return;
-    }
 
     console.log(`[Email] ROI lead dossier sent to admin for ${params.lead.email}`);
   } catch (error) {

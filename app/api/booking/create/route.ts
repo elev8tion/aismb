@@ -241,8 +241,7 @@ export async function POST(req: NextRequest) {
             websiteUrl: validatedData.websiteUrl || '',
             appointmentTime: `${booking.booking_date} at ${booking.start_time}`
           },
-          emailWorkerUrl: env.EMAIL_WORKER_URL,
-          emailWorkerSecret: env.EMAIL_WORKER_SECRET,
+          emailitApiKey: env.EMAILIT_API_KEY,
         });
       } catch (err) {
         console.error('Failed to send admin dossier:', err);
@@ -262,7 +261,7 @@ export async function POST(req: NextRequest) {
       isAssessment ? 'assessment' : 'consultation'
     );
 
-    // Send confirmation email via email worker (non-blocking)
+    // Send confirmation email via EmailIt (non-blocking)
     const { env } = getRequestContext();
     if (isAssessment) {
       sendAssessmentConfirmation({
@@ -277,8 +276,7 @@ export async function POST(req: NextRequest) {
           google: calendarLinks.google,
           outlook: calendarLinks.outlook,
         },
-        emailWorkerUrl: env.EMAIL_WORKER_URL,
-        emailWorkerSecret: env.EMAIL_WORKER_SECRET,
+        emailitApiKey: env.EMAILIT_API_KEY,
       }).catch(err => console.error('Assessment email send failed:', err));
     } else {
       sendBookingConfirmation({
@@ -292,8 +290,7 @@ export async function POST(req: NextRequest) {
           google: calendarLinks.google,
           outlook: calendarLinks.outlook,
         },
-        emailWorkerUrl: env.EMAIL_WORKER_URL,
-        emailWorkerSecret: env.EMAIL_WORKER_SECRET,
+        emailitApiKey: env.EMAILIT_API_KEY,
       }).catch(err => console.error('Email send failed:', err));
     }
 

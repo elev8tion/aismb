@@ -77,13 +77,11 @@ export async function POST(request: NextRequest) {
       calculations: metrics,
     }).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
 
-    // Send emails (non-blocking, requires Cloudflare env)
-    let emailWorkerUrl: string | undefined;
-    let emailWorkerSecret: string | undefined;
+    // Get EmailIt API key from Cloudflare env
+    let emailitApiKey: string | undefined;
     try {
       const { env } = getRequestContext();
-      emailWorkerUrl = env.EMAIL_WORKER_URL;
-      emailWorkerSecret = env.EMAIL_WORKER_SECRET;
+      emailitApiKey = env.EMAILIT_API_KEY;
     } catch {
       console.warn('[Email] Cloudflare context unavailable (local dev), skipping emails');
     }
@@ -116,8 +114,7 @@ export async function POST(request: NextRequest) {
           consultantCost: Math.round(metrics.totalWeeklyHoursSaved * 175 * 52),
           agencyCost: 6500 * 12,
         },
-        emailWorkerUrl,
-        emailWorkerSecret,
+        emailitApiKey,
       }).catch((err) => console.error('[Email] Failed to send ROI report:', err)),
 
       sendROILeadDossierToAdmin({
@@ -141,8 +138,7 @@ export async function POST(request: NextRequest) {
             weeklySavings: t.weeklySavings,
           })),
         },
-        emailWorkerUrl,
-        emailWorkerSecret,
+        emailitApiKey,
       }).catch((err) => console.error('[Email] Failed to send ROI dossier:', err)),
     ]);
 

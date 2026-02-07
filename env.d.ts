@@ -8,8 +8,7 @@ declare global {
     RATE_LIMIT_KV: KVNamespace;
     COST_MONITOR_KV: KVNamespace;
     RESPONSE_CACHE_KV: KVNamespace;
-    EMAIL_WORKER_URL: string;
-    EMAIL_WORKER_SECRET: string;
+    EMAILIT_API_KEY: string;
     STRIPE_SECRET_KEY: string;
     STRIPE_WEBHOOK_SECRET: string;
     STRIPE_ASSESSMENT_PRICE_ID: string;
