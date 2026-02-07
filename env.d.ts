@@ -10,6 +10,11 @@ declare global {
     RESPONSE_CACHE_KV: KVNamespace;
     EMAIL_WORKER_URL: string;
     EMAIL_WORKER_SECRET: string;
+    STRIPE_SECRET_KEY: string;
+    STRIPE_WEBHOOK_SECRET: string;
+    STRIPE_ASSESSMENT_PRICE_ID: string;
+    NCB_INSTANCE: string;
+    NCB_DATA_API_URL: string;
   }
 }
 

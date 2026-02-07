@@ -7,17 +7,22 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
-function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key, { apiVersion: '2023-10-16' });
-}
-
 export async function GET(req: NextRequest) {
   try {
+    const { env } = getRequestContext();
+    const stripeKey = env.STRIPE_SECRET_KEY;
+
+    if (!stripeKey) {
+      return NextResponse.json(
+        { success: false, error: 'Stripe is not configured.' },
+        { status: 500 }
+      );
+    }
+
     const sessionId = req.nextUrl.searchParams.get('session_id');
     if (!sessionId) {
       return NextResponse.json(
@@ -26,7 +31,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const stripe = getStripe();
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     return NextResponse.json({

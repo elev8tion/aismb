@@ -8,20 +8,16 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 import { ASSESSMENT_FEE_CENTS, ASSESSMENT_DURATION } from '@/lib/booking/types';
 import { calculateEndTime } from '@/lib/booking/availability';
 
 export const runtime = 'edge';
 
-function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key, { apiVersion: '2023-10-16' });
-}
-
 function getNCBConfig() {
-  const instance = process.env.NCB_INSTANCE;
-  const dataApiUrl = process.env.NCB_DATA_API_URL;
+  const { env } = getRequestContext();
+  const instance = env.NCB_INSTANCE || process.env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL || process.env.NCB_DATA_API_URL;
   if (!instance || !dataApiUrl) throw new Error('Missing NCB environment variables');
   return { instance, dataApiUrl };
 }
@@ -90,15 +86,22 @@ async function createBookingFromSession(metadata: Record<string, string>, sessio
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.text();
-    const sig = req.headers.get('stripe-signature');
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const { env } = getRequestContext();
+    const stripeKey = env.STRIPE_SECRET_KEY;
+    const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 
-    if (!sig || !webhookSecret) {
-      return NextResponse.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
+    if (!stripeKey || !webhookSecret) {
+      return NextResponse.json({ error: 'Stripe webhook not configured' }, { status: 500 });
     }
 
-    const stripe = getStripe();
+    const body = await req.text();
+    const sig = req.headers.get('stripe-signature');
+
+    if (!sig) {
+      return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
+    }
+
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
     let event: Stripe.Event;
 
     try {

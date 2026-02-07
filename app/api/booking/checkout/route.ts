@@ -7,19 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getRequestContext } from '@cloudflare/next-on-pages';
+
 export const runtime = 'edge';
-
-function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key, { apiVersion: '2023-10-16' });
-}
-
-function getAssessmentPriceId(): string {
-  const priceId = process.env.STRIPE_ASSESSMENT_PRICE_ID;
-  if (!priceId) throw new Error('STRIPE_ASSESSMENT_PRICE_ID not configured');
-  return priceId;
-}
 
 function getBaseUrl(req: NextRequest): string {
   const host = req.headers.get('host') || 'localhost:3000';
@@ -29,6 +19,25 @@ function getBaseUrl(req: NextRequest): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const { env } = getRequestContext();
+    const stripeKey = env.STRIPE_SECRET_KEY;
+    const assessmentPriceId = env.STRIPE_ASSESSMENT_PRICE_ID;
+
+    if (!stripeKey) {
+      return NextResponse.json(
+        { success: false, error: 'Stripe is not configured.' },
+        { status: 500 }
+      );
+    }
+    if (!assessmentPriceId) {
+      return NextResponse.json(
+        { success: false, error: 'Assessment pricing is not configured.' },
+        { status: 500 }
+      );
+    }
+
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+
     const body = await req.json() as Record<string, unknown>;
     const date = body.date as string | undefined;
     const time = body.time as string | undefined;
@@ -60,7 +69,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const stripe = getStripe();
     const baseUrl = getBaseUrl(req);
 
     const session = await stripe.checkout.sessions.create({
@@ -69,7 +77,7 @@ export async function POST(req: NextRequest) {
       customer_email: email.trim().toLowerCase(),
       line_items: [
         {
-          price: getAssessmentPriceId(),
+          price: assessmentPriceId,
           quantity: 1,
         },
       ],
