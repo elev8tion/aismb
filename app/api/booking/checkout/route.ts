@@ -11,6 +11,10 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
+function truncate(str: string, max: number = 500): string {
+  return str.length > max ? str.slice(0, max) : str;
+}
+
 function getBaseUrl(req: NextRequest): string {
   const host = req.headers.get('host') || 'localhost:3000';
   const proto = host.includes('localhost') ? 'http' : 'https';
@@ -44,8 +48,13 @@ export async function POST(req: NextRequest) {
     const name = body.name as string | undefined;
     const email = body.email as string | undefined;
     const phone = body.phone as string | undefined;
-    const notes = body.notes as string | undefined;
     const timezone = body.timezone as string | undefined;
+    const companyName = body.companyName as string | undefined;
+    const industry = body.industry as string | undefined;
+    const employeeCount = body.employeeCount as string | undefined;
+    const challenge = body.challenge as string | undefined;
+    const referralSource = body.referralSource as string | undefined;
+    const websiteUrl = body.websiteUrl as string | undefined;
 
     // Basic validation
     if (!date || !time || !name || !email || !timezone) {
@@ -69,6 +78,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!companyName || companyName.trim().length < 2) {
+      return NextResponse.json(
+        { success: false, error: 'Please enter your company name.' },
+        { status: 400 }
+      );
+    }
+
+    if (!industry || industry.trim().length < 2) {
+      return NextResponse.json(
+        { success: false, error: 'Please enter your industry.' },
+        { status: 400 }
+      );
+    }
+
+    if (!employeeCount || !employeeCount.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'Please enter your number of employees.' },
+        { status: 400 }
+      );
+    }
+
     const baseUrl = getBaseUrl(req);
 
     const session = await stripe.checkout.sessions.create({
@@ -88,8 +118,13 @@ export async function POST(req: NextRequest) {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         phone: (phone || '').trim(),
-        notes: (notes || '').trim(),
         timezone: timezone as string,
+        company_name: truncate(companyName.trim()),
+        industry: truncate(industry.trim()),
+        employee_count: truncate(employeeCount.trim()),
+        challenge: truncate((challenge || '').trim()),
+        referral_source: truncate((referralSource || '').trim()),
+        website_url: truncate((websiteUrl || '').trim()),
       },
       success_url: `${baseUrl}/booking/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/#pricing`,

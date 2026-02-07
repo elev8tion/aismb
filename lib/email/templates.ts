@@ -355,12 +355,16 @@ export function assessmentConfirmationTemplate(data: AssessmentConfirmationData)
 export interface LeadDossierData {
   guestName: string;
   guestEmail: string;
+  companyName?: string;
   industry: string;
   employeeCount: string;
   roiScore: number;
   priority: string;
   painPoints: string[];
   summary: string;
+  challenge?: string;
+  referralSource?: string;
+  websiteUrl?: string;
   appointmentTime: string;
 }
 
@@ -394,6 +398,10 @@ export function leadDossierTemplate(data: LeadDossierData): string {
     </div>
 
     <div class="stat-grid">
+      ${data.companyName ? `<div class="stat-item">
+        <div class="stat-label">Company</div>
+        <div class="stat-value">${data.companyName}</div>
+      </div>` : ''}
       <div class="stat-item">
         <div class="stat-label">Industry</div>
         <div class="stat-value">${data.industry}</div>
@@ -410,7 +418,19 @@ export function leadDossierTemplate(data: LeadDossierData): string {
         <div class="stat-label">Email</div>
         <div class="stat-value">${data.guestEmail}</div>
       </div>
+      ${data.referralSource ? `<div class="stat-item">
+        <div class="stat-label">Referral Source</div>
+        <div class="stat-value">${data.referralSource}</div>
+      </div>` : ''}
     </div>
+
+    ${data.websiteUrl ? `<div class="section-title">Website</div>
+    <p style="font-size: 15px;"><a href="${data.websiteUrl}" style="color: #0066FF; text-decoration: underline;">${data.websiteUrl}</a></p>` : ''}
+
+    ${data.challenge ? `<div class="section-title">Biggest Challenge</div>
+    <p style="font-size: 15px; background: #FFF5F5; padding: 16px; border-radius: 8px; border-left: 4px solid #EF4444; color: #C53030;">
+      ${data.challenge}
+    </p>` : ''}
 
     <div class="section-title">Detected Pain Points</div>
     <div>

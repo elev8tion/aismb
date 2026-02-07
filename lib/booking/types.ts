@@ -18,6 +18,12 @@ export interface Booking {
   end_time: string; // HH:mm
   timezone: string;
   notes?: string;
+  company_name?: string;
+  industry?: string;
+  employee_count?: string;
+  challenge?: string;
+  referral_source?: string;
+  website_url?: string;
   status: BookingStatus;
   booking_type?: BookingType;
   stripe_session_id?: string;
@@ -68,7 +74,12 @@ export interface BookingFormData {
   name: string;
   email: string;
   phone?: string;
-  notes?: string;
+  companyName?: string;
+  industry?: string;
+  employeeCount?: string;
+  challenge?: string;
+  referralSource?: string;
+  websiteUrl?: string;
   timezone: string;
   bookingType?: BookingType;
 }
@@ -90,7 +101,12 @@ export interface CreateBookingRequest {
   name: string;
   email: string;
   phone?: string;
-  notes?: string;
+  companyName?: string;
+  industry?: string;
+  employeeCount?: string;
+  challenge?: string;
+  referralSource?: string;
+  websiteUrl?: string;
   timezone: string;
   bookingType?: BookingType;
   stripe_session_id?: string;

@@ -310,13 +310,24 @@ export interface Translations {
       emailPlaceholder: string;
       phone: string;
       phonePlaceholder: string;
-      notes: string;
-      notesPlaceholder: string;
+      companyName: string;
+      companyNamePlaceholder: string;
+      industry: string;
+      industryPlaceholder: string;
+      employeeCount: string;
+      employeeCountPlaceholder: string;
+      challenge: string;
+      challengePlaceholder: string;
+      referralSource: string;
+      referralSourcePlaceholder: string;
+      websiteUrl: string;
+      websiteUrlPlaceholder: string;
+      yourInfo: string;
+      aboutBusiness: string;
       submit: string;
       submitting: string;
       submitAssessment: string;
       submittingAssessment: string;
-      assessmentNotesPlaceholder: string;
       assessmentDuration: string;
       required: string;
     };
@@ -995,13 +1006,24 @@ export const translations: Record<Language, Translations> = {
         emailPlaceholder: 'john@company.com',
         phone: 'Phone Number (optional)',
         phonePlaceholder: '+1 (555) 123-4567',
-        notes: 'Anything you want us to know? (optional)',
-        notesPlaceholder: 'Tell us about your business or what you hope to discuss...',
+        companyName: 'Company / Business Name',
+        companyNamePlaceholder: 'Acme Plumbing LLC',
+        industry: 'Industry',
+        industryPlaceholder: 'e.g. HVAC, Real Estate, Construction',
+        employeeCount: 'Number of Employees',
+        employeeCountPlaceholder: 'e.g. 12',
+        challenge: 'Biggest Operational Challenge (optional)',
+        challengePlaceholder: 'What slows your team down or costs you the most time?',
+        referralSource: 'How did you hear about us? (optional)',
+        referralSourcePlaceholder: 'Google, referral, social media, etc.',
+        websiteUrl: 'Website URL (optional)',
+        websiteUrlPlaceholder: 'https://yourcompany.com',
+        yourInfo: 'Your Information',
+        aboutBusiness: 'About Your Business',
         submit: 'Confirm Booking',
         submitting: 'Booking...',
         submitAssessment: 'Continue to Payment ($250)',
         submittingAssessment: 'Redirecting to payment...',
-        assessmentNotesPlaceholder: 'Tell us about your business operations, team size, and what challenges you face...',
         assessmentDuration: '3 hrs',
         required: 'Required fields',
       },
@@ -1687,13 +1709,24 @@ export const translations: Record<Language, Translations> = {
         emailPlaceholder: 'juan@empresa.com',
         phone: 'Numero de Telefono (opcional)',
         phonePlaceholder: '+52 (55) 1234-5678',
-        notes: 'Algo que quieras que sepamos? (opcional)',
-        notesPlaceholder: 'Cuentanos sobre tu negocio o que te gustaria discutir...',
+        companyName: 'Empresa / Nombre del Negocio',
+        companyNamePlaceholder: 'Plomeria Acme LLC',
+        industry: 'Industria',
+        industryPlaceholder: 'ej. HVAC, Bienes Raices, Construccion',
+        employeeCount: 'Numero de Empleados',
+        employeeCountPlaceholder: 'ej. 12',
+        challenge: 'Mayor Desafio Operacional (opcional)',
+        challengePlaceholder: 'Que es lo que mas retrasa a tu equipo o te cuesta mas tiempo?',
+        referralSource: 'Como te enteraste de nosotros? (opcional)',
+        referralSourcePlaceholder: 'Google, referencia, redes sociales, etc.',
+        websiteUrl: 'URL del Sitio Web (opcional)',
+        websiteUrlPlaceholder: 'https://tuempresa.com',
+        yourInfo: 'Tu Informacion',
+        aboutBusiness: 'Sobre Tu Negocio',
         submit: 'Confirmar Reserva',
         submitting: 'Reservando...',
         submitAssessment: 'Continuar al Pago ($250)',
         submittingAssessment: 'Redirigiendo al pago...',
-        assessmentNotesPlaceholder: 'Cuentanos sobre las operaciones de tu negocio, tamano del equipo y que desafios enfrentas...',
         assessmentDuration: '3 hrs',
         required: 'Campos requeridos',
       },

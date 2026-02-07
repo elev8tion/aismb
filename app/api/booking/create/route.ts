@@ -101,13 +101,23 @@ function validateBookingRequest(data: unknown): CreateBookingRequest | null {
 
   const bookingType = req.bookingType === 'assessment' ? 'assessment' : 'consultation';
 
+  // Validate required business fields
+  if (typeof req.companyName !== 'string' || req.companyName.trim().length < 2) return null;
+  if (typeof req.industry !== 'string' || req.industry.trim().length < 2) return null;
+  if (typeof req.employeeCount !== 'string' || !req.employeeCount.trim()) return null;
+
   return {
     date: req.date,
     time: req.time,
     name: req.name.trim(),
     email: req.email.trim().toLowerCase(),
     phone: typeof req.phone === 'string' ? req.phone.trim() : undefined,
-    notes: typeof req.notes === 'string' ? req.notes.trim() : undefined,
+    companyName: req.companyName.trim(),
+    industry: req.industry.trim(),
+    employeeCount: req.employeeCount.trim(),
+    challenge: typeof req.challenge === 'string' ? req.challenge.trim() : undefined,
+    referralSource: typeof req.referralSource === 'string' ? req.referralSource.trim() : undefined,
+    websiteUrl: typeof req.websiteUrl === 'string' ? req.websiteUrl.trim() : undefined,
     timezone: req.timezone,
     bookingType: bookingType as BookingType,
     stripe_session_id: typeof req.stripe_session_id === 'string' ? req.stripe_session_id : undefined,
@@ -167,7 +177,12 @@ export async function POST(req: NextRequest) {
       start_time: validatedData.time,
       end_time: endTime,
       timezone: validatedData.timezone,
-      notes: validatedData.notes || '',
+      company_name: validatedData.companyName || '',
+      industry: validatedData.industry || '',
+      employee_count: validatedData.employeeCount || '',
+      challenge: validatedData.challenge || '',
+      referral_source: validatedData.referralSource || '',
+      website_url: validatedData.websiteUrl || '',
       status: 'confirmed',
       booking_type: validatedData.bookingType || 'consultation',
       ...(validatedData.stripe_session_id && {
@@ -195,8 +210,11 @@ export async function POST(req: NextRequest) {
       phone: booking.guest_phone,
       date: booking.booking_date,
       time: booking.start_time,
-      notes: booking.notes,
-      timezone: booking.timezone
+      timezone: booking.timezone,
+      companyName: validatedData.companyName,
+      industry: validatedData.industry,
+      employeeCount: validatedData.employeeCount,
+      challenge: validatedData.challenge,
     }).catch(err => console.error('Failed to sync booking to CRM:', err));
 
     // 📬 ADMIN DOSSIER: Send briefing to you
@@ -211,12 +229,16 @@ export async function POST(req: NextRequest) {
           lead: {
             guestName: booking.guest_name,
             guestEmail: booking.guest_email,
-            industry: lead?.industry || 'Unknown',
-            employeeCount: lead?.employeeCount || 'Unknown',
+            companyName: validatedData.companyName || (lead?.companyName as string) || 'Unknown',
+            industry: validatedData.industry || (lead?.industry as string) || 'Unknown',
+            employeeCount: validatedData.employeeCount || (lead?.employeeCount as string) || 'Unknown',
             roiScore: leadScore.score,
             priority: leadScore.tier,
             painPoints: leadScore.factors,
             summary: lead?.notes || 'No conversation summary available.',
+            challenge: validatedData.challenge || '',
+            referralSource: validatedData.referralSource || '',
+            websiteUrl: validatedData.websiteUrl || '',
             appointmentTime: `${booking.booking_date} at ${booking.start_time}`
           },
           emailWorkerUrl: env.EMAIL_WORKER_URL,
@@ -236,7 +258,7 @@ export async function POST(req: NextRequest) {
       booking.start_time,
       booking.end_time,
       booking.timezone,
-      validatedData.notes,
+      validatedData.challenge,
       isAssessment ? 'assessment' : 'consultation'
     );
 

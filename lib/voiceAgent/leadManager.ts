@@ -149,15 +149,21 @@ export async function syncBookingToCRM(data: {
   phone?: string;
   date: string;
   time: string;
-  notes?: string;
   timezone: string;
+  companyName?: string;
+  industry?: string;
+  employeeCount?: string;
+  challenge?: string;
 }): Promise<boolean> {
   await syncLeadToCRM({
     email: data.email,
     firstName: data.name.split(' ')[0],
     lastName: data.name.split(' ').slice(1).join(' '),
     phone: data.phone,
-    notes: `Booked strategy call for ${data.date} at ${data.time}. Notes: ${data.notes || 'None'}`,
+    companyName: data.companyName,
+    industry: data.industry,
+    employeeCount: data.employeeCount,
+    notes: `Booked strategy call for ${data.date} at ${data.time}. Challenge: ${data.challenge || 'None'}`,
     source: 'Calendar Booking'
   });
 

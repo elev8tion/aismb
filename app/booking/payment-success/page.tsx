@@ -21,8 +21,13 @@ interface SessionData {
     name: string;
     email: string;
     phone: string;
-    notes: string;
     timezone: string;
+    company_name: string;
+    industry: string;
+    employee_count: string;
+    challenge: string;
+    referral_source: string;
+    website_url: string;
   };
 }
 
@@ -74,8 +79,13 @@ async function processStripeSession(sessionId: string): Promise<{
         name: meta.name,
         email: meta.email,
         phone: meta.phone || undefined,
-        notes: meta.notes || undefined,
         timezone: meta.timezone,
+        companyName: meta.company_name || undefined,
+        industry: meta.industry || undefined,
+        employeeCount: meta.employee_count || undefined,
+        challenge: meta.challenge || undefined,
+        referralSource: meta.referral_source || undefined,
+        websiteUrl: meta.website_url || undefined,
         bookingType: 'assessment',
         stripe_session_id: sessionData.id,
         payment_amount_cents: ASSESSMENT_FEE_CENTS,

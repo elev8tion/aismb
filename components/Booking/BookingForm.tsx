@@ -16,13 +16,24 @@ interface BookingFormProps {
     emailPlaceholder: string;
     phone: string;
     phonePlaceholder: string;
-    notes: string;
-    notesPlaceholder: string;
+    companyName: string;
+    companyNamePlaceholder: string;
+    industry: string;
+    industryPlaceholder: string;
+    employeeCount: string;
+    employeeCountPlaceholder: string;
+    challenge: string;
+    challengePlaceholder: string;
+    referralSource: string;
+    referralSourcePlaceholder: string;
+    websiteUrl: string;
+    websiteUrlPlaceholder: string;
+    yourInfo: string;
+    aboutBusiness: string;
     submit: string;
     submitting: string;
     submitAssessment: string;
     submittingAssessment: string;
-    assessmentNotesPlaceholder: string;
     assessmentDuration: string;
     required: string;
   };
@@ -40,7 +51,12 @@ export default function BookingForm({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [notes, setNotes] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [employeeCount, setEmployeeCount] = useState('');
+  const [challenge, setChallenge] = useState('');
+  const [referralSource, setReferralSource] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Format date and time for display
@@ -68,6 +84,18 @@ export default function BookingForm({
       newErrors.email = 'Please enter a valid email address';
     }
 
+    if (!companyName.trim() || companyName.trim().length < 2) {
+      newErrors.companyName = 'Please enter your company name';
+    }
+
+    if (!industry.trim() || industry.trim().length < 2) {
+      newErrors.industry = 'Please enter your industry';
+    }
+
+    if (!employeeCount.trim()) {
+      newErrors.employeeCount = 'Please enter your number of employees';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -85,7 +113,12 @@ export default function BookingForm({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim() || undefined,
-      notes: notes.trim() || undefined,
+      companyName: companyName.trim(),
+      industry: industry.trim(),
+      employeeCount: employeeCount.trim(),
+      challenge: challenge.trim() || undefined,
+      referralSource: referralSource.trim() || undefined,
+      websiteUrl: websiteUrl.trim() || undefined,
       timezone,
       bookingType,
     });
@@ -109,83 +142,196 @@ export default function BookingForm({
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name Field */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Section: Your Information */}
         <div>
-          <label htmlFor="booking-name" className="block text-sm font-medium mb-2">
-            {translations.name} <span className="text-[#F97316]">*</span>
-          </label>
-          <input
-            id="booking-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={translations.namePlaceholder}
-            disabled={loading}
-            className={`
-              w-full input-glass
-              ${errors.name ? 'border-[#EF4444]' : ''}
-              disabled:opacity-50 disabled:cursor-not-allowed
-            `}
-          />
-          {errors.name && (
-            <p className="mt-1 text-sm text-[#EF4444]">{errors.name}</p>
-          )}
+          <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-3">{translations.yourInfo}</h3>
+          <div className="space-y-4">
+            {/* Name Field */}
+            <div>
+              <label htmlFor="booking-name" className="block text-sm font-medium mb-2">
+                {translations.name} <span className="text-[#F97316]">*</span>
+              </label>
+              <input
+                id="booking-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={translations.namePlaceholder}
+                disabled={loading}
+                className={`
+                  w-full input-glass
+                  ${errors.name ? 'border-[#EF4444]' : ''}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+              {errors.name && (
+                <p className="mt-1 text-sm text-[#EF4444]">{errors.name}</p>
+              )}
+            </div>
+
+            {/* Email Field */}
+            <div>
+              <label htmlFor="booking-email" className="block text-sm font-medium mb-2">
+                {translations.email} <span className="text-[#F97316]">*</span>
+              </label>
+              <input
+                id="booking-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={translations.emailPlaceholder}
+                disabled={loading}
+                className={`
+                  w-full input-glass
+                  ${errors.email ? 'border-[#EF4444]' : ''}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-[#EF4444]">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Phone Field (Optional) */}
+            <div>
+              <label htmlFor="booking-phone" className="block text-sm font-medium mb-2">
+                {translations.phone}
+              </label>
+              <input
+                id="booking-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder={translations.phonePlaceholder}
+                disabled={loading}
+                className="w-full input-glass disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Email Field */}
+        {/* Section: About Your Business */}
         <div>
-          <label htmlFor="booking-email" className="block text-sm font-medium mb-2">
-            {translations.email} <span className="text-[#F97316]">*</span>
-          </label>
-          <input
-            id="booking-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={translations.emailPlaceholder}
-            disabled={loading}
-            className={`
-              w-full input-glass
-              ${errors.email ? 'border-[#EF4444]' : ''}
-              disabled:opacity-50 disabled:cursor-not-allowed
-            `}
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-[#EF4444]">{errors.email}</p>
-          )}
-        </div>
+          <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-3">{translations.aboutBusiness}</h3>
+          <div className="space-y-4">
+            {/* Company Name Field */}
+            <div>
+              <label htmlFor="booking-company" className="block text-sm font-medium mb-2">
+                {translations.companyName} <span className="text-[#F97316]">*</span>
+              </label>
+              <input
+                id="booking-company"
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder={translations.companyNamePlaceholder}
+                disabled={loading}
+                className={`
+                  w-full input-glass
+                  ${errors.companyName ? 'border-[#EF4444]' : ''}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+              {errors.companyName && (
+                <p className="mt-1 text-sm text-[#EF4444]">{errors.companyName}</p>
+              )}
+            </div>
 
-        {/* Phone Field (Optional) */}
-        <div>
-          <label htmlFor="booking-phone" className="block text-sm font-medium mb-2">
-            {translations.phone}
-          </label>
-          <input
-            id="booking-phone"
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder={translations.phonePlaceholder}
-            disabled={loading}
-            className="w-full input-glass disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
+            {/* Industry Field */}
+            <div>
+              <label htmlFor="booking-industry" className="block text-sm font-medium mb-2">
+                {translations.industry} <span className="text-[#F97316]">*</span>
+              </label>
+              <input
+                id="booking-industry"
+                type="text"
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                placeholder={translations.industryPlaceholder}
+                disabled={loading}
+                className={`
+                  w-full input-glass
+                  ${errors.industry ? 'border-[#EF4444]' : ''}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+              {errors.industry && (
+                <p className="mt-1 text-sm text-[#EF4444]">{errors.industry}</p>
+              )}
+            </div>
 
-        {/* Notes Field (Optional) */}
-        <div>
-          <label htmlFor="booking-notes" className="block text-sm font-medium mb-2">
-            {translations.notes}
-          </label>
-          <textarea
-            id="booking-notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder={isAssessment ? translations.assessmentNotesPlaceholder : translations.notesPlaceholder}
-            disabled={loading}
-            rows={3}
-            className="w-full input-glass resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-          />
+            {/* Employee Count Field */}
+            <div>
+              <label htmlFor="booking-employees" className="block text-sm font-medium mb-2">
+                {translations.employeeCount} <span className="text-[#F97316]">*</span>
+              </label>
+              <input
+                id="booking-employees"
+                type="text"
+                value={employeeCount}
+                onChange={(e) => setEmployeeCount(e.target.value)}
+                placeholder={translations.employeeCountPlaceholder}
+                disabled={loading}
+                className={`
+                  w-full input-glass
+                  ${errors.employeeCount ? 'border-[#EF4444]' : ''}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+              {errors.employeeCount && (
+                <p className="mt-1 text-sm text-[#EF4444]">{errors.employeeCount}</p>
+              )}
+            </div>
+
+            {/* Challenge Field (Optional) */}
+            <div>
+              <label htmlFor="booking-challenge" className="block text-sm font-medium mb-2">
+                {translations.challenge}
+              </label>
+              <textarea
+                id="booking-challenge"
+                value={challenge}
+                onChange={(e) => setChallenge(e.target.value)}
+                placeholder={translations.challengePlaceholder}
+                disabled={loading}
+                rows={3}
+                className="w-full input-glass resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            {/* Referral Source Field (Optional) */}
+            <div>
+              <label htmlFor="booking-referral" className="block text-sm font-medium mb-2">
+                {translations.referralSource}
+              </label>
+              <input
+                id="booking-referral"
+                type="text"
+                value={referralSource}
+                onChange={(e) => setReferralSource(e.target.value)}
+                placeholder={translations.referralSourcePlaceholder}
+                disabled={loading}
+                className="w-full input-glass disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            {/* Website URL Field (Optional) */}
+            <div>
+              <label htmlFor="booking-website" className="block text-sm font-medium mb-2">
+                {translations.websiteUrl}
+              </label>
+              <input
+                id="booking-website"
+                type="url"
+                value={websiteUrl}
+                onChange={(e) => setWebsiteUrl(e.target.value)}
+                placeholder={translations.websiteUrlPlaceholder}
+                disabled={loading}
+                className="w-full input-glass disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Required Fields Note */}
