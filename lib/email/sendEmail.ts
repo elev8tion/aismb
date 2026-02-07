@@ -25,7 +25,7 @@ const FROM_EMAIL = 'AI KRE8TION Partners <bookings@kre8tion.com>';
  * Low-level helper: send an email via EmailIt API.
  * Throws on failure so callers can handle/log.
  */
-async function sendViaEmailIt(params: {
+export async function sendViaEmailIt(params: {
   apiKey: string;
   to: string;
   subject: string;
@@ -44,6 +44,8 @@ async function sendViaEmailIt(params: {
       subject: params.subject,
       html: params.html,
       ...(params.text ? { text: params.text } : {}),
+      track_opens: true,
+      track_clicks: true,
       tags: ['kre8tion'],
     }),
   });
