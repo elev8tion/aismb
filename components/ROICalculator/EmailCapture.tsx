@@ -37,7 +37,7 @@ export default function EmailCapture({ basics, taskHours, revenue, tier, results
           industry: selectedIndustry?.name,
           employees: selectedSize?.name,
           hourlyValue: basics.hourlyLaborCost,
-          tier: selectedTier?.name,
+          tier: selectedTier?.id,
           metrics: {
             taskHours,
             monthlyRevenue: revenue.monthlyRevenue,

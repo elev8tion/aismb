@@ -176,6 +176,21 @@ export interface Translations {
       paysForItself: string;
       continuesGenerating: string;
       automatedTasksLabel: string;
+      miniRoi: string;
+      miniSavings: string;
+      miniPayback: string;
+      weeksShort: string;
+      monthsShort: string;
+      paybackLabel: string;
+    };
+    inputSummary: {
+      title: string;
+      industry: string;
+      teamSize: string;
+      hourlyRate: string;
+      weeklyHours: string;
+      monthlyRevenue: string;
+      lostLeads: string;
     };
     emailCapture: {
       heading: string;
@@ -774,6 +789,21 @@ export const translations: Record<Language, Translations> = {
         paysForItself: 'Pays for itself in ~',
         continuesGenerating: 'weeks, then continues generating value',
         automatedTasksLabel: 'Tasks Automated (by savings)',
+        miniRoi: 'ROI',
+        miniSavings: 'Weekly',
+        miniPayback: 'Payback',
+        weeksShort: 'wks',
+        monthsShort: 'mo',
+        paybackLabel: 'Payback Period',
+      },
+      inputSummary: {
+        title: 'Your Inputs',
+        industry: 'Industry',
+        teamSize: 'Team Size',
+        hourlyRate: 'Hourly Rate',
+        weeklyHours: 'Weekly Hours',
+        monthlyRevenue: 'Monthly Revenue',
+        lostLeads: 'Lost Leads/mo',
       },
       emailCapture: {
         heading: 'Email me this full report',
@@ -1514,6 +1544,21 @@ export const translations: Record<Language, Translations> = {
         paysForItself: 'Se paga solo en ~',
         continuesGenerating: 'semanas, luego continua generando valor',
         automatedTasksLabel: 'Tareas Automatizadas (por ahorro)',
+        miniRoi: 'ROI',
+        miniSavings: 'Semanal',
+        miniPayback: 'Retorno',
+        weeksShort: 'sem',
+        monthsShort: 'mes',
+        paybackLabel: 'Periodo de Retorno',
+      },
+      inputSummary: {
+        title: 'Tus Datos',
+        industry: 'Industria',
+        teamSize: 'Equipo',
+        hourlyRate: 'Tarifa/Hora',
+        weeklyHours: 'Horas Semanales',
+        monthlyRevenue: 'Ingresos Mensuales',
+        lostLeads: 'Prospectos Perdidos/mes',
       },
       emailCapture: {
         heading: 'Enviame este reporte completo',

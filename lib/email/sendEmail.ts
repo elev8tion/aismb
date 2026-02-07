@@ -19,7 +19,11 @@ import {
 } from './templates';
 
 const EMAILIT_API_URL = 'https://api.emailit.com/v1/emails';
-const FROM_EMAIL = 'AI KRE8TION Partners <bookings@kre8tion.com>';
+
+// Per-type sender addresses (all @kre8tion.com — domain verified in EmailIt)
+const FROM_BOOKINGS = 'AI KRE8TION Partners <bookings@kre8tion.com>';
+const FROM_REPORTS  = 'AI KRE8TION Partners <reports@kre8tion.com>';
+const FROM_ALERTS   = 'AI KRE8TION Partners <alerts@kre8tion.com>';
 
 /**
  * Low-level helper: send an email via EmailIt API.
@@ -31,6 +35,7 @@ export async function sendViaEmailIt(params: {
   subject: string;
   html: string;
   text?: string;
+  from?: string;
 }): Promise<void> {
   const res = await fetch(EMAILIT_API_URL, {
     method: 'POST',
@@ -39,7 +44,7 @@ export async function sendViaEmailIt(params: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: FROM_EMAIL,
+      from: params.from || FROM_BOOKINGS,
       to: params.to,
       subject: params.subject,
       html: params.html,
@@ -207,6 +212,7 @@ export async function sendLeadDossierToAdmin(
       subject,
       html,
       text: plainText,
+      from: FROM_ALERTS,
     });
 
     console.log(`[Email] Lead dossier sent to admin for ${params.lead.guestEmail}`);
@@ -246,6 +252,7 @@ export async function sendROIReport(
       subject,
       html,
       text: plainText,
+      from: FROM_REPORTS,
     });
 
     console.log(`[Email] ROI report sent to ${params.to}`);
@@ -284,6 +291,7 @@ export async function sendROILeadDossierToAdmin(
       subject,
       html,
       text: plainText,
+      from: FROM_ALERTS,
     });
 
     console.log(`[Email] ROI lead dossier sent to admin for ${params.lead.email}`);

@@ -16,6 +16,8 @@ import RevenueImpactStep from './RevenueImpactStep';
 import ResultsPanel from './ResultsPanel';
 import ComparisonCard from './ComparisonCard';
 import EmailCapture from './EmailCapture';
+import MiniResultsBar from './MiniResultsBar';
+import InputSummary from './InputSummary';
 
 const TOTAL_STEPS = 4;
 
@@ -72,6 +74,9 @@ export default function ROICalculator() {
 
   const nextStep = useCallback(() => setStep((s) => Math.min(s + 1, TOTAL_STEPS)), []);
   const prevStep = useCallback(() => setStep((s) => Math.max(s - 1, 1)), []);
+  const goToStep = useCallback((target: number) => {
+    if (target < step) setStep(target);
+  }, [step]);
 
   return (
     <section className="relative py-20 lg:py-32 px-4 sm:px-6" id="roi-calculator">
@@ -89,14 +94,16 @@ export default function ROICalculator() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Left Column: Step Wizard */}
-          <div className="glass p-4 md:p-6 lg:p-8">
-            <StepIndicator currentStep={step} totalSteps={TOTAL_STEPS} />
+          <div className={`glass p-4 md:p-6 lg:p-8 ${step < 4 ? 'pb-24 lg:pb-8' : ''}`}>
+            <StepIndicator currentStep={step} totalSteps={TOTAL_STEPS} onStepClick={goToStep} />
 
             {step === 1 && (
               <BusinessBasicsStep
                 state={basics}
                 onChange={handleBasicsChange}
                 onNext={nextStep}
+                tier={tier}
+                onTierChange={setTier}
               />
             )}
             {step === 2 && (
@@ -134,6 +141,18 @@ export default function ROICalculator() {
                   />
                 </div>
 
+                {/* Desktop: EmailCapture + InputSummary in left column */}
+                <div className="hidden lg:block space-y-4 mb-4">
+                  <EmailCapture
+                    basics={basics}
+                    taskHours={taskHours}
+                    revenue={revenue}
+                    tier={tier}
+                    results={results}
+                  />
+                  <InputSummary basics={basics} taskHours={taskHours} revenue={revenue} />
+                </div>
+
                 <button
                   onClick={prevStep}
                   className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/70 font-semibold rounded-xl transition-colors border border-white/10 mb-3"
@@ -154,13 +173,15 @@ export default function ROICalculator() {
           <div className="hidden lg:flex flex-col gap-4">
             <ResultsPanel results={results} tier={tier} onTierChange={setTier} />
             <ComparisonCard results={results} />
-            <EmailCapture
-              basics={basics}
-              taskHours={taskHours}
-              revenue={revenue}
-              tier={tier}
-              results={results}
-            />
+            {step < 4 && (
+              <EmailCapture
+                basics={basics}
+                taskHours={taskHours}
+                revenue={revenue}
+                tier={tier}
+                results={results}
+              />
+            )}
             <a
               href="#pricing"
               className="btn-primary text-center py-4 rounded-2xl font-semibold"
@@ -169,6 +190,9 @@ export default function ROICalculator() {
             </a>
           </div>
         </div>
+
+        {/* Sticky Mini Results Bar for Mobile */}
+        <MiniResultsBar results={results} visible={step < 4} />
 
         {/* Disclaimer */}
         <div className="mt-10 text-center">

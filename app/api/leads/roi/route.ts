@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       }).catch((err) => console.error('[Email] Failed to send ROI report:', err)),
 
       sendROILeadDossierToAdmin({
-        adminEmail: 'admin@kre8tion.com',
+        adminEmail: 'connect@elev8tion.one',
         lead: {
           email,
           industry,

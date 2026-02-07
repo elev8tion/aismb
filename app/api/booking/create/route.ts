@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
         const leadScore = calculateLeadScore(lead || { email: booking.guest_email });
         
         await sendLeadDossierToAdmin({
-          adminEmail: process.env.ADMIN_EMAIL || 'admin@kre8tion.com',
+          adminEmail: process.env.ADMIN_EMAIL || 'connect@elev8tion.one',
           lead: {
             guestName: booking.guest_name,
             guestEmail: booking.guest_email,

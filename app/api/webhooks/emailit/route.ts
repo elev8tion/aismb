@@ -11,7 +11,7 @@ import { sendViaEmailIt } from '@/lib/email/sendEmail';
 
 export const runtime = 'edge';
 
-const ADMIN_EMAIL = 'admin@kre8tion.com';
+const ADMIN_EMAIL = 'connect@elev8tion.one';
 
 interface EmailItEvent {
   event: string;
@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
             await sendViaEmailIt({
               apiKey,
               to: ADMIN_EMAIL,
+              from: 'AI KRE8TION Partners <alerts@kre8tion.com>',
               subject: `⚠ Email Bounce: ${payload.email}`,
               html: `<p>An email to <strong>${payload.email}</strong> bounced.</p>
 <p><strong>Subject:</strong> ${payload.subject || 'N/A'}</p>
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
             await sendViaEmailIt({
               apiKey: inboundApiKey,
               to: ADMIN_EMAIL,
+              from: 'AI KRE8TION Partners <alerts@kre8tion.com>',
               subject: `Fwd: ${payload.subject || 'Customer Reply'}`,
               html: `<p><strong>From:</strong> ${payload.from || 'Unknown'}</p>
 <p><strong>To:</strong> ${payload.to || 'N/A'}</p>
