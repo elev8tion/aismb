@@ -121,16 +121,25 @@ export function generateAllCalendarLinks(
   startTime: string,
   endTime: string,
   timezone: string,
-  notes?: string
+  notes?: string,
+  bookingType?: 'consultation' | 'assessment'
 ): {
   google: string;
   outlook: string;
   icsDataUri: string;
   icsContent: string;
 } {
+  const isAssessment = bookingType === 'assessment';
+  const title = isAssessment
+    ? `Onsite AI Assessment - ${guestName}`
+    : `Strategy Call - ${guestName}`;
+  const descPrefix = isAssessment
+    ? `AI KRE8TION Partners Onsite Assessment\n\n60-minute onsite business walkthrough`
+    : `AI KRE8TION Partners Strategy Call`;
+
   const data: CalendarLinkData = {
-    title: `Strategy Call - ${guestName}`,
-    description: `AI KRE8TION Partners Strategy Call\n\nGuest: ${guestName}\nEmail: ${guestEmail}${notes ? `\n\nNotes: ${notes}` : ''}`,
+    title,
+    description: `${descPrefix}\n\nGuest: ${guestName}\nEmail: ${guestEmail}${notes ? `\n\nNotes: ${notes}` : ''}`,
     startDate: date,
     startTime,
     endTime,

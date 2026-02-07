@@ -10,11 +10,13 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import {
   CreateBookingRequest,
   Booking,
+  BookingType,
   MEETING_DURATION,
+  ASSESSMENT_DURATION,
 } from '@/lib/booking/types';
 import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
 import { generateAllCalendarLinks } from '@/lib/booking/calendarLinks';
-import { sendBookingConfirmation, sendLeadDossierToAdmin } from '@/lib/email/sendEmail';
+import { sendBookingConfirmation, sendAssessmentConfirmation, sendLeadDossierToAdmin } from '@/lib/email/sendEmail';
 import { syncBookingToCRM, getLeadByEmail } from '@/lib/voiceAgent/leadManager';
 import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
 
@@ -97,6 +99,8 @@ function validateBookingRequest(data: unknown): CreateBookingRequest | null {
   if (typeof req.email !== 'string' || !req.email.includes('@')) return null;
   if (typeof req.timezone !== 'string') return null;
 
+  const bookingType = req.bookingType === 'assessment' ? 'assessment' : 'consultation';
+
   return {
     date: req.date,
     time: req.time,
@@ -105,14 +109,17 @@ function validateBookingRequest(data: unknown): CreateBookingRequest | null {
     phone: typeof req.phone === 'string' ? req.phone.trim() : undefined,
     notes: typeof req.notes === 'string' ? req.notes.trim() : undefined,
     timezone: req.timezone,
+    bookingType: bookingType as BookingType,
+    stripe_session_id: typeof req.stripe_session_id === 'string' ? req.stripe_session_id : undefined,
+    payment_amount_cents: typeof req.payment_amount_cents === 'number' ? req.payment_amount_cents : undefined,
   };
 }
 
-async function isSlotAvailable(date: string, time: string): Promise<boolean> {
+async function isSlotAvailable(date: string, time: string, duration: number = MEETING_DURATION): Promise<boolean> {
   const bookings = await fetchFromNCB<Booking>('bookings', { booking_date: date });
 
   const slotStart = timeToMinutes(time);
-  const slotEnd = slotStart + MEETING_DURATION;
+  const slotEnd = slotStart + duration;
 
   return !bookings.some((booking) => {
     if (booking.status === 'cancelled') return false;
@@ -136,8 +143,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const isAssessment = validatedData.bookingType === 'assessment';
+    const duration = isAssessment ? ASSESSMENT_DURATION : MEETING_DURATION;
+
     // Double-check slot availability to prevent race conditions
-    const available = await isSlotAvailable(validatedData.date, validatedData.time);
+    const available = await isSlotAvailable(validatedData.date, validatedData.time, duration);
     if (!available) {
       return NextResponse.json(
         { success: false, error: 'This time slot is no longer available. Please select another time.' },
@@ -146,7 +156,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Calculate end time
-    const endTime = calculateEndTime(validatedData.time, MEETING_DURATION);
+    const endTime = calculateEndTime(validatedData.time, duration);
 
     // Create booking record
     const bookingData: Partial<Booking> = {
@@ -158,7 +168,13 @@ export async function POST(req: NextRequest) {
       end_time: endTime,
       timezone: validatedData.timezone,
       notes: validatedData.notes || '',
-      status: 'confirmed', // Auto-confirm for now
+      status: 'confirmed',
+      booking_type: validatedData.bookingType || 'consultation',
+      ...(validatedData.stripe_session_id && {
+        stripe_session_id: validatedData.stripe_session_id,
+        payment_status: 'paid',
+        payment_amount_cents: validatedData.payment_amount_cents,
+      }),
       created_at: new Date().toISOString(),
     };
 
@@ -220,25 +236,44 @@ export async function POST(req: NextRequest) {
       booking.start_time,
       booking.end_time,
       booking.timezone,
-      validatedData.notes
+      validatedData.notes,
+      isAssessment ? 'assessment' : 'consultation'
     );
 
     // Send confirmation email via email worker (non-blocking)
     const { env } = getRequestContext();
-    sendBookingConfirmation({
-      to: booking.guest_email,
-      guestName: booking.guest_name,
-      date: booking.booking_date,
-      startTime: booking.start_time,
-      endTime: booking.end_time,
-      timezone: booking.timezone,
-      calendarLinks: {
-        google: calendarLinks.google,
-        outlook: calendarLinks.outlook,
-      },
-      emailWorkerUrl: env.EMAIL_WORKER_URL,
-      emailWorkerSecret: env.EMAIL_WORKER_SECRET,
-    }).catch(err => console.error('Email send failed:', err));
+    if (isAssessment) {
+      sendAssessmentConfirmation({
+        to: booking.guest_email,
+        guestName: booking.guest_name,
+        date: booking.booking_date,
+        startTime: booking.start_time,
+        endTime: booking.end_time,
+        timezone: booking.timezone,
+        paymentAmountCents: validatedData.payment_amount_cents || 25000,
+        calendarLinks: {
+          google: calendarLinks.google,
+          outlook: calendarLinks.outlook,
+        },
+        emailWorkerUrl: env.EMAIL_WORKER_URL,
+        emailWorkerSecret: env.EMAIL_WORKER_SECRET,
+      }).catch(err => console.error('Assessment email send failed:', err));
+    } else {
+      sendBookingConfirmation({
+        to: booking.guest_email,
+        guestName: booking.guest_name,
+        date: booking.booking_date,
+        startTime: booking.start_time,
+        endTime: booking.end_time,
+        timezone: booking.timezone,
+        calendarLinks: {
+          google: calendarLinks.google,
+          outlook: calendarLinks.outlook,
+        },
+        emailWorkerUrl: env.EMAIL_WORKER_URL,
+        emailWorkerSecret: env.EMAIL_WORKER_SECRET,
+      }).catch(err => console.error('Email send failed:', err));
+    }
 
     return NextResponse.json({
       success: true,

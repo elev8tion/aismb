@@ -3,3 +3,4 @@ export { default as CalendarPicker } from './CalendarPicker';
 export { default as TimeSlotPicker } from './TimeSlotPicker';
 export { default as BookingForm } from './BookingForm';
 export { default as BookingConfirmation } from './BookingConfirmation';
+export { default as BookingTypeSelector } from './BookingTypeSelector';

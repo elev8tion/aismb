@@ -8,8 +8,10 @@
 
 import {
   bookingConfirmationTemplate,
+  assessmentConfirmationTemplate,
   leadDossierTemplate,
   type BookingConfirmationData,
+  type AssessmentConfirmationData,
   type LeadDossierData,
 } from './templates';
 
@@ -87,6 +89,76 @@ export async function sendBookingConfirmation(
     console.log(`[Email] Confirmation sent to ${params.to}`);
   } catch (error) {
     console.error('[Email] Failed to send confirmation email:', error);
+  }
+}
+
+export interface SendAssessmentConfirmationParams {
+  to: string;
+  guestName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  paymentAmountCents: number;
+  calendarLinks: {
+    google: string;
+    outlook: string;
+  };
+  emailWorkerUrl?: string;
+  emailWorkerSecret?: string;
+}
+
+/**
+ * Send an assessment confirmation email via the email worker.
+ */
+export async function sendAssessmentConfirmation(
+  params: SendAssessmentConfirmationParams
+): Promise<void> {
+  if (!params.emailWorkerUrl || !params.emailWorkerSecret) {
+    console.warn('[Email] EMAIL_WORKER_URL or EMAIL_WORKER_SECRET not configured, skipping assessment email');
+    return;
+  }
+
+  try {
+    const templateData: AssessmentConfirmationData = {
+      guestName: params.guestName,
+      date: params.date,
+      startTime: params.startTime,
+      endTime: params.endTime,
+      timezone: params.timezone,
+      paymentAmountCents: params.paymentAmountCents,
+      googleCalLink: params.calendarLinks.google,
+      outlookCalLink: params.calendarLinks.outlook,
+    };
+
+    const html = assessmentConfirmationTemplate(templateData);
+    const subject = `Assessment Confirmed & Paid \u2014 Onsite Visit on ${formatSubjectDate(params.date)}`;
+    const plainText = `Your onsite AI assessment has been confirmed for ${formatSubjectDate(params.date)}. Amount paid: $${(params.paymentAmountCents / 100).toFixed(2)}.`;
+
+    const res = await fetch(params.emailWorkerUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${params.emailWorkerSecret}`,
+      },
+      body: JSON.stringify({
+        to: params.to,
+        toName: params.guestName,
+        subject,
+        html,
+        text: plainText,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`[Email] Assessment Worker returned ${res.status}: ${err}`);
+      return;
+    }
+
+    console.log(`[Email] Assessment confirmation sent to ${params.to}`);
+  } catch (error) {
+    console.error('[Email] Failed to send assessment email:', error);
   }
 }
 

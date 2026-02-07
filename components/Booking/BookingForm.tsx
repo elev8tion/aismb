@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { BookingFormData } from '@/lib/booking/types';
+import { BookingFormData, BookingType } from '@/lib/booking/types';
 
 interface BookingFormProps {
   date: string;
   time: string;
   onSubmit: (data: BookingFormData) => void;
   loading?: boolean;
+  bookingType?: BookingType;
   translations: {
     name: string;
     namePlaceholder: string;
@@ -19,6 +20,10 @@ interface BookingFormProps {
     notesPlaceholder: string;
     submit: string;
     submitting: string;
+    submitAssessment: string;
+    submittingAssessment: string;
+    assessmentNotesPlaceholder: string;
+    assessmentDuration: string;
     required: string;
   };
 }
@@ -28,8 +33,10 @@ export default function BookingForm({
   time,
   onSubmit,
   loading = false,
+  bookingType = 'consultation',
   translations,
 }: BookingFormProps) {
+  const isAssessment = bookingType === 'assessment';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -80,6 +87,7 @@ export default function BookingForm({
       phone: phone.trim() || undefined,
       notes: notes.trim() || undefined,
       timezone,
+      bookingType,
     });
   };
 
@@ -95,7 +103,7 @@ export default function BookingForm({
           </div>
           <div>
             <p className="font-medium">{formattedDate}</p>
-            <p className="text-sm text-white/60">{formattedTime} (30 min)</p>
+            <p className="text-sm text-white/60">{formattedTime} ({isAssessment ? translations.assessmentDuration : '30 min'})</p>
           </div>
         </div>
       </div>
@@ -173,7 +181,7 @@ export default function BookingForm({
             id="booking-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder={translations.notesPlaceholder}
+            placeholder={isAssessment ? translations.assessmentNotesPlaceholder : translations.notesPlaceholder}
             disabled={loading}
             rows={3}
             className="w-full input-glass resize-none disabled:opacity-50 disabled:cursor-not-allowed"
@@ -194,14 +202,14 @@ export default function BookingForm({
           {loading ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {translations.submitting}
+              {isAssessment ? translations.submittingAssessment : translations.submitting}
             </>
           ) : (
             <>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              {translations.submit}
+              {isAssessment ? translations.submitAssessment : translations.submit}
             </>
           )}
         </button>

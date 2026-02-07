@@ -5,7 +5,8 @@ import CalendarPicker from './CalendarPicker';
 import TimeSlotPicker from './TimeSlotPicker';
 import BookingForm from './BookingForm';
 import BookingConfirmation from './BookingConfirmation';
-import { TimeSlot, Booking, BookingFormData } from '@/lib/booking/types';
+import BookingTypeSelector from './BookingTypeSelector';
+import { TimeSlot, Booking, BookingFormData, BookingType } from '@/lib/booking/types';
 import { useTranslations } from '@/contexts/LanguageContext';
 
 interface BookingModalProps {
@@ -13,11 +14,12 @@ interface BookingModalProps {
   onClose: () => void;
 }
 
-type Step = 'date' | 'time' | 'details' | 'confirmation';
+type Step = 'type' | 'date' | 'time' | 'details' | 'confirmation';
 
 export default function BookingModal({ open, onClose }: BookingModalProps) {
   const { t } = useTranslations();
-  const [step, setStep] = useState<Step>('date');
+  const [step, setStep] = useState<Step>('type');
+  const [bookingType, setBookingType] = useState<BookingType | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
@@ -49,12 +51,12 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
   // Reset state when modal opens/closes
   useEffect(() => {
     if (open) {
-      setStep('date');
+      setStep('type');
+      setBookingType(null);
       setSelectedDate(null);
       setSelectedTime(null);
       setBooking(null);
       setError(null);
-      fetchAvailableDates();
     }
   }, [open, fetchAvailableDates]);
 
@@ -90,33 +92,59 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
     setStep('details');
   };
 
+  // Handle type selection
+  const handleTypeSelect = (type: BookingType) => {
+    setBookingType(type);
+    setStep('date');
+    fetchAvailableDates();
+  };
+
   // Handle form submission
   const handleSubmit = async (data: BookingFormData) => {
     setSubmitting(true);
     setError(null);
 
     try {
-      const res = await fetch('/api/booking/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      if (data.bookingType === 'assessment') {
+        // Assessment: create Stripe checkout session and redirect
+        const res = await fetch('/api/booking/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
 
-      const result: {
-        success?: boolean;
-        booking?: Booking;
-        calendarLinks?: { google: string; outlook: string; ics: string };
-        error?: string;
-      } = await res.json();
+        const result: { success?: boolean; url?: string; error?: string } = await res.json();
 
-      if (result.success && result.booking) {
-        setBooking(result.booking);
-        if (result.calendarLinks) {
-          setCalendarLinks(result.calendarLinks);
+        if (result.success && result.url) {
+          window.location.href = result.url;
+          return; // Don't set submitting to false - page is redirecting
+        } else {
+          setError(result.error || 'Failed to create checkout session. Please try again.');
         }
-        setStep('confirmation');
       } else {
-        setError(result.error || 'Failed to create booking. Please try again.');
+        // Consultation: create booking directly
+        const res = await fetch('/api/booking/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result: {
+          success?: boolean;
+          booking?: Booking;
+          calendarLinks?: { google: string; outlook: string; ics: string };
+          error?: string;
+        } = await res.json();
+
+        if (result.success && result.booking) {
+          setBooking(result.booking);
+          if (result.calendarLinks) {
+            setCalendarLinks(result.calendarLinks);
+          }
+          setStep('confirmation');
+        } else {
+          setError(result.error || 'Failed to create booking. Please try again.');
+        }
       }
     } catch (err) {
       console.error('Booking submission error:', err);
@@ -128,7 +156,10 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
 
   // Handle back navigation
   const handleBack = () => {
-    if (step === 'time') {
+    if (step === 'date') {
+      setStep('type');
+      setBookingType(null);
+    } else if (step === 'time') {
       setStep('date');
       setSelectedTime(null);
     } else if (step === 'details') {
@@ -141,14 +172,14 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
     onClose();
   };
 
-  // Get step number for progress indicator
+  // Get step number for progress indicator (shown after type selection)
   const getStepNumber = (): number => {
     switch (step) {
       case 'date': return 1;
       case 'time': return 2;
       case 'details': return 3;
       case 'confirmation': return 4;
-      default: return 1;
+      default: return 0;
     }
   };
 
@@ -171,7 +202,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
           <div className="px-6 py-4 border-b border-white/10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {step !== 'date' && step !== 'confirmation' && (
+                {step !== 'type' && step !== 'confirmation' && (
                   <button
                     onClick={handleBack}
                     className="p-1.5 -ml-1.5 rounded-lg hover:bg-white/10 transition-colors"
@@ -197,8 +228,8 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
               )}
             </div>
 
-            {/* Progress Indicator */}
-            {step !== 'confirmation' && (
+            {/* Progress Indicator - shown after type selection */}
+            {step !== 'type' && step !== 'confirmation' && (
               <div className="flex items-center gap-2 mt-4">
                 {[1, 2, 3].map((num) => (
                   <div key={num} className="flex items-center">
@@ -237,6 +268,13 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
             )}
 
             {/* Step Content */}
+            {step === 'type' && (
+              <BookingTypeSelector
+                onSelectType={handleTypeSelect}
+                translations={bookingT.typeSelection}
+              />
+            )}
+
             {step === 'date' && (
               <div>
                 <p className="text-white/60 text-sm mb-4">{bookingT.selectDate}</p>
@@ -270,6 +308,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
                   time={selectedTime}
                   onSubmit={handleSubmit}
                   loading={submitting}
+                  bookingType={bookingType || 'consultation'}
                   translations={bookingT.form}
                 />
               </div>

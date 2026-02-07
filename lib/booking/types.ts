@@ -2,6 +2,11 @@
 
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
 export type CalendarProvider = 'google' | 'caldav';
+export type BookingType = 'consultation' | 'assessment';
+
+// Assessment pricing constants
+export const ASSESSMENT_FEE_CENTS = 25000; // $250.00
+export const ASSESSMENT_DURATION = 60; // minutes
 
 export interface Booking {
   id: string;
@@ -14,6 +19,10 @@ export interface Booking {
   timezone: string;
   notes?: string;
   status: BookingStatus;
+  booking_type?: BookingType;
+  stripe_session_id?: string;
+  payment_status?: string;
+  payment_amount_cents?: number;
   calendar_provider?: CalendarProvider;
   calendar_event_id?: string;
   meeting_link?: string;
@@ -61,6 +70,7 @@ export interface BookingFormData {
   phone?: string;
   notes?: string;
   timezone: string;
+  bookingType?: BookingType;
 }
 
 export interface AvailabilityRequest {
@@ -82,6 +92,9 @@ export interface CreateBookingRequest {
   phone?: string;
   notes?: string;
   timezone: string;
+  bookingType?: BookingType;
+  stripe_session_id?: string;
+  payment_amount_cents?: number;
 }
 
 export interface CreateBookingResponse {

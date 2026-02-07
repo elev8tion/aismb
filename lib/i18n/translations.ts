@@ -282,6 +282,22 @@ export interface Translations {
     selectDate: string;
     selectTime: string;
     enterDetails: string;
+    typeSelection: {
+      heading: string;
+      consultation: {
+        title: string;
+        description: string;
+        price: string;
+        duration: string;
+      };
+      assessment: {
+        title: string;
+        description: string;
+        price: string;
+        duration: string;
+        includes: string;
+      };
+    };
     form: {
       name: string;
       namePlaceholder: string;
@@ -293,6 +309,10 @@ export interface Translations {
       notesPlaceholder: string;
       submit: string;
       submitting: string;
+      submitAssessment: string;
+      submittingAssessment: string;
+      assessmentNotesPlaceholder: string;
+      assessmentDuration: string;
       required: string;
     };
     confirmation: {
@@ -308,6 +328,21 @@ export interface Translations {
       outlookCalendar: string;
       done: string;
       confirmationSent: string;
+    };
+    paymentSuccess: {
+      title: string;
+      subtitle: string;
+      amount: string;
+      whatToExpect: string;
+      expectItems: string[];
+      strategyDocNote: string;
+      addToCalendar: string;
+      googleCalendar: string;
+      appleCalendar: string;
+      outlookCalendar: string;
+      backToHome: string;
+      error: string;
+      processing: string;
     };
   };
 }
@@ -922,6 +957,22 @@ export const translations: Record<Language, Translations> = {
       selectDate: 'Select a date for your strategy call',
       selectTime: 'Choose your preferred time',
       enterDetails: 'Enter your details to confirm',
+      typeSelection: {
+        heading: 'How would you like to connect?',
+        consultation: {
+          title: 'Free Strategy Call',
+          description: 'A 30-minute video call to discuss your business goals and explore AI opportunities.',
+          price: 'Free',
+          duration: '30 min video call',
+        },
+        assessment: {
+          title: 'Onsite Assessment',
+          description: 'An in-person walkthrough of your business operations to identify AI opportunities.',
+          price: '$250',
+          duration: '60 min onsite visit',
+          includes: 'Includes strategy document',
+        },
+      },
       form: {
         name: 'Full Name',
         namePlaceholder: 'John Smith',
@@ -933,6 +984,10 @@ export const translations: Record<Language, Translations> = {
         notesPlaceholder: 'Tell us about your business or what you hope to discuss...',
         submit: 'Confirm Booking',
         submitting: 'Booking...',
+        submitAssessment: 'Continue to Payment ($250)',
+        submittingAssessment: 'Redirecting to payment...',
+        assessmentNotesPlaceholder: 'Tell us about your business operations, team size, and what challenges you face...',
+        assessmentDuration: '60 min',
         required: 'Required fields',
       },
       confirmation: {
@@ -948,6 +1003,26 @@ export const translations: Record<Language, Translations> = {
         outlookCalendar: 'Outlook',
         done: 'Done',
         confirmationSent: "A confirmation email has been sent to your inbox.",
+      },
+      paymentSuccess: {
+        title: 'Assessment Confirmed & Paid!',
+        subtitle: 'Your onsite AI assessment has been booked. We look forward to visiting your business.',
+        amount: 'Amount Paid',
+        whatToExpect: 'What to Expect',
+        expectItems: [
+          'A 60-minute walkthrough of your business operations',
+          'Identification of specific AI automation opportunities',
+          'Discussion of agentic systems tailored to your workflows',
+          'A detailed strategy document delivered after the visit',
+        ],
+        strategyDocNote: 'After the assessment, you will receive a detailed strategy document with all implementation recommendations, whether or not you proceed with our services.',
+        addToCalendar: 'Add to your calendar',
+        googleCalendar: 'Google',
+        appleCalendar: 'Apple',
+        outlookCalendar: 'Outlook',
+        backToHome: 'Back to Home',
+        error: 'Something went wrong. Please contact us if you were charged.',
+        processing: 'Verifying your payment...',
       },
     },
   },
@@ -1564,6 +1639,22 @@ export const translations: Record<Language, Translations> = {
       selectDate: 'Selecciona una fecha para tu llamada estrategica',
       selectTime: 'Elige tu horario preferido',
       enterDetails: 'Ingresa tus datos para confirmar',
+      typeSelection: {
+        heading: 'Como te gustaria conectar?',
+        consultation: {
+          title: 'Llamada Estrategica Gratuita',
+          description: 'Una videollamada de 30 minutos para discutir tus objetivos de negocio y explorar oportunidades de IA.',
+          price: 'Gratis',
+          duration: 'Videollamada de 30 min',
+        },
+        assessment: {
+          title: 'Evaluacion en Sitio',
+          description: 'Un recorrido presencial de las operaciones de tu negocio para identificar oportunidades de IA.',
+          price: '$250',
+          duration: 'Visita presencial de 60 min',
+          includes: 'Incluye documento de estrategia',
+        },
+      },
       form: {
         name: 'Nombre Completo',
         namePlaceholder: 'Juan Garcia',
@@ -1575,6 +1666,10 @@ export const translations: Record<Language, Translations> = {
         notesPlaceholder: 'Cuentanos sobre tu negocio o que te gustaria discutir...',
         submit: 'Confirmar Reserva',
         submitting: 'Reservando...',
+        submitAssessment: 'Continuar al Pago ($250)',
+        submittingAssessment: 'Redirigiendo al pago...',
+        assessmentNotesPlaceholder: 'Cuentanos sobre las operaciones de tu negocio, tamano del equipo y que desafios enfrentas...',
+        assessmentDuration: '60 min',
         required: 'Campos requeridos',
       },
       confirmation: {
@@ -1590,6 +1685,26 @@ export const translations: Record<Language, Translations> = {
         outlookCalendar: 'Outlook',
         done: 'Listo',
         confirmationSent: 'Se ha enviado un correo de confirmacion a tu bandeja de entrada.',
+      },
+      paymentSuccess: {
+        title: 'Evaluacion Confirmada y Pagada!',
+        subtitle: 'Tu evaluacion presencial de IA ha sido reservada. Esperamos visitar tu negocio.',
+        amount: 'Monto Pagado',
+        whatToExpect: 'Que Esperar',
+        expectItems: [
+          'Un recorrido de 60 minutos por las operaciones de tu negocio',
+          'Identificacion de oportunidades especificas de automatizacion con IA',
+          'Discusion de sistemas agenticos adaptados a tus flujos de trabajo',
+          'Un documento de estrategia detallado entregado despues de la visita',
+        ],
+        strategyDocNote: 'Despues de la evaluacion, recibiras un documento de estrategia detallado con todas las recomendaciones de implementacion, ya sea que procedas con nuestros servicios o no.',
+        addToCalendar: 'Agregar a tu calendario',
+        googleCalendar: 'Google',
+        appleCalendar: 'Apple',
+        outlookCalendar: 'Outlook',
+        backToHome: 'Volver al Inicio',
+        error: 'Algo salio mal. Por favor contactanos si se te cobro.',
+        processing: 'Verificando tu pago...',
       },
     },
   },
