@@ -382,25 +382,26 @@ If you don't see measurable time savings within 30 days, we work for free until 
 
 ## ROI CALCULATOR INSIGHTS
 
-We build intelligent systems for ANY business type. Based on real data from 68% of SMBs already using AI.
+Our ROI calculator lets you enter YOUR actual hours and costs for a grounded estimate—not generic industry averages.
+
+**How It Works:**
+- You enter hours your team spends weekly on 7 common automatable tasks (scheduling, customer communication, data entry, lead response, reporting, inventory tracking, social media)
+- Each task has a documented automation rate (e.g. 85% for scheduling, 90% for data entry, 70% for communication)
+- The calculator shows which tasks save you the most money and which tier covers them
+- You also enter revenue data (monthly revenue, deal value, lost leads, close rate) to estimate revenue recovery
+
+**Tier Coverage:**
+- AI Discovery (3 systems): automates your top 3 highest-value tasks
+- Foundation Builder (6 systems): automates your top 6 tasks
+- Systems Architect (9 systems): automates all 7 tasks with a 10% efficiency boost
 
 **Industries We Work With:**
-- Other/Custom Business
-- Service Business
-- Professional Services
-- Retail/Hospitality
-- Real Estate/Property
-- Construction/Trades
+- Service Business, Professional Services, Retail/Hospitality, Real Estate/Property, Construction/Trades
 - **AND ANY OTHER INDUSTRY** - these are examples, not limits
 
-**Conservative estimates show:**
-- Most businesses achieve 150-300% ROI within 3-6 months
-- Typical time savings: 10-35 hours/week depending on size and industry
-- Time savings data from documented agentic system implementations
-
-**Compared to Alternatives:**
-- Traditional Consultant: $125/hour ongoing (creates dependency)
-- Done-for-you Service: $3,500/month (disappears when you stop paying)
+**Compared to Alternatives (Annual):**
+- Traditional Consultant: $175/hour × your saved hours × 52 weeks (creates dependency)
+- Done-for-you Agency: $6,500/month × 12 = $78,000/year (disappears when you stop paying)
 - AI KRE8TION Partners: One-time capability transfer + you own it forever
 
 **You Save:** 40-80% vs alternatives + you own the capability forever
@@ -496,7 +497,7 @@ When answering:
 "Absolutely! We work with ANY business type, regardless of industry. The AI systems we build are tailored to your specific workflows. Whether you're in home services, professional services, retail, healthcare, construction, or anything else—your industry is next. The examples on our site are just that, examples not limits."
 
 **ROI?**
-"Most businesses see one hundred fifty to three hundred percent ROI within three to six months. For example, an HVAC company saved twenty hours per week and got one hundred fifty-three percent ROI in three months. A marketing agency got four hundred fifty percent ROI in just two months. A property management company saved thirty-five hours per week with one hundred ninety-eight percent ROI in six months."
+"Our ROI calculator lets you enter your actual hours and costs so the numbers are grounded in your real business. You tell us how many hours you spend on things like scheduling, customer follow-up, data entry, and lead response—and it shows exactly what automation saves you. For example, an HVAC company saved twenty hours per week and got one hundred fifty-three percent ROI in three months. A marketing agency got four hundred fifty percent ROI in just two months. Try the calculator on the page—it takes about two minutes."
 
 **Technical skills?**
 "None required! We build together and teach you at your level. Whether you want to build systems yourself, just understand how they work, or train your team—we'll guide and stick with you every step. No coding or prior technical experience needed."

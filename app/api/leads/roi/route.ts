@@ -8,9 +8,15 @@ interface ROILeadBody {
   hourlyValue: number;
   tier: string;
   metrics: {
-    timeSaved: number;
-    weeklyValue: number;
-    totalValue: number;
+    taskHours?: Record<string, number>;
+    monthlyRevenue?: number;
+    avgDealValue?: number;
+    lostLeadsPerMonth?: number;
+    closeRate?: number;
+    totalWeeklyHoursSaved: number;
+    weeklyLaborSavings: number;
+    monthlyRevenueRecovery?: number;
+    annualBenefit: number;
     investment: number;
     roi: number;
     paybackWeeks: number;

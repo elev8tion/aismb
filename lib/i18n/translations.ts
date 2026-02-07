@@ -127,30 +127,55 @@ export interface Translations {
     tag: string;
     heading: string;
     description: string;
-    yourBusinessDetails: string;
     labels: {
       industry: string;
       businessSize: string;
-      timeValue: string;
+      hourlyLaborCost: string;
       partnershipTier: string;
     };
-    industryNote: string;
-    timeValueNote: string;
+    hourlyLaborCostNote: string;
     industries: Array<{ id: string; name: string }>;
     employeeSizes: Array<{ id: string; name: string }>;
     tiers: Array<{ id: string; name: string }>;
+    tasks: {
+      scheduling: string;
+      communication: string;
+      dataEntry: string;
+      leadResponse: string;
+      reporting: string;
+      inventory: string;
+      socialMedia: string;
+    };
+    steps: {
+      labels: string[];
+      next: string;
+      back: string;
+      seeResults: string;
+      basics: { title: string; subtitle: string };
+      timeAudit: { title: string; subtitle: string; totalWeeklyHours: string };
+      revenue: {
+        title: string;
+        subtitle: string;
+        monthlyRevenue: string;
+        avgDealValue: string;
+        lostLeads: string;
+        closeRate: string;
+      };
+      results: { title: string; subtitle: string };
+    };
     results: {
       heading: string;
       timeSaved: string;
       weeklyValue: string;
       investment: string;
-      systemsBuilt: string;
-      totalValueCreated: string;
-      over: string;
-      weeks: string;
+      tasksAutomated: string;
+      revenueRecovery: string;
+      recoveredLeadsLabel: string;
+      annualBenefit: string;
       yourRoi: string;
       paysForItself: string;
       continuesGenerating: string;
+      automatedTasksLabel: string;
     };
     emailCapture: {
       heading: string;
@@ -163,7 +188,9 @@ export interface Translations {
     comparison: {
       heading: string;
       traditionalConsultant: string;
+      consultantRate: string;
       doneForYou: string;
+      agencyRate: string;
       aiSmbPartners: string;
       savePercent: string;
       ownCapability: string;
@@ -668,18 +695,16 @@ export const translations: Record<Language, Translations> = {
 
     roiCalculator: {
       tag: 'Calculate Your ROI',
-      heading: 'See your capability return on investment',
+      heading: 'See what automation actually saves you',
       description:
-        'We build intelligent systems for ANY business type. Based on real data from 68% of SMBs already using AI. Conservative estimates show most businesses achieve 150-300% ROI within 3-6 months.',
-      yourBusinessDetails: 'Your Business Details',
+        'Enter your real hours and costs. Get grounded ROI numbers based on your actual operations—not industry averages.',
       labels: {
         industry: 'Industry',
         businessSize: 'Business Size',
-        timeValue: 'Your Time Value (per hour)',
+        hourlyLaborCost: 'Hourly Labor Cost',
         partnershipTier: 'Partnership Tier',
       },
-      industryNote: 'Don\'t see your industry? We work with all business types—select "Other" for general estimates.',
-      timeValueNote: 'Industry average: Service businesses $50-100/hr, Professional services $100-200/hr',
+      hourlyLaborCostNote: 'Average blended cost per hour of staff time (wages + overhead)',
       industries: [
         { id: 'other', name: 'Other/Custom Business' },
         { id: 'service', name: 'Service Business' },
@@ -699,18 +724,55 @@ export const translations: Record<Language, Translations> = {
         { id: 'foundation', name: 'Foundation Builder' },
         { id: 'architect', name: 'Systems Architect' },
       ],
+      tasks: {
+        scheduling: 'Scheduling & Appointments',
+        communication: 'Customer Communication & Follow-up',
+        dataEntry: 'Data Entry, Invoicing & Bookkeeping',
+        leadResponse: 'Lead Response & Qualification',
+        reporting: 'Reporting & Analytics',
+        inventory: 'Inventory / Supply Tracking',
+        socialMedia: 'Social Media & Marketing',
+      },
+      steps: {
+        labels: ['Basics', 'Time Audit', 'Revenue', 'Results'],
+        next: 'Next',
+        back: 'Back',
+        seeResults: 'See Results',
+        basics: {
+          title: 'Business Basics',
+          subtitle: 'Tell us about your business so we can tailor the analysis.',
+        },
+        timeAudit: {
+          title: 'Weekly Time Audit',
+          subtitle: 'How many hours per week does your team spend on these tasks?',
+          totalWeeklyHours: 'Total automatable hours',
+        },
+        revenue: {
+          title: 'Revenue Impact',
+          subtitle: 'Help us estimate the revenue you could recover.',
+          monthlyRevenue: 'Monthly Revenue',
+          avgDealValue: 'Average Deal / Sale Value',
+          lostLeads: 'Leads Lost per Month',
+          closeRate: 'Close Rate',
+        },
+        results: {
+          title: 'Your Results',
+          subtitle: 'Here\'s what automation could do for your business.',
+        },
+      },
       results: {
         heading: 'Your Projected Results',
         timeSaved: 'Time Saved',
-        weeklyValue: 'Weekly Value',
+        weeklyValue: 'Weekly Savings',
         investment: 'Investment',
-        systemsBuilt: 'Systems Built',
-        totalValueCreated: 'Total Value Created',
-        over: 'Over',
-        weeks: 'weeks',
+        tasksAutomated: 'Tasks Automated',
+        revenueRecovery: 'Revenue Recovery',
+        recoveredLeadsLabel: 'leads recovered/mo',
+        annualBenefit: 'Annual Benefit',
         yourRoi: 'Your ROI',
         paysForItself: 'Pays for itself in ~',
         continuesGenerating: 'weeks, then continues generating value',
+        automatedTasksLabel: 'Tasks Automated (by savings)',
       },
       emailCapture: {
         heading: 'Email me this full report',
@@ -721,16 +783,18 @@ export const translations: Record<Language, Translations> = {
         success: 'Report sent successfully! Check your inbox.',
       },
       comparison: {
-        heading: 'Compare Alternatives',
+        heading: 'Compare Alternatives (Annual)',
         traditionalConsultant: 'Traditional Consultant',
-        doneForYou: 'Done-for-you Service',
+        consultantRate: '$175/hr × your saved hours',
+        doneForYou: 'Done-for-you Agency',
+        agencyRate: '$6,500/mo × 12',
         aiSmbPartners: 'AI KRE8TION Partners',
-        savePercent: 'Save',
+        savePercent: 'Save ',
         ownCapability: '% vs alternatives + you own the capability forever',
       },
       cta: 'Start Building Your Systems',
       disclaimer:
-        'Calculations based on conservative estimates from industry data (McKinsey, Gartner, SBA reports). Actual results vary by business. Time savings data from documented agentic system implementations across 68% of SMBs currently using AI in 2025.',
+        'Calculations use your inputs with documented automation rates (85% scheduling, 90% data entry, etc.) from real agentic system implementations. Revenue recovery assumes 60% lead recapture rate. Actual results vary by business.',
     },
 
     pricing: {
@@ -1370,19 +1434,16 @@ export const translations: Record<Language, Translations> = {
 
     roiCalculator: {
       tag: 'Calcula Tu ROI',
-      heading: 'Ve tu retorno de inversion en capacidad',
+      heading: 'Ve lo que la automatizacion realmente te ahorra',
       description:
-        'Construimos sistemas inteligentes para CUALQUIER tipo de negocio. Basado en datos reales del 68% de PYMEs que ya usan IA. Estimaciones conservadoras muestran que la mayoria de negocios logran 150-300% de ROI en 3-6 meses.',
-      yourBusinessDetails: 'Detalles de Tu Negocio',
+        'Ingresa tus horas y costos reales. Obtiene numeros de ROI basados en tus operaciones actuales, no en promedios de la industria.',
       labels: {
         industry: 'Industria',
         businessSize: 'Tamano del Negocio',
-        timeValue: 'Valor de Tu Tiempo (por hora)',
+        hourlyLaborCost: 'Costo Laboral por Hora',
         partnershipTier: 'Nivel de Alianza',
       },
-      industryNote:
-        'No ves tu industria? Trabajamos con todos los tipos de negocios, selecciona "Otro" para estimaciones generales.',
-      timeValueNote: 'Promedio de la industria: Negocios de servicios $50-100/hr, Servicios profesionales $100-200/hr',
+      hourlyLaborCostNote: 'Costo promedio combinado por hora de tiempo del personal (salarios + gastos generales)',
       industries: [
         { id: 'other', name: 'Otro/Negocio Personalizado' },
         { id: 'service', name: 'Negocio de Servicios' },
@@ -1402,18 +1463,55 @@ export const translations: Record<Language, Translations> = {
         { id: 'foundation', name: 'Constructor de Base' },
         { id: 'architect', name: 'Arquitecto de Sistemas' },
       ],
+      tasks: {
+        scheduling: 'Programacion y Citas',
+        communication: 'Comunicacion con Clientes y Seguimiento',
+        dataEntry: 'Entrada de Datos, Facturacion y Contabilidad',
+        leadResponse: 'Respuesta y Calificacion de Prospectos',
+        reporting: 'Reportes y Analitica',
+        inventory: 'Inventario / Seguimiento de Suministros',
+        socialMedia: 'Redes Sociales y Marketing',
+      },
+      steps: {
+        labels: ['Basicos', 'Tiempo', 'Ingresos', 'Resultados'],
+        next: 'Siguiente',
+        back: 'Atras',
+        seeResults: 'Ver Resultados',
+        basics: {
+          title: 'Datos del Negocio',
+          subtitle: 'Cuentanos sobre tu negocio para personalizar el analisis.',
+        },
+        timeAudit: {
+          title: 'Auditoria de Tiempo Semanal',
+          subtitle: 'Cuantas horas por semana dedica tu equipo a estas tareas?',
+          totalWeeklyHours: 'Total de horas automatizables',
+        },
+        revenue: {
+          title: 'Impacto en Ingresos',
+          subtitle: 'Ayudanos a estimar los ingresos que podrias recuperar.',
+          monthlyRevenue: 'Ingresos Mensuales',
+          avgDealValue: 'Valor Promedio de Venta',
+          lostLeads: 'Prospectos Perdidos por Mes',
+          closeRate: 'Tasa de Cierre',
+        },
+        results: {
+          title: 'Tus Resultados',
+          subtitle: 'Esto es lo que la automatizacion podria hacer por tu negocio.',
+        },
+      },
       results: {
         heading: 'Tus Resultados Proyectados',
         timeSaved: 'Tiempo Ahorrado',
-        weeklyValue: 'Valor Semanal',
+        weeklyValue: 'Ahorro Semanal',
         investment: 'Inversion',
-        systemsBuilt: 'Sistemas Construidos',
-        totalValueCreated: 'Valor Total Creado',
-        over: 'Durante',
-        weeks: 'semanas',
+        tasksAutomated: 'Tareas Automatizadas',
+        revenueRecovery: 'Recuperacion de Ingresos',
+        recoveredLeadsLabel: 'prospectos recuperados/mes',
+        annualBenefit: 'Beneficio Anual',
         yourRoi: 'Tu ROI',
         paysForItself: 'Se paga solo en ~',
         continuesGenerating: 'semanas, luego continua generando valor',
+        automatedTasksLabel: 'Tareas Automatizadas (por ahorro)',
       },
       emailCapture: {
         heading: 'Enviame este reporte completo',
@@ -1424,16 +1522,18 @@ export const translations: Record<Language, Translations> = {
         success: 'Reporte enviado exitosamente! Revisa tu bandeja de entrada.',
       },
       comparison: {
-        heading: 'Compara Alternativas',
+        heading: 'Comparar Alternativas (Anual)',
         traditionalConsultant: 'Consultor Tradicional',
-        doneForYou: 'Servicio Llave en Mano',
+        consultantRate: '$175/hr x tus horas ahorradas',
+        doneForYou: 'Agencia Llave en Mano',
+        agencyRate: '$6,500/mes x 12',
         aiSmbPartners: 'AI KRE8TION Partners',
-        savePercent: 'Ahorra',
+        savePercent: 'Ahorra ',
         ownCapability: '% vs alternativas + eres dueno de la capacidad para siempre',
       },
       cta: 'Comienza a Construir Tus Sistemas',
       disclaimer:
-        'Calculos basados en estimaciones conservadoras de datos de la industria (McKinsey, Gartner, reportes SBA). Los resultados reales varian por negocio. Datos de ahorro de tiempo de implementaciones documentadas de sistemas agenticos en el 68% de PYMEs que actualmente usan IA en 2025.',
+        'Los calculos usan tus datos con tasas de automatizacion documentadas (85% programacion, 90% entrada de datos, etc.) de implementaciones reales de sistemas agenticos. La recuperacion de ingresos asume una tasa de recaptura del 60%. Los resultados reales varian por negocio.',
     },
 
     pricing: {
