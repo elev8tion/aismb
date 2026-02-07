@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 import { syncROICalcToCRM } from '@/lib/voiceAgent/leadManager';
+import { sendROIReport, sendROILeadDossierToAdmin } from '@/lib/email/sendEmail';
+import { TASK_CATEGORIES, TIER_DATA } from '@/components/ROICalculator/types';
+
+const TASK_NAMES: Record<string, string> = {
+  scheduling: 'Scheduling & Appointments',
+  communication: 'Customer Communication & Follow-up',
+  dataEntry: 'Data Entry, Invoicing & Bookkeeping',
+  leadResponse: 'Lead Response & Qualification',
+  reporting: 'Reporting & Analytics',
+  inventory: 'Inventory / Supply Tracking',
+  socialMedia: 'Social Media & Marketing',
+};
 
 interface ROILeadBody {
   email: string;
@@ -35,9 +48,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 🔄 SYNC TO CRM: Save lead and ROI calculation
-    console.log(`🎯 Syncing ROI Lead to CRM: ${email}`);
-    
+    const selectedTier = TIER_DATA[tier] || TIER_DATA.foundation;
+
+    // Build task breakdown from client-provided taskHours
+    const tierName = tier === 'discovery' ? 'AI Discovery' : tier === 'foundation' ? 'Foundation Builder' : 'Systems Architect';
+    const taskBreakdown = TASK_CATEGORIES.map((cat) => {
+      const hours = metrics.taskHours?.[cat.id] ?? cat.defaultHoursPerWeek;
+      return {
+        id: cat.id,
+        name: TASK_NAMES[cat.id] || cat.id,
+        hoursPerWeek: hours,
+        automationRate: cat.automationRate,
+        weeklySavings: Math.round(hours * cat.automationRate * hourlyValue),
+      };
+    }).sort((a, b) => b.weeklySavings - a.weeklySavings);
+
+    const automatedIds = new Set(
+      taskBreakdown.slice(0, selectedTier.tasksAutomated).map((t) => t.id)
+    );
+
     // Non-blocking sync to CRM
     syncROICalcToCRM({
       email,
@@ -45,24 +74,82 @@ export async function POST(request: NextRequest) {
       employeeCount: employees,
       hourlyRate: hourlyValue,
       selectedTier: tier,
-      calculations: metrics
-    }).catch(err => console.error('Failed to sync ROI lead to CRM:', err));
+      calculations: metrics,
+    }).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
 
-    // SIMULATION: Log to console for visibility in logs
-    console.log('📝 ROI LEAD PROCESSED:', {
-      email,
-      industry,
-      employees,
-      tier,
-      roi: `${metrics?.roi}%`
-    });
+    // Send emails (non-blocking, requires Cloudflare env)
+    let emailWorkerUrl: string | undefined;
+    let emailWorkerSecret: string | undefined;
+    try {
+      const { env } = getRequestContext();
+      emailWorkerUrl = env.EMAIL_WORKER_URL;
+      emailWorkerSecret = env.EMAIL_WORKER_SECRET;
+    } catch {
+      console.warn('[Email] Cloudflare context unavailable (local dev), skipping emails');
+    }
 
-    // Return success
-    return NextResponse.json({ 
+    // Send ROI report to user
+    sendROIReport({
+      to: email,
+      report: {
+        industry,
+        employees,
+        hourlyLaborCost: hourlyValue,
+        tier: tierName,
+        taskBreakdown: taskBreakdown.map((t) => ({
+          name: t.name,
+          hoursPerWeek: t.hoursPerWeek,
+          automationRate: t.automationRate,
+          weeklySavings: t.weeklySavings,
+          automated: automatedIds.has(t.id),
+        })),
+        totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
+        weeklyLaborSavings: metrics.weeklyLaborSavings,
+        recoveredLeads: metrics.lostLeadsPerMonth ? Math.round(metrics.lostLeadsPerMonth * 0.6 * 10) / 10 : 0,
+        monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
+        annualBenefit: metrics.annualBenefit,
+        investment: metrics.investment,
+        roi: metrics.roi,
+        paybackWeeks: metrics.paybackWeeks,
+        consultantCost: Math.round(metrics.totalWeeklyHoursSaved * 175 * 52),
+        agencyCost: 6500 * 12,
+      },
+      emailWorkerUrl,
+      emailWorkerSecret,
+    }).catch((err) => console.error('[Email] Failed to send ROI report:', err));
+
+    // Send admin dossier
+    sendROILeadDossierToAdmin({
+      adminEmail: 'admin@kre8tion.com',
+      lead: {
+        email,
+        industry,
+        employees,
+        hourlyLaborCost: hourlyValue,
+        tier: tierName,
+        totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
+        weeklyLaborSavings: metrics.weeklyLaborSavings,
+        monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
+        annualBenefit: metrics.annualBenefit,
+        investment: metrics.investment,
+        roi: metrics.roi,
+        paybackWeeks: metrics.paybackWeeks,
+        taskBreakdown: taskBreakdown.map((t) => ({
+          name: t.name,
+          hoursPerWeek: t.hoursPerWeek,
+          weeklySavings: t.weeklySavings,
+        })),
+      },
+      emailWorkerUrl,
+      emailWorkerSecret,
+    }).catch((err) => console.error('[Email] Failed to send ROI dossier:', err));
+
+    console.log('ROI LEAD PROCESSED:', { email, industry, employees, tier, roi: `${metrics?.roi}%` });
+
+    return NextResponse.json({
       success: true,
-      message: 'Report sent successfully' 
+      message: 'Report sent successfully',
     });
-
   } catch (error) {
     console.error('Lead capture error:', error);
     return NextResponse.json(

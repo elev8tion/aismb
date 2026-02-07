@@ -449,3 +449,394 @@ export function leadDossierTemplate(data: LeadDossierData): string {
 </body>
 </html>`;
 }
+
+// ─── ROI Report Email (sent to the user) ──────────────────────────────────
+
+export interface ROIReportData {
+  industry: string;
+  employees: string;
+  hourlyLaborCost: number;
+  tier: string;
+  taskBreakdown: Array<{ name: string; hoursPerWeek: number; automationRate: number; weeklySavings: number; automated: boolean }>;
+  totalWeeklyHoursSaved: number;
+  weeklyLaborSavings: number;
+  recoveredLeads: number;
+  monthlyRevenueRecovery: number;
+  annualBenefit: number;
+  investment: number;
+  roi: number;
+  paybackWeeks: number;
+  consultantCost: number;
+  agencyCost: number;
+}
+
+export function roiReportTemplate(data: ROIReportData): string {
+  const year = new Date().getFullYear();
+
+  const taskRows = data.taskBreakdown
+    .map((t) => {
+      const badge = t.automated
+        ? '<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#DCFCE7;color:#166534;font-size:11px;font-weight:600;">Automated</span>'
+        : '<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#F3F4F6;color:#6B7280;font-size:11px;">Not in tier</span>';
+      return `<tr>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;color:#1a1a2e;">${escapeHtml(t.name)}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;color:#4a4a6a;text-align:center;">${t.hoursPerWeek}h</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;color:#4a4a6a;text-align:center;">${Math.round(t.automationRate * 100)}%</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;font-weight:600;color:#0066FF;text-align:right;">$${t.weeklySavings.toLocaleString()}/wk</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:center;">${badge}</td>
+      </tr>`;
+    })
+    .join('');
+
+  const cheapestAlt = Math.min(data.consultantCost, data.agencyCost);
+  const savingsPercent = cheapestAlt > 0 ? Math.round(((cheapestAlt - data.investment) / cheapestAlt) * 100) : 0;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your ROI Report</title>
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    @media only screen and (max-width: 620px) {
+      .email-container { width: 100% !important; max-width: 100% !important; }
+      .metric-cell { display: block !important; width: 100% !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f9;">
+  <table role="presentation" style="width:100%;border:none;border-spacing:0;background-color:#f4f6f9;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" class="email-container" style="width:600px;max-width:600px;border:none;border-spacing:0;text-align:left;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:16px;line-height:1.5;color:#1a1a2e;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:32px 40px 24px;text-align:center;background-color:#0a0a1a;border-radius:12px 12px 0 0;">
+              <span style="font-size:28px;font-weight:700;color:#ffffff;">AI KRE8TION</span>
+              <span style="font-size:28px;font-weight:300;color:#0066FF;"> Partners</span>
+              <br>
+              <span style="display:inline-block;margin-top:16px;background-color:#0066FF;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:6px 20px;border-radius:20px;">Your ROI Report</span>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background-color:#ffffff;">
+              <!-- Intro -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:36px 40px 16px;">
+                    <h1 style="margin:0;font-size:22px;font-weight:600;color:#1a1a2e;">Your Personalized ROI Analysis</h1>
+                    <p style="margin:12px 0 0;font-size:15px;color:#4a4a6a;line-height:1.6;">Based on the hours and costs you entered, here's what automation could do for your business.</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Business Info -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:8px 40px 20px;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background-color:#f8f9fc;border-radius:10px;border:1px solid #e8eaf0;">
+                      <tr>
+                        <td style="padding:16px 24px;">
+                          <span style="font-size:13px;color:#8a8aaa;font-weight:600;">BUSINESS PROFILE</span>
+                          <table role="presentation" style="width:100%;border:none;border-spacing:0;margin-top:8px;">
+                            <tr>
+                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;">Industry: <strong style="color:#1a1a2e;">${escapeHtml(data.industry)}</strong></td>
+                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;text-align:right;">Size: <strong style="color:#1a1a2e;">${escapeHtml(data.employees)}</strong></td>
+                            </tr>
+                            <tr>
+                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;">Labor Cost: <strong style="color:#1a1a2e;">$${data.hourlyLaborCost}/hr</strong></td>
+                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;text-align:right;">Tier: <strong style="color:#0066FF;">${escapeHtml(data.tier)}</strong></td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Key Metrics -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:0 40px 20px;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                      <tr>
+                        <td class="metric-cell" style="width:50%;padding:0 6px 12px 0;vertical-align:top;">
+                          <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#EFF6FF;border-radius:10px;border:1px solid #BFDBFE;">
+                            <tr><td style="padding:16px 20px;">
+                              <span style="font-size:11px;color:#3B82F6;font-weight:700;text-transform:uppercase;">Time Saved</span><br>
+                              <span style="font-size:28px;font-weight:700;color:#1E40AF;">${data.totalWeeklyHoursSaved} hrs/wk</span>
+                            </td></tr>
+                          </table>
+                        </td>
+                        <td class="metric-cell" style="width:50%;padding:0 0 12px 6px;vertical-align:top;">
+                          <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#EFF6FF;border-radius:10px;border:1px solid #BFDBFE;">
+                            <tr><td style="padding:16px 20px;">
+                              <span style="font-size:11px;color:#3B82F6;font-weight:700;text-transform:uppercase;">Weekly Savings</span><br>
+                              <span style="font-size:28px;font-weight:700;color:#1E40AF;">$${data.weeklyLaborSavings.toLocaleString()}</span>
+                            </td></tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ROI + Payback Highlight -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:0 40px 20px;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#F0FDF4;border-radius:10px;border:1px solid #BBF7D0;">
+                      <tr>
+                        <td style="padding:20px 24px;">
+                          <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                            <tr>
+                              <td>
+                                <span style="font-size:11px;color:#16A34A;font-weight:700;text-transform:uppercase;">Your ROI</span><br>
+                                <span style="font-size:36px;font-weight:700;color:#166534;">${data.roi}%</span>
+                              </td>
+                              <td style="text-align:right;">
+                                <span style="font-size:11px;color:#16A34A;font-weight:700;text-transform:uppercase;">Payback Period</span><br>
+                                <span style="font-size:36px;font-weight:700;color:#166534;">~${data.paybackWeeks} wks</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Annual Benefit + Investment -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:0 40px 24px;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                      <tr>
+                        <td class="metric-cell" style="width:50%;padding:0 6px 0 0;vertical-align:top;">
+                          <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#f8f9fc;border-radius:10px;border:1px solid #e8eaf0;">
+                            <tr><td style="padding:16px 20px;">
+                              <span style="font-size:11px;color:#8a8aaa;font-weight:700;text-transform:uppercase;">Annual Benefit</span><br>
+                              <span style="font-size:24px;font-weight:700;color:#1a1a2e;">$${data.annualBenefit.toLocaleString()}</span>
+                            </td></tr>
+                          </table>
+                        </td>
+                        <td class="metric-cell" style="width:50%;padding:0 0 0 6px;vertical-align:top;">
+                          <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#f8f9fc;border-radius:10px;border:1px solid #e8eaf0;">
+                            <tr><td style="padding:16px 20px;">
+                              <span style="font-size:11px;color:#8a8aaa;font-weight:700;text-transform:uppercase;">Investment</span><br>
+                              <span style="font-size:24px;font-weight:700;color:#1a1a2e;">$${data.investment.toLocaleString()}</span>
+                            </td></tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              ${data.monthlyRevenueRecovery > 0 ? `<!-- Revenue Recovery -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:0 40px 24px;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#F5F3FF;border-radius:10px;border:1px solid #DDD6FE;">
+                      <tr><td style="padding:16px 24px;">
+                        <span style="font-size:11px;color:#7C3AED;font-weight:700;text-transform:uppercase;">Revenue Recovery</span><br>
+                        <span style="font-size:24px;font-weight:700;color:#5B21B6;">$${data.monthlyRevenueRecovery.toLocaleString()}/mo</span>
+                        <span style="font-size:13px;color:#7C3AED;margin-left:8px;">(${data.recoveredLeads} leads recovered/mo)</span>
+                      </td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>` : ''}
+
+              <!-- Task Breakdown Table -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:0 40px 24px;">
+                    <p style="margin:0 0 12px;font-size:15px;font-weight:700;color:#1a1a2e;">Task Breakdown</p>
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;border-radius:10px;overflow:hidden;border:1px solid #e8eaf0;">
+                      <tr style="background:#f8f9fc;">
+                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;">Task</td>
+                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:center;">Hrs/Wk</td>
+                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:center;">Auto Rate</td>
+                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:right;">Savings</td>
+                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:center;">Status</td>
+                      </tr>
+                      ${taskRows}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Comparison -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr><td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #e8eaf0;margin:0;"></td></tr>
+                <tr>
+                  <td style="padding:24px 40px;">
+                    <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:#1a1a2e;">Compare Alternatives (Annual)</p>
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                      <tr>
+                        <td style="padding:8px 0;font-size:14px;color:#4a4a6a;">Traditional Consultant <span style="color:#aaa;font-size:12px;">($175/hr)</span></td>
+                        <td style="padding:8px 0;text-align:right;font-size:16px;font-weight:700;color:#F97316;">$${data.consultantCost.toLocaleString()}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;font-size:14px;color:#4a4a6a;border-top:1px solid #f0f2f5;">Done-for-you Agency <span style="color:#aaa;font-size:12px;">($6,500/mo)</span></td>
+                        <td style="padding:8px 0;text-align:right;font-size:16px;font-weight:700;color:#F97316;border-top:1px solid #f0f2f5;">$${data.agencyCost.toLocaleString()}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;font-size:14px;font-weight:600;color:#1a1a2e;border-top:1px solid #f0f2f5;">AI KRE8TION Partners</td>
+                        <td style="padding:8px 0;text-align:right;font-size:16px;font-weight:700;color:#16A34A;border-top:1px solid #f0f2f5;">$${data.investment.toLocaleString()}</td>
+                      </tr>
+                    </table>
+                    ${savingsPercent > 0 ? `<table role="presentation" style="width:100%;border:none;border-spacing:0;margin-top:12px;"><tr><td style="padding:12px 16px;background:#F0FDF4;border-radius:8px;border:1px solid #BBF7D0;font-size:14px;font-weight:600;color:#166534;">Save ${savingsPercent}% vs alternatives + you own the capability forever</td></tr></table>` : ''}
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:8px 40px 36px;text-align:center;">
+                    <a href="https://kre8tion.com/#pricing" style="display:inline-block;background-color:#0066FF;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;min-width:200px;">Start Building Your Systems</a>
+                    <p style="margin:12px 0 0;font-size:13px;color:#8a8aaa;">Questions? Reply to this email or book a free strategy call.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:28px 40px;text-align:center;background-color:#0a0a1a;border-radius:0 0 12px 12px;">
+              <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#ffffff;">AI KRE8TION Partners</p>
+              <p style="margin:0 0 16px;font-size:13px;color:#8a8aaa;">Agentic Systems for Small &amp; Medium Businesses</p>
+              <p style="margin:0;font-size:11px;color:#4a4a6a;">Calculations use your inputs with documented automation rates. Revenue recovery assumes 60% lead recapture. Actual results vary.</p>
+              <p style="margin:12px 0 0;font-size:11px;color:#4a4a6a;">&copy; ${year} AI KRE8TION Partners. All rights reserved.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ─── ROI Lead Dossier (sent to admin) ──────────────────────────────────────
+
+export interface ROILeadDossierData {
+  email: string;
+  industry: string;
+  employees: string;
+  hourlyLaborCost: number;
+  tier: string;
+  totalWeeklyHoursSaved: number;
+  weeklyLaborSavings: number;
+  monthlyRevenueRecovery: number;
+  annualBenefit: number;
+  investment: number;
+  roi: number;
+  paybackWeeks: number;
+  taskBreakdown: Array<{ name: string; hoursPerWeek: number; weeklySavings: number }>;
+}
+
+export function roiLeadDossierTemplate(data: ROILeadDossierData): string {
+  const roiColor = data.roi >= 200 ? '#16A34A' : data.roi >= 100 ? '#F59E0B' : '#EF4444';
+
+  const taskRows = data.taskBreakdown
+    .map(
+      (t) =>
+        `<tr>
+          <td style="padding:6px 0;font-size:14px;color:#1a1a2e;">${escapeHtml(t.name)}</td>
+          <td style="padding:6px 0;text-align:center;font-size:14px;color:#4a4a6a;">${t.hoursPerWeek}h/wk</td>
+          <td style="padding:6px 0;text-align:right;font-size:14px;font-weight:600;color:#0066FF;">$${t.weeklySavings.toLocaleString()}/wk</td>
+        </tr>`
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: sans-serif; line-height: 1.5; color: #1a1a2e; background: #f4f6f9; margin: 0; padding: 20px; }
+    .card { background: white; border-radius: 12px; padding: 32px; max-width: 600px; margin: 0 auto; border: 1px solid #e8eaf0; }
+    .header { border-bottom: 2px solid #f0f2f5; padding-bottom: 20px; margin-bottom: 24px; }
+    .roi-badge { display: inline-block; padding: 4px 16px; border-radius: 20px; color: white; font-size: 14px; font-weight: bold; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-item { background: #f8f9fc; padding: 12px; border-radius: 8px; border: 1px solid #e8eaf0; }
+    .stat-label { font-size: 11px; color: #8a8aaa; text-transform: uppercase; font-weight: bold; }
+    .stat-value { font-size: 16px; font-weight: bold; }
+    .section-title { font-size: 13px; font-weight: bold; color: #0066FF; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <span class="roi-badge" style="background-color:${roiColor};">${data.roi}% ROI</span>
+      <h1 style="margin:8px 0 0;font-size:22px;">ROI Report Request</h1>
+      <p style="color:#6a6a8a;margin:4px 0 0;font-size:15px;">${escapeHtml(data.email)}</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-item">
+        <div class="stat-label">Industry</div>
+        <div class="stat-value">${escapeHtml(data.industry)}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Business Size</div>
+        <div class="stat-value">${escapeHtml(data.employees)}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Labor Cost</div>
+        <div class="stat-value">$${data.hourlyLaborCost}/hr</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Selected Tier</div>
+        <div class="stat-value" style="color:#0066FF;">${escapeHtml(data.tier)}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Time Saved</div>
+        <div class="stat-value">${data.totalWeeklyHoursSaved} hrs/wk</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Weekly Savings</div>
+        <div class="stat-value" style="color:#0066FF;">$${data.weeklyLaborSavings.toLocaleString()}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Annual Benefit</div>
+        <div class="stat-value">$${data.annualBenefit.toLocaleString()}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Payback</div>
+        <div class="stat-value">~${data.paybackWeeks} weeks</div>
+      </div>
+    </div>
+
+    ${data.monthlyRevenueRecovery > 0 ? `<div class="stat-item" style="margin-bottom:20px;">
+      <div class="stat-label">Revenue Recovery</div>
+      <div class="stat-value" style="color:#7C3AED;">$${data.monthlyRevenueRecovery.toLocaleString()}/mo</div>
+    </div>` : ''}
+
+    <div class="section-title">Task Breakdown (sorted by savings)</div>
+    <table style="width:100%;border-collapse:collapse;">
+      ${taskRows}
+    </table>
+
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #eee;text-align:center;font-size:12px;color:#aaa;">
+      Sent automatically by AI KRE8TION Partners ROI Calculator.
+    </div>
+  </div>
+</body>
+</html>`;
+}
