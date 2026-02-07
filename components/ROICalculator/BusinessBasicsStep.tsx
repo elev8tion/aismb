@@ -101,7 +101,7 @@ export default function BusinessBasicsStep({ state, onChange, onNext, tier, onTi
                 <div>{ti.name}</div>
                 {tierInfo && (
                   <div className="text-[10px] opacity-70 mt-0.5">
-                    ${tierInfo.cost.toLocaleString()}
+                    ${tierInfo.setupFee.toLocaleString()} + ${tierInfo.monthlyFee.toLocaleString()}/mo
                   </div>
                 )}
               </button>

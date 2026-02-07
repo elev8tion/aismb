@@ -43,7 +43,7 @@ export default function ResultsPanel({ results, tier, onTierChange }: Props) {
                 <div>{ti.name}</div>
                 {tierInfo && (
                   <div className="text-[10px] opacity-70 mt-0.5">
-                    ${tierInfo.cost.toLocaleString()}
+                    ${tierInfo.setupFee.toLocaleString()} + ${tierInfo.monthlyFee.toLocaleString()}/mo
                   </div>
                 )}
               </button>
