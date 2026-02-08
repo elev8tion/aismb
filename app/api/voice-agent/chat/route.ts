@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
-import { createOpenAI, MODELS } from '@/lib/openai/config';
+import type OpenAI from 'openai';
+import { createOpenAI, MODELS, TOKEN_LIMITS } from '@/lib/openai/config';
 import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
 import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
@@ -8,6 +9,7 @@ import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
 import { extractLeadInfo, syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
 import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
 import { getHighPriorityLeadsReport, getDailySummary } from '@/lib/voiceAgent/analyticsAgent';
+import { VOICE_AGENT_TOOLS, executeTool, type ToolContext } from '@/lib/voiceAgent/tools';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     const leadScore = calculateLeadScore(leadInfo);
     
     // Build messages
-    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
+    const messages: Array<OpenAI.ChatCompletionMessageParam> = [];
 
     // Language instruction
     if (language === 'es') {
@@ -99,15 +101,49 @@ the ROI is typically 300%+. [ACTION:SCROLL_TO_BOOKING]
     messages.push(...conversationHistory);
     messages.push({ role: 'user', content: sanitizedQuestion });
 
-    // Call OpenAI
+    // Call OpenAI with tool support
+    const toolCtx: ToolContext = { env: env as unknown as Record<string, string> };
+
     const completion = await openai.chat.completions.create({
       model: MODELS.chat,
       messages,
       temperature: 0.7,
-      max_tokens: classification.maxTokens,
+      max_tokens: TOKEN_LIMITS.withTools,
+      tools: VOICE_AGENT_TOOLS,
+      tool_choice: 'auto',
     });
 
-    const response = completion.choices[0]?.message?.content || 'I apologize, I could not generate a response.';
+    let responseMessage = completion.choices[0]?.message;
+    let toolRound = 0;
+
+    while (responseMessage?.tool_calls?.length && toolRound < TOKEN_LIMITS.maxToolRounds) {
+      toolRound++;
+      messages.push(responseMessage as OpenAI.ChatCompletionMessageParam);
+
+      for (const toolCall of responseMessage.tool_calls) {
+        if (toolCall.type !== 'function') continue;
+        const args = JSON.parse(toolCall.function.arguments);
+        let result: string;
+        try {
+          result = await executeTool(toolCall.function.name, args, toolCtx);
+        } catch (err) {
+          result = JSON.stringify({ error: err instanceof Error ? err.message : 'Tool failed' });
+        }
+        messages.push({ role: 'tool', tool_call_id: toolCall.id, content: result });
+      }
+
+      const followUp = await openai.chat.completions.create({
+        model: MODELS.chat,
+        messages,
+        temperature: 0.7,
+        max_tokens: TOKEN_LIMITS.withTools,
+        tools: VOICE_AGENT_TOOLS,
+        tool_choice: 'auto',
+      });
+      responseMessage = followUp.choices[0]?.message;
+    }
+
+    const response = responseMessage?.content || 'I apologize, I could not generate a response.';
 
     // Save and Sync
     await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);

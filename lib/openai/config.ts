@@ -19,6 +19,12 @@ export const MODELS = {
   voice: 'echo',
 } as const;
 
+// Token limits for chat completions
+export const TOKEN_LIMITS = {
+  withTools: 400,
+  maxToolRounds: 3,
+} as const;
+
 // Rate limiting configuration
 export const RATE_LIMIT = {
   maxRequestsPerMinute: 10,
