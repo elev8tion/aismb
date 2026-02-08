@@ -115,7 +115,7 @@ export function getAvailableSlots(
 
   // Filter bookings for this date
   const dayBookings = existingBookings.filter(
-    (b) => b.booking_date === dateStr && b.status !== 'cancelled'
+    (b) => b.booking_date.startsWith(dateStr) && b.status !== 'cancelled'
   );
 
   // Generate slots at 30-minute intervals
