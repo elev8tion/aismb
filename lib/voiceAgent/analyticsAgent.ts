@@ -26,18 +26,19 @@ interface NCBRoiCalc {
 
 async function fetchFromNCB<T>(env: Record<string, string>, tableName: string, filters?: Record<string, string>): Promise<T[]> {
   const instance = env.NCB_INSTANCE;
-  const dataApiUrl = env.NCB_DATA_API_URL;
+  const openApiUrl = env.NCB_OPENAPI_URL;
+  const secretKey = env.NCB_SECRET_KEY;
 
-  if (!instance || !dataApiUrl) return [];
+  if (!instance || !openApiUrl || !secretKey) return [];
 
-  const params = new URLSearchParams({ instance });
+  const params = new URLSearchParams({ Instance: instance });
   if (filters) {
     Object.entries(filters).forEach(([k, v]) => params.set(k, v));
   }
 
   try {
-    const res = await fetch(`${dataApiUrl}/read/${tableName}?${params.toString()}`, {
-      headers: { 'X-Database-Instance': instance }
+    const res = await fetch(`${openApiUrl}/read/${tableName}?${params.toString()}`, {
+      headers: { 'Authorization': `Bearer ${secretKey}` }
     });
     if (!res.ok) return [];
     const data = (await res.json()) as { data?: T[] };

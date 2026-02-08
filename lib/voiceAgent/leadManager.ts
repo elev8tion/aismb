@@ -37,21 +37,22 @@ async function ncbRequest<T>(
   body?: Record<string, unknown>
 ): Promise<T | null> {
   const instance = env.NCB_INSTANCE;
-  const dataApiUrl = env.NCB_DATA_API_URL;
+  const openApiUrl = env.NCB_OPENAPI_URL;
+  const secretKey = env.NCB_SECRET_KEY;
 
-  if (!instance || !dataApiUrl) {
+  if (!instance || !openApiUrl || !secretKey) {
     console.error('Missing NCB environment variables');
     return null;
   }
 
-  const url = `${dataApiUrl}/${path}?instance=${instance}`;
+  const url = `${openApiUrl}/${path}?Instance=${instance}`;
 
   try {
     const res = await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'X-Database-Instance': instance,
+        'Authorization': `Bearer ${secretKey}`,
       },
       body: body ? JSON.stringify(body) : undefined,
     });

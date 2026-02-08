@@ -41,9 +41,10 @@ export interface ToolContext {
 
 function getNCBConfig(env: Record<string, string>) {
   const instance = env.NCB_INSTANCE;
-  const dataApiUrl = env.NCB_DATA_API_URL;
-  if (!instance || !dataApiUrl) throw new Error('Missing NCB environment variables');
-  return { instance, dataApiUrl };
+  const openApiUrl = env.NCB_OPENAPI_URL;
+  const secretKey = env.NCB_SECRET_KEY;
+  if (!instance || !openApiUrl || !secretKey) throw new Error('Missing NCB environment variables');
+  return { instance, openApiUrl, secretKey };
 }
 
 async function fetchFromNCB<T>(
@@ -53,16 +54,16 @@ async function fetchFromNCB<T>(
 ): Promise<T[]> {
   const config = getNCBConfig(env);
   const params = new URLSearchParams();
-  params.set('instance', config.instance);
+  params.set('Instance', config.instance);
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => params.set(key, value));
   }
-  const url = `${config.dataApiUrl}/read/${tableName}?${params.toString()}`;
+  const url = `${config.openApiUrl}/read/${tableName}?${params.toString()}`;
   const res = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'X-Database-Instance': config.instance,
+      'Authorization': `Bearer ${config.secretKey}`,
     },
   });
   if (!res.ok) return [];
@@ -77,13 +78,13 @@ async function createInNCB<T>(
 ): Promise<T | null> {
   const config = getNCBConfig(env);
   const params = new URLSearchParams();
-  params.set('instance', config.instance);
-  const url = `${config.dataApiUrl}/create/${tableName}?${params.toString()}`;
+  params.set('Instance', config.instance);
+  const url = `${config.openApiUrl}/create/${tableName}?${params.toString()}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Database-Instance': config.instance,
+      'Authorization': `Bearer ${config.secretKey}`,
     },
     body: JSON.stringify(inputData),
   });
@@ -92,7 +93,10 @@ async function createInNCB<T>(
     console.error(`NCB create error for ${tableName}:`, res.status, error);
     return null;
   }
-  const result: { data?: T } = await res.json();
+  const result: { status?: string; id?: number; data?: T } = await res.json();
+  if (result.status === 'success' && result.id) {
+    return { ...inputData, id: result.id } as T;
+  }
   return result.data || null;
 }
 
@@ -319,17 +323,16 @@ async function handleCreateConsultation(
   const bookingData: Partial<Booking> = {
     guest_name: name,
     guest_email: email,
-    guest_phone: phone,
+    guest_phone: phone || null,
     booking_date: date,
     start_time: time,
     end_time: endTime,
     timezone,
-    company_name: companyName,
-    industry,
-    employee_count: employeeCount,
+    company_name: companyName || null,
+    industry: industry || null,
+    employee_count: employeeCount || null,
     status: 'confirmed',
     booking_type: 'consultation',
-    created_at: new Date().toISOString(),
   };
 
   const booking = await createInNCB<Booking>(ctx.env, 'bookings', bookingData);
