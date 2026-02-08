@@ -62,7 +62,7 @@ export default function Header() {
 
             {/* Desktop CTA + Language Switcher */}
             <div className="hidden lg:flex items-center gap-4">
-              <LanguageSwitcher variant="compact" />
+              <LanguageSwitcher />
               <a
                 href="#get-started"
                 className="text-sm lg:text-base font-medium text-white/70 hover:text-white transition-colors"
@@ -79,7 +79,7 @@ export default function Header() {
 
             {/* Mobile Language Switcher + Menu Button */}
             <div className="lg:hidden flex items-center gap-2">
-              <LanguageSwitcher variant="compact" />
+              <LanguageSwitcher />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
@@ -130,9 +130,6 @@ export default function Header() {
                   </a>
                 ))}
                 <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
-                  <div className="px-4 py-2">
-                    <LanguageSwitcher variant="compact" />
-                  </div>
                   <a
                     href="#get-started"
                     className="block px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"

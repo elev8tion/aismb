@@ -31,13 +31,6 @@ export const setLanguage = (lang: Language): void => {
   }
 };
 
-export const getLanguageLabel = (lang: Language): string => {
-  return {
-    en: 'English',
-    es: 'Español',
-  }[lang];
-};
-
 /**
  * Add locale parameter to a URL
  * Handles both URLs with and without existing query params
