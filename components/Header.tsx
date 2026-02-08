@@ -53,7 +53,7 @@ export default function Header() {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10 hover:shadow-lg hover:shadow-white/5"
+                  className="px-4 py-2 text-sm lg:text-base font-medium text-white/70 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10 hover:shadow-lg hover:shadow-white/5"
                 >
                   {item.label}
                 </a>
@@ -65,13 +65,13 @@ export default function Header() {
               <LanguageSwitcher variant="compact" />
               <a
                 href="#get-started"
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+                className="text-sm lg:text-base font-medium text-white/70 hover:text-white transition-colors"
               >
                 {t.nav.contact}
               </a>
               <a
                 href="#get-started"
-                className="btn-fab text-sm px-6 py-2.5"
+                className="btn-fab text-sm lg:text-base px-6 py-2.5"
               >
                 {t.nav.getStarted}
               </a>
