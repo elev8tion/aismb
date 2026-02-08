@@ -229,11 +229,11 @@ const RESPOND_TO_USER_TOOL: OpenAI.ChatCompletionTool = {
   type: 'function',
   function: {
     name: 'respond_to_user',
-    description: 'Send a conversational message to the user. Use this when you need to ask the user a question or provide a message without calling an availability or booking tool.',
+    description: 'Ask the user for their personal details (name, email, company, industry) during the booking flow. ONLY use this to collect user info. NEVER use this to discuss availability or dates — use get_available_dates or get_available_slots for that.',
     parameters: {
       type: 'object',
       properties: {
-        message: { type: 'string', description: 'The message to send to the user' },
+        message: { type: 'string', description: 'A question asking for the user\'s name, email, company, or industry' },
       },
       required: ['message'],
     },

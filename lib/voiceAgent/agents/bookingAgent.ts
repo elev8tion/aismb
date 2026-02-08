@@ -10,6 +10,11 @@ import type OpenAI from 'openai';
 import { BOOKING_AGENT_PROMPT, SPANISH_INSTRUCTION } from './prompts';
 import { BOOKING_TOOLS, executeTool, type ToolContext } from '../tools';
 import { MODELS, TOKEN_LIMITS } from '@/lib/openai/config';
+
+/** Booking tools WITHOUT respond_to_user — used on first call to force availability check */
+const AVAILABILITY_ONLY_TOOLS = BOOKING_TOOLS.filter(
+  (t) => t.type === 'function' && t.function.name !== 'respond_to_user',
+);
 import type { ConversationMessage } from '../sessionStorage';
 
 export interface BookingAgentOptions {
@@ -42,13 +47,14 @@ export async function runBookingAgent(
   // Current question
   messages.push({ role: 'user', content: question });
 
-  // First call: tool_choice 'required' — must call a tool
+  // First call: tool_choice 'required' with ONLY availability/booking tools
+  // respond_to_user is excluded so the LLM cannot bail out — it MUST check availability
   const completion = await openai.chat.completions.create({
     model: MODELS.chat,
     messages,
     temperature: 0.5,
     max_tokens: TOKEN_LIMITS.withTools,
-    tools: BOOKING_TOOLS,
+    tools: AVAILABILITY_ONLY_TOOLS,
     tool_choice: 'required',
   });
 
