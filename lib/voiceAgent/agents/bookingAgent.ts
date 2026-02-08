@@ -19,6 +19,8 @@ import type { ConversationMessage } from '../sessionStorage';
 
 export interface BookingAgentOptions {
   language?: 'en' | 'es';
+  /** True when the router detected this is a continuation (user replying with name/email/date) */
+  isContinuation?: boolean;
 }
 
 export async function runBookingAgent(
@@ -47,15 +49,18 @@ export async function runBookingAgent(
   // Current question
   messages.push({ role: 'user', content: question });
 
-  // First call: tool_choice 'required' with ONLY availability/booking tools
-  // respond_to_user is excluded so the LLM cannot bail out — it MUST check availability
+  // First call strategy:
+  // - Fresh booking request → tool_choice 'required' with NO respond_to_user (must check availability)
+  // - Continuation (user replying with name/email/date) → tool_choice 'auto' with ALL tools
+  //   so the LLM can collect info, create booking, or check more slots as needed
+  const isFirstRequest = !options.isContinuation;
   const completion = await openai.chat.completions.create({
     model: MODELS.chat,
     messages,
     temperature: 0.5,
     max_tokens: TOKEN_LIMITS.withTools,
-    tools: AVAILABILITY_ONLY_TOOLS,
-    tool_choice: 'required',
+    tools: isFirstRequest ? AVAILABILITY_ONLY_TOOLS : BOOKING_TOOLS,
+    tool_choice: isFirstRequest ? 'required' : 'auto',
   });
 
   let responseMessage = completion.choices[0]?.message;

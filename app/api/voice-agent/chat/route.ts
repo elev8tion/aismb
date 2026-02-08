@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
     const leadScore = calculateLeadScore(leadInfo);
 
     // ─── Intent classification (deterministic, no LLM) ──────────────────
-    const { intent } = classifyIntent(sanitizedQuestion, conversationHistory);
-    console.log(`Intent: ${intent} for question: "${sanitizedQuestion.slice(0, 60)}"`);
+    const { intent, isContinuation } = classifyIntent(sanitizedQuestion, conversationHistory);
+    console.log(`Intent: ${intent}${isContinuation ? ' (continuation)' : ''} for: "${sanitizedQuestion.slice(0, 60)}"`);
 
     // ─── Management intent (handled directly, no LLM) ───────────────────
     if (intent === 'management') {
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     switch (intent) {
       case 'booking':
-        response = await runBookingAgent(openai, sanitizedQuestion, conversationHistory, toolCtx, agentOptions);
+        response = await runBookingAgent(openai, sanitizedQuestion, conversationHistory, toolCtx, { ...agentOptions, isContinuation });
         break;
       case 'roi':
         response = await runROIAgent(openai, sanitizedQuestion, conversationHistory, toolCtx, agentOptions);

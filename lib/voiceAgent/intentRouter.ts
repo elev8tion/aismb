@@ -12,6 +12,8 @@ export type Intent = 'management' | 'booking' | 'roi' | 'info';
 export interface IntentResult {
   intent: Intent;
   confidence: number;
+  /** True when booking intent was triggered by continuation detection (last assistant asked for details) */
+  isContinuation: boolean;
 }
 
 // ─── Signal patterns ────────────────────────────────────────────────────────
@@ -122,7 +124,7 @@ export function classifyIntent(
   // ─── 1. Management (highest priority — owner-only commands) ──────────
   for (const signal of MANAGEMENT_SIGNALS) {
     if (q.includes(signal)) {
-      return { intent: 'management', confidence: 1.0 };
+      return { intent: 'management', confidence: 1.0, isContinuation: false };
     }
   }
 
@@ -131,7 +133,7 @@ export function classifyIntent(
   if (lastAssistantMsg) {
     for (const pattern of BOOKING_CONTINUATION_PATTERNS) {
       if (pattern.test(lastAssistantMsg)) {
-        return { intent: 'booking', confidence: 0.9 };
+        return { intent: 'booking', confidence: 0.9, isContinuation: true };
       }
     }
   }
@@ -179,21 +181,21 @@ export function classifyIntent(
   // ─── 4. Ambiguity resolution ──────────────────────────────────────────
   // If booking + info both present but no strong scheduling keyword → info
   if (bookingScore > 0 && infoOverride && bookingScore < 3) {
-    return { intent: 'info', confidence: 0.7 };
+    return { intent: 'info', confidence: 0.7, isContinuation: false };
   }
 
   // Clear booking intent
   if (bookingScore >= 2) {
-    return { intent: 'booking', confidence: Math.min(0.95, 0.5 + bookingScore * 0.1) };
+    return { intent: 'booking', confidence: Math.min(0.95, 0.5 + bookingScore * 0.1), isContinuation: false };
   }
 
   // Clear ROI intent
   if (roiScore >= 2) {
-    return { intent: 'roi', confidence: Math.min(0.95, 0.5 + roiScore * 0.1) };
+    return { intent: 'roi', confidence: Math.min(0.95, 0.5 + roiScore * 0.1), isContinuation: false };
   }
 
   // ─── 5. Default to info ───────────────────────────────────────────────
-  return { intent: 'info', confidence: 0.6 };
+  return { intent: 'info', confidence: 0.6, isContinuation: false };
 }
 
 function getLastAssistantMessage(history: ConversationMessage[]): string | null {
