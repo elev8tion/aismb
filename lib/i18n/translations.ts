@@ -290,6 +290,8 @@ export interface Translations {
     copyright: string;
     privacyPolicy: string;
     termsOfService: string;
+    aiDisclosure: string;
+    refundPolicy: string;
   };
 
   voiceAgent: {
@@ -373,6 +375,8 @@ export interface Translations {
       submittingAssessment: string;
       assessmentDuration: string;
       required: string;
+      termsAgreement: string;
+      termsRequired: string;
     };
     confirmation: {
       title: string;
@@ -1034,6 +1038,8 @@ export const translations: Record<Language, Translations> = {
       copyright: 'elev8tion. All rights reserved.',
       privacyPolicy: 'Privacy Policy',
       termsOfService: 'Terms of Service',
+      aiDisclosure: 'AI Disclosure',
+      refundPolicy: 'Refund Policy',
     },
 
     voiceAgent: {
@@ -1122,6 +1128,8 @@ export const translations: Record<Language, Translations> = {
         submittingAssessment: 'Redirecting to payment...',
         assessmentDuration: '3 hrs',
         required: 'Required fields',
+        termsAgreement: 'I agree to the <terms>Terms of Service</terms> and <refund>Refund Policy</refund>',
+        termsRequired: 'You must agree to the Terms of Service and Refund Policy',
       },
       confirmation: {
         title: 'Booking Confirmed!',
@@ -1789,6 +1797,8 @@ export const translations: Record<Language, Translations> = {
       copyright: 'elev8tion. Todos los derechos reservados.',
       privacyPolicy: 'Politica de Privacidad',
       termsOfService: 'Terminos de Servicio',
+      aiDisclosure: 'Divulgacion de IA',
+      refundPolicy: 'Politica de Reembolso',
     },
 
     voiceAgent: {
@@ -1877,6 +1887,8 @@ export const translations: Record<Language, Translations> = {
         submittingAssessment: 'Redirigiendo al pago...',
         assessmentDuration: '3 hrs',
         required: 'Campos requeridos',
+        termsAgreement: 'Acepto los <terms>Terminos de Servicio</terms> y la <refund>Politica de Reembolso</refund>',
+        termsRequired: 'Debe aceptar los Terminos de Servicio y la Politica de Reembolso',
       },
       confirmation: {
         title: 'Reserva Confirmada!',

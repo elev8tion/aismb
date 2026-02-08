@@ -93,12 +93,18 @@ export default function Footer() {
           <p className="text-sm text-[#71717A]">
             &copy; {new Date().getFullYear()} {t.footer.copyright}
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-6">
             <a href="/privacy" className="text-sm text-[#71717A] hover:text-white transition-colors">
               {t.footer.privacyPolicy}
             </a>
             <a href="/terms" className="text-sm text-[#71717A] hover:text-white transition-colors">
               {t.footer.termsOfService}
+            </a>
+            <a href="/ai-disclosure" className="text-sm text-[#71717A] hover:text-white transition-colors">
+              {t.footer.aiDisclosure}
+            </a>
+            <a href="/refund-policy" className="text-sm text-[#71717A] hover:text-white transition-colors">
+              {t.footer.refundPolicy}
             </a>
           </div>
         </div>

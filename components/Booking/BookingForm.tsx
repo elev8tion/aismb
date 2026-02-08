@@ -36,6 +36,8 @@ interface BookingFormProps {
     submittingAssessment: string;
     assessmentDuration: string;
     required: string;
+    termsAgreement: string;
+    termsRequired: string;
   };
 }
 
@@ -57,6 +59,7 @@ export default function BookingForm({
   const [challenge, setChallenge] = useState('');
   const [referralSource, setReferralSource] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [termsAgreed, setTermsAgreed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Format date and time for display
@@ -94,6 +97,10 @@ export default function BookingForm({
 
     if (!employeeCount.trim()) {
       newErrors.employeeCount = 'Please enter your number of employees';
+    }
+
+    if (!termsAgreed) {
+      newErrors.terms = translations.termsRequired;
     }
 
     setErrors(newErrors);
@@ -338,6 +345,53 @@ export default function BookingForm({
         <p className="text-xs text-white/40">
           <span className="text-[#F97316]">*</span> {translations.required}
         </p>
+
+        {/* Terms Agreement Checkbox */}
+        <div>
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={termsAgreed}
+              onChange={(e) => setTermsAgreed(e.target.checked)}
+              disabled={loading}
+              className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 text-[#0EA5E9] focus:ring-[#0EA5E9] focus:ring-offset-0 focus:ring-offset-transparent disabled:opacity-50"
+            />
+            <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">
+              {(() => {
+                const text = translations.termsAgreement;
+                const parts: React.ReactNode[] = [];
+                let lastIndex = 0;
+                const regex = /<(terms|refund)>(.*?)<\/\1>/g;
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                  if (match.index > lastIndex) {
+                    parts.push(text.slice(lastIndex, match.index));
+                  }
+                  const href = match[1] === 'terms' ? '/terms' : '/refund-policy';
+                  parts.push(
+                    <a
+                      key={match.index}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0EA5E9] hover:text-white underline transition-colors"
+                    >
+                      {match[2]}
+                    </a>
+                  );
+                  lastIndex = match.index + match[0].length;
+                }
+                if (lastIndex < text.length) {
+                  parts.push(text.slice(lastIndex));
+                }
+                return parts;
+              })()}
+            </span>
+          </label>
+          {errors.terms && (
+            <p className="mt-1 ml-7 text-sm text-[#EF4444]">{errors.terms}</p>
+          )}
+        </div>
 
         {/* Submit Button */}
         <button

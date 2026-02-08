@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice Agent Architecture — AI KRE8TION Partners</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a1a; color: #e0e0f0; font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Fira Code', monospace; padding: 32px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  h1 span { color: #0066FF; font-weight: 300; }
+  .subtitle { color: #8a8aaa; font-size: 14px; margin-bottom: 40px; }
+  .legend { display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8a8aaa; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+
+  .projects { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px; }
+  @media (max-width: 1200px) { .projects { grid-template-columns: 1fr; } }
+
+  .project { background: #111128; border: 1px solid #1a1a3e; border-radius: 16px; padding: 24px; }
+  .project-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #1a1a3e; }
+  .project-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-public { background: #0066FF20; color: #0066FF; border: 1px solid #0066FF40; }
+  .badge-auth { background: #22C55E20; color: #22C55E; border: 1px solid #22C55E40; }
+  .project-title { font-size: 18px; font-weight: 600; }
+  .project-desc { font-size: 12px; color: #6a6a8a; }
+
+  .layer { margin-bottom: 20px; }
+  .layer-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #4a4a6a; margin-bottom: 10px; padding-left: 4px; }
+  .nodes { display: flex; flex-direction: column; gap: 8px; }
+  .node { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 10px; border: 1px solid; font-size: 12px; line-height: 1.5; }
+  .node-icon { flex-shrink: 0; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .node-body { flex: 1; min-width: 0; }
+  .node-name { font-weight: 600; font-size: 13px; }
+  .node-path { font-size: 10px; color: #6a6a8a; word-break: break-all; }
+  .node-detail { font-size: 11px; color: #8a8aaa; margin-top: 4px; }
+  .node-connections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .conn { padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; }
+
+  /* Color coding by layer */
+  .n-frontend { background: #1a1040; border-color: #6C3AED40; }
+  .n-frontend .node-icon { background: #6C3AED30; color: #A78BFA; }
+  .n-frontend .node-name { color: #A78BFA; }
+
+  .n-api { background: #0a1a30; border-color: #0066FF40; }
+  .n-api .node-icon { background: #0066FF30; color: #60A5FA; }
+  .n-api .node-name { color: #60A5FA; }
+
+  .n-logic { background: #0a2018; border-color: #22C55E40; }
+  .n-logic .node-icon { background: #22C55E30; color: #4ADE80; }
+  .n-logic .node-name { color: #4ADE80; }
+
+  .n-security { background: #1a1008; border-color: #F59E0B40; }
+  .n-security .node-icon { background: #F59E0B30; color: #FBBF24; }
+  .n-security .node-name { color: #FBBF24; }
+
+  .n-external { background: #1a0818; border-color: #EC489940; }
+  .n-external .node-icon { background: #EC489930; color: #F472B6; }
+  .n-external .node-name { color: #F472B6; }
+
+  .n-data { background: #0a1820; border-color: #06B6D440; }
+  .n-data .node-icon { background: #06B6D430; color: #22D3EE; }
+  .n-data .node-name { color: #22D3EE; }
+
+  .conn-api { background: #0066FF20; color: #60A5FA; }
+  .conn-logic { background: #22C55E20; color: #4ADE80; }
+  .conn-ext { background: #EC489920; color: #F472B6; }
+  .conn-data { background: #06B6D420; color: #22D3EE; }
+
+  /* Flow diagram section */
+  .flow-section { margin-top: 48px; }
+  .flow-section h2 { font-size: 20px; font-weight: 600; margin-bottom: 24px; }
+  .flow-section h2 span { color: #0066FF; }
+  .flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 1200px) { .flow-grid { grid-template-columns: 1fr; } }
+
+  .flow-card { background: #111128; border: 1px solid #1a1a3e; border-radius: 16px; padding: 24px; }
+  .flow-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .flow-steps { position: relative; }
+  .step { display: flex; gap: 12px; padding: 10px 0; position: relative; }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 38px;
+    bottom: -2px;
+    width: 2px;
+    background: linear-gradient(to bottom, #0066FF40, #0066FF10);
+  }
+  .step-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: #0066FF20; border: 1px solid #0066FF40; color: #60A5FA; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 1; }
+  .step-text { font-size: 12px; color: #c0c0d0; line-height: 1.6; padding-top: 4px; }
+  .step-text strong { color: #e0e0f0; }
+  .step-text code { background: #1a1a3e; padding: 1px 5px; border-radius: 4px; font-size: 11px; color: #A78BFA; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 48px; }
+  .stat { background: #111128; border: 1px solid #1a1a3e; border-radius: 12px; padding: 20px; text-align: center; }
+  .stat-val { font-size: 32px; font-weight: 700; color: #0066FF; }
+  .stat-label { font-size: 11px; color: #6a6a8a; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Model table */
+  .model-section { margin-top: 48px; }
+  .model-section h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 10px 14px; background: #1a1a3e; color: #8a8aaa; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td { padding: 10px 14px; border-bottom: 1px solid #1a1a3e; }
+  tr:hover td { background: #111128; }
+  .model-tag { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .mt-nano { background: #22C55E20; color: #4ADE80; }
+  .mt-mini { background: #0066FF20; color: #60A5FA; }
+  .mt-reasoning { background: #F59E0B20; color: #FBBF24; }
+  .mt-tts { background: #A78BFA20; color: #A78BFA; }
+  .mt-stt { background: #EC489920; color: #F472B6; }
+</style>
+</head>
+<body>
+
+<h1>Voice Agent Architecture <span>Map</span></h1>
+<p class="subtitle">AI KRE8TION Partners — Complete implementation across Landing Page + CRM</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#6C3AED;"></div> Frontend</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#0066FF;"></div> API Routes</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#22C55E;"></div> Business Logic</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#F59E0B;"></div> Security</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#06B6D4;"></div> Data / Sessions</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#EC4899;"></div> External Services</div>
+</div>
+
+<!-- ═══════════════════════ TWO PROJECTS ═══════════════════════ -->
+<div class="projects">
+
+  <!-- ─── PROJECT 1: LANDING PAGE ─── -->
+  <div class="project">
+    <div class="project-header">
+      <span class="project-badge badge-public">Public</span>
+      <div>
+        <div class="project-title">Landing Page Voice Agent</div>
+        <div class="project-desc">ai-smb-partners — Visitor-facing strategist</div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Frontend</div>
+      <div class="nodes">
+        <div class="node n-frontend">
+          <div class="node-icon">🎙</div>
+          <div class="node-body">
+            <div class="node-name">VoiceAgentFAB</div>
+            <div class="node-path">components/VoiceAgentFAB/index.tsx</div>
+            <div class="node-detail">Floating button + modal. States: idle → listening → processing → speaking. Parses <code>[ACTION:SCROLL_TO_*]</code> tags. Auto-close countdown. EN/ES language toggle.</div>
+            <div class="node-connections">
+              <span class="conn conn-api">→ /api/voice-agent/chat</span>
+              <span class="conn conn-api">→ /api/voice-agent/speak</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-frontend">
+          <div class="node-icon">🎤</div>
+          <div class="node-body">
+            <div class="node-name">useVoiceRecording</div>
+            <div class="node-path">components/VoiceAgentFAB/useVoiceRecording.ts</div>
+            <div class="node-detail">Recording hook. MediaRecorder → audio blob → FormData. 60s max. iOS audio unlock. Abort control.</div>
+            <div class="node-connections">
+              <span class="conn conn-api">→ /api/voice-agent/transcribe</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">API Routes (Edge Runtime)</div>
+      <div class="nodes">
+        <div class="node n-api">
+          <div class="node-icon">📝</div>
+          <div class="node-body">
+            <div class="node-name">/api/voice-agent/transcribe</div>
+            <div class="node-detail">Audio → text. Whisper-1. Max 5MB. Validates MIME type.</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ OpenAI Whisper</span>
+              <span class="conn conn-logic">← requestValidator</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-api">
+          <div class="node-icon">🧠</div>
+          <div class="node-body">
+            <div class="node-name">/api/voice-agent/chat</div>
+            <div class="node-detail">Core intelligence. Classifies question → scores lead → builds dynamic strategist prompt → GPT-4.1-nano → syncs lead to CRM. Management intents bypass GPT (direct NCB query).</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ OpenAI Chat</span>
+              <span class="conn conn-logic">← questionClassifier</span>
+              <span class="conn conn-logic">← leadScorer</span>
+              <span class="conn conn-logic">← leadManager</span>
+              <span class="conn conn-logic">← analyticsAgent</span>
+              <span class="conn conn-logic">← knowledgeBase</span>
+              <span class="conn conn-data">← sessionStorage (KV)</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-api">
+          <div class="node-icon">🔊</div>
+          <div class="node-body">
+            <div class="node-name">/api/voice-agent/speak</div>
+            <div class="node-detail">Text → audio/mpeg. GPT-4o-mini-tts. Returns raw MP3 buffer.</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ OpenAI TTS</span>
+              <span class="conn conn-logic">← requestValidator</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Business Logic</div>
+      <div class="nodes">
+        <div class="node n-logic">
+          <div class="node-icon">📊</div>
+          <div class="node-body">
+            <div class="node-name">questionClassifier</div>
+            <div class="node-detail">Routes to token budgets: simple (150) · moderate (175) · complex (200). Pattern-matches pricing, comparisons, multi-part queries.</div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">🎯</div>
+          <div class="node-body">
+            <div class="node-name">leadScorer</div>
+            <div class="node-detail">0-100 score → low/medium/high tier. Weights: industry fit (30) + business size (30) + contact completeness (20) + intent (20).</div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">🔗</div>
+          <div class="node-body">
+            <div class="node-name">leadManager</div>
+            <div class="node-detail">Extracts email/industry/size from conversation via regex. Syncs to NCB CRM (create or update). Also syncs ROI calcs and bookings.</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ NCB API</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">📈</div>
+          <div class="node-body">
+            <div class="node-name">analyticsAgent</div>
+            <div class="node-detail">Management intent handler. Queries NCB for daily summary (leads/bookings/ROI calcs) and high-priority lead reports.</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ NCB API</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">📋</div>
+          <div class="node-body">
+            <div class="node-name">knowledgeBase</div>
+            <div class="node-detail">Static system prompt (~600 lines). Company value prop, pricing tiers, FAQ, process steps, industry examples, Spanish market strategy.</div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">🗺️</div>
+          <div class="node-body">
+            <div class="node-name">roadmapGenerator</div>
+            <div class="node-detail">Generates AI strategy reports per lead. Industry-specific system recommendations (HVAC, plumbing, property mgmt, construction, real estate).</div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">💾</div>
+          <div class="node-body">
+            <div class="node-name">responseCache</div>
+            <div class="node-detail">Caches frequent Q&A pairs (pricing, industry fit, tier diffs). 24h TTL, max 100 entries. Normalizes questions to cache keys.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Security & Monitoring</div>
+      <div class="nodes">
+        <div class="node n-security">
+          <div class="node-icon">🛡️</div>
+          <div class="node-body">
+            <div class="node-name">requestValidator</div>
+            <div class="node-detail">Input sanitation. Max 2000 chars. Prompt injection detection (7 regex patterns). Audio file validation (5MB, MIME types).</div>
+          </div>
+        </div>
+        <div class="node n-security">
+          <div class="node-icon">⏱️</div>
+          <div class="node-body">
+            <div class="node-name">rateLimiter</div>
+            <div class="node-detail">10 req/min, 100 req/hour per IP. 1-hour block on burst. Auto-cleanup every 5 min.</div>
+          </div>
+        </div>
+        <div class="node n-security">
+          <div class="node-icon">💰</div>
+          <div class="node-body">
+            <div class="node-name">costMonitor</div>
+            <div class="node-detail">Daily budget $10 (alert at $5). Tracks per-request cost by model. Pricing: nano $0.10/$0.40/1M, whisper $0.006/min, tts $12/1M chars.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Data & External</div>
+      <div class="nodes">
+        <div class="node n-data">
+          <div class="node-icon">🗄️</div>
+          <div class="node-body">
+            <div class="node-name">Cloudflare KV</div>
+            <div class="node-detail">Session storage. TTL 1 hour. Max 10 messages per session. Key: <code>session:{id}</code>. Falls back to in-memory in dev.</div>
+          </div>
+        </div>
+        <div class="node n-external">
+          <div class="node-icon">☁️</div>
+          <div class="node-body">
+            <div class="node-name">External Services</div>
+            <div class="node-detail">OpenAI API (Whisper, GPT-4.1-nano, GPT-4o-mini-tts) · NCB CRM (leads, bookings, roi_calculations) · Email Worker (booking confirmations, admin dossiers)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROJECT 2: CRM ─── -->
+  <div class="project">
+    <div class="project-header">
+      <span class="project-badge badge-auth">Authenticated</span>
+      <div>
+        <div class="project-title">CRM Voice Operator</div>
+        <div class="project-desc">ai_smb_crm_frontend — Operator-facing agent with 44 tools</div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Frontend</div>
+      <div class="nodes">
+        <div class="node n-frontend">
+          <div class="node-icon">🎙</div>
+          <div class="node-body">
+            <div class="node-name">VoiceOperator</div>
+            <div class="node-path">components/VoiceOperator/index.tsx</div>
+            <div class="node-detail">FAB in DashboardLayout. Sends <code>pagePath</code> for context. Processes <code>clientActions[]</code> from response: navigation (router.push) + UI actions (filters, search, forms).</div>
+            <div class="node-connections">
+              <span class="conn conn-api">→ /api/agent/chat</span>
+              <span class="conn conn-api">→ /api/agent/speak</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-frontend">
+          <div class="node-icon">🎤</div>
+          <div class="node-body">
+            <div class="node-name">useVoiceRecording</div>
+            <div class="node-path">components/VoiceOperator/useVoiceRecording.ts</div>
+            <div class="node-detail">Ported from landing page. <code>credentials: 'include'</code> for auth cookies.</div>
+            <div class="node-connections">
+              <span class="conn conn-api">→ /api/agent/transcribe</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">API Routes (Edge Runtime, Auth Required)</div>
+      <div class="nodes">
+        <div class="node n-api">
+          <div class="node-icon">📝</div>
+          <div class="node-body">
+            <div class="node-name">/api/agent/transcribe</div>
+            <div class="node-detail">Audio → text. Auth required. Same Whisper-1 pipeline.</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ OpenAI Whisper</span>
+              <span class="conn conn-logic">← getSessionUser</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-api">
+          <div class="node-icon">🧠</div>
+          <div class="node-body">
+            <div class="node-name">/api/agent/chat</div>
+            <div class="node-detail">Main orchestrator. Auth → model selection → GPT with 44 tools → tool call loop (max 5 rounds) → collect clientActions → respond. Includes bilingual few-shot nav examples + UI action dispatch.</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ OpenAI Chat (3 tiers)</span>
+              <span class="conn conn-logic">← modelRouter</span>
+              <span class="conn conn-logic">← ALL_CRM_FUNCTIONS</span>
+              <span class="conn conn-logic">← executeTool</span>
+              <span class="conn conn-data">← session (in-memory)</span>
+              <span class="conn conn-logic">← getSessionUser</span>
+            </div>
+          </div>
+        </div>
+        <div class="node n-api">
+          <div class="node-icon">🔊</div>
+          <div class="node-body">
+            <div class="node-name">/api/agent/speak</div>
+            <div class="node-detail">Text → audio/mpeg. Auth required. GPT-4o-mini-tts.</div>
+            <div class="node-connections">
+              <span class="conn conn-ext">→ OpenAI TTS</span>
+              <span class="conn conn-logic">← getSessionUser</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Agent Intelligence</div>
+      <div class="nodes">
+        <div class="node n-logic">
+          <div class="node-icon">🔀</div>
+          <div class="node-body">
+            <div class="node-name">modelRouter</div>
+            <div class="node-detail">3-tier routing. Greetings (&lt;30 chars) → nano. "analyze/why/compare/strategy" → o4-mini. Multi-question/long → mini. Default → nano.</div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">🛠️</div>
+          <div class="node-body">
+            <div class="node-name">functions.ts — 44 Tool Definitions</div>
+            <div class="node-detail">
+              Leads (7) · Bookings (9) · Pipeline (4) · Contacts (6) · Partnerships (4) · Analytics (5) · Tasks (2) · Navigation (1) · UI Actions (5) · Score (1)
+            </div>
+          </div>
+        </div>
+        <div class="node n-logic">
+          <div class="node-icon">⚡</div>
+          <div class="node-body">
+            <div class="node-name">tools/ — Domain Handlers</div>
+            <div class="node-detail">6 domain files + navigation + UI. Each handler calls ncbClient. CREATE tools inject userId. Registry dispatches by tool name.</div>
+            <div class="node-connections">
+              <span class="conn conn-data">→ ncbClient</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Tool Domains (6 files)</div>
+      <div class="nodes">
+        <div class="node n-logic" style="padding:8px 14px;">
+          <div class="node-body" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <div><span style="color:#4ADE80;font-weight:600;">leads.ts</span><br><span style="font-size:10px;color:#8a8aaa;">list · search · count · create · update_status · score · summary</span></div>
+            <div><span style="color:#4ADE80;font-weight:600;">bookings.ts</span><br><span style="font-size:10px;color:#8a8aaa;">today · upcoming · list · confirm · cancel · block · unblock · avail · summary</span></div>
+            <div><span style="color:#4ADE80;font-weight:600;">pipeline.ts</span><br><span style="font-size:10px;color:#8a8aaa;">list_opportunities · get_summary · create · move_deal</span></div>
+            <div><span style="color:#4ADE80;font-weight:600;">contacts.ts</span><br><span style="font-size:10px;color:#8a8aaa;">search · get · create · companies · create_company · company_contacts</span></div>
+            <div><span style="color:#4ADE80;font-weight:600;">partnerships.ts</span><br><span style="font-size:10px;color:#8a8aaa;">list · summary · update_phase · update_health</span></div>
+            <div><span style="color:#4ADE80;font-weight:600;">analytics.ts</span><br><span style="font-size:10px;color:#8a8aaa;">dashboard · daily_summary · activities · voice_insights · roi_insights · tasks</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Security</div>
+      <div class="nodes">
+        <div class="node n-security">
+          <div class="node-icon">🔒</div>
+          <div class="node-body">
+            <div class="node-name">Auth + Validation</div>
+            <div class="node-detail">Cookie-based session auth via NCB. <code>getSessionUser(cookies)</code> on every request. requestValidator (ported). rateLimiter (30 req/min).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-label">Data & External</div>
+      <div class="nodes">
+        <div class="node n-data">
+          <div class="node-icon">🗄️</div>
+          <div class="node-body">
+            <div class="node-name">ncbClient + In-Memory Sessions</div>
+            <div class="node-detail"><code>ncbRead</code> · <code>ncbCreate</code> · <code>ncbUpdate</code> · <code>ncbDelete</code> — all pass auth cookies. Sessions: 30-min TTL, 20-turn max, lazy cleanup.</div>
+          </div>
+        </div>
+        <div class="node n-external">
+          <div class="node-icon">☁️</div>
+          <div class="node-body">
+            <div class="node-name">External Services</div>
+            <div class="node-detail">OpenAI API (Whisper, GPT-4.1-nano / GPT-4.1-mini / o4-mini, GPT-4o-mini-tts) · NCB CRM (all tables: leads, bookings, contacts, companies, partnerships, pipeline, tasks, roi_calculations, voice_sessions)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ REQUEST FLOWS ═══════════════════════ -->
+<div class="flow-section">
+  <h2>Request <span>Flows</span></h2>
+  <div class="flow-grid">
+
+    <div class="flow-card">
+      <div class="flow-title" style="color:#A78BFA;">Landing Page: Visitor asks "What's your pricing?"</div>
+      <div class="flow-steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">User presses mic → <strong>useVoiceRecording</strong> captures audio via MediaRecorder</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Audio blob → <code>POST /api/voice-agent/transcribe</code> → <strong>Whisper-1</strong> → "What's your pricing?"</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text"><strong>VoiceAgentFAB</strong> sends text → <code>POST /api/voice-agent/chat</code></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text"><strong>requestValidator</strong> sanitizes input, checks injection patterns</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text"><strong>questionClassifier</strong> → "simple" (150 tokens). <strong>extractLeadInfo</strong> scans for email/industry</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text"><strong>leadScorer</strong> evaluates profile → score/tier. Dynamic system prompt: if high → aggressive booking CTA</div></div>
+        <div class="step"><div class="step-num">7</div><div class="step-text">Assembles: language instruction + strategist prompt + <strong>knowledgeBase</strong> + conversation history + question</div></div>
+        <div class="step"><div class="step-num">8</div><div class="step-text"><strong>GPT-4.1-nano</strong> generates response with pricing details + <code>[ACTION:SCROLL_TO_PRICING]</code></div></div>
+        <div class="step"><div class="step-num">9</div><div class="step-text">Saves messages to <strong>KV session</strong>. If email found → <strong>syncLeadToCRM</strong> (fire-and-forget)</div></div>
+        <div class="step"><div class="step-num">10</div><div class="step-text">FAB receives response → <code>POST /api/voice-agent/speak</code> → <strong>GPT-4o-mini-tts</strong> → plays audio. Parses action tag → scrolls page to pricing section</div></div>
+      </div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-title" style="color:#4ADE80;">CRM: Operator says "How many leads do I have this week?"</div>
+      <div class="flow-steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">User presses mic → <strong>useVoiceRecording</strong> captures audio (with <code>credentials: include</code>)</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Audio → <code>POST /api/agent/transcribe</code> → <strong>getSessionUser</strong> validates auth → <strong>Whisper-1</strong> → "How many leads do I have this week?"</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text"><strong>VoiceOperator</strong> sends <code>{ question, sessionId, pagePath: '/dashboard' }</code> → <code>POST /api/agent/chat</code></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text"><strong>getSessionUser</strong> validates auth. <strong>modelRouter</strong> → "standard" (gpt-4.1-mini, multi-part question)</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Assembles: system prompt + page context + bilingual few-shots + conversation history + question</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text"><strong>GPT-4.1-mini</strong> decides to call tool: <code>count_leads({ date_range: "this_week" })</code></div></div>
+        <div class="step"><div class="step-num">7</div><div class="step-text"><strong>executeTool</strong> dispatches → <strong>leads.ts</strong> handler → <strong>ncbClient.ncbRead('leads', cookies, filters)</strong> → NCB API</div></div>
+        <div class="step"><div class="step-num">8</div><div class="step-text">Tool result fed back to GPT → generates natural response: "You have about twelve new leads this week, three more than last week."</div></div>
+        <div class="step"><div class="step-num">9</div><div class="step-text">Response + <code>clientActions: []</code> (no navigation needed) returned to frontend</div></div>
+        <div class="step"><div class="step-num">10</div><div class="step-text">VoiceOperator → <code>POST /api/agent/speak</code> → <strong>GPT-4o-mini-tts</strong> → plays audio response</div></div>
+      </div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-title" style="color:#60A5FA;">CRM: Operator says "Abrir leads" (Spanish navigation)</div>
+      <div class="flow-steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">Transcribed → "Abrir leads" → <code>POST /api/agent/chat</code></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text"><strong>modelRouter</strong> → "fast" (nano, short greeting-like command)</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text"><strong>GPT-4.1-nano</strong> matches few-shot pattern → calls tool: <code>navigate({ target: "leads" })</code></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text"><strong>navigation handler</strong> returns <code>{ ok: true, client_action: { type: "navigate", route: "/leads" } }</code></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">GPT generates: "Abriendo leads." + clientActions collected</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text">Frontend processes <code>clientActions</code> → <strong>router.push('/leads')</strong> → page navigates</div></div>
+      </div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-title" style="color:#FBBF24;">Landing Page: Management intent — "Daily summary"</div>
+      <div class="flow-steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">Transcribed → "How are we doing today?" → <code>POST /api/voice-agent/chat</code></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Keyword match: <code>"how are we doing today"</code> → <strong>management intent detected</strong></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Bypasses GPT entirely</strong> → calls <strong>getDailySummary()</strong> from analyticsAgent</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">analyticsAgent queries NCB: today's leads, bookings, ROI calculations → builds summary string</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Returns directly: "Today's Overview: You have 5 new leads (2 high-value), 3 new bookings, and 1 ROI calculation."</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ STATS ═══════════════════════ -->
+<div class="stats">
+  <div class="stat"><div class="stat-val">44</div><div class="stat-label">CRM Tool Definitions</div></div>
+  <div class="stat"><div class="stat-val">6</div><div class="stat-label">Domain Handler Files</div></div>
+  <div class="stat"><div class="stat-val">3</div><div class="stat-label">API Routes per Project</div></div>
+  <div class="stat"><div class="stat-val">5</div><div class="stat-label">OpenAI Models Used</div></div>
+  <div class="stat"><div class="stat-val">2</div><div class="stat-label">Languages (EN/ES)</div></div>
+  <div class="stat"><div class="stat-val">~45</div><div class="stat-label">Total Files</div></div>
+</div>
+
+<!-- ═══════════════════════ MODEL TABLE ═══════════════════════ -->
+<div class="model-section">
+  <h2>Model <span>Configuration</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Use</th>
+        <th>Project</th>
+        <th>When</th>
+        <th>Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="model-tag mt-nano">gpt-4.1-nano</span></td>
+        <td>Chat (fast tier)</td>
+        <td>Both</td>
+        <td>Greetings, simple questions, short commands, navigation</td>
+        <td>$0.10 / $0.40 per 1M tokens</td>
+      </tr>
+      <tr>
+        <td><span class="model-tag mt-mini">gpt-4.1-mini</span></td>
+        <td>Chat (standard tier)</td>
+        <td>CRM only</td>
+        <td>Multi-part queries, long transcripts (&gt;200 chars)</td>
+        <td>$0.40 / $1.60 per 1M tokens</td>
+      </tr>
+      <tr>
+        <td><span class="model-tag mt-reasoning">o4-mini</span></td>
+        <td>Chat (reasoning tier)</td>
+        <td>CRM only</td>
+        <td>"Analyze", "why", "compare", "strategy", "forecast"</td>
+        <td>$1.10 / $4.40 per 1M tokens</td>
+      </tr>
+      <tr>
+        <td><span class="model-tag mt-stt">whisper-1</span></td>
+        <td>Speech-to-text</td>
+        <td>Both</td>
+        <td>All audio transcription</td>
+        <td>$0.006 / minute</td>
+      </tr>
+      <tr>
+        <td><span class="model-tag mt-tts">gpt-4o-mini-tts</span></td>
+        <td>Text-to-speech</td>
+        <td>Both</td>
+        <td>All spoken responses (voice: echo)</td>
+        <td>$12 / 1M characters</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div style="margin-top:48px;padding-top:24px;border-top:1px solid #1a1a3e;text-align:center;font-size:11px;color:#4a4a6a;">
+  AI KRE8TION Partners — Voice Agent Architecture Map — Generated Feb 2026
+</div>
+
+</body>
+</html>

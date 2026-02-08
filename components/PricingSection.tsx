@@ -195,6 +195,12 @@ export default function PricingSection() {
           </div>
         </div>
 
+        {/* Disclaimer */}
+        <p className="text-xs text-white/40 text-center max-w-2xl mx-auto mt-8">
+          Services are consulting and capability transfer. Outcomes depend on implementation and use by the client.
+          AI systems require human oversight.
+        </p>
+
         {/* Booking Modal */}
         <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
       </div>
