@@ -86,7 +86,13 @@ async function createInNCB<T>(tableName: string, inputData: Partial<T>): Promise
     return null;
   }
 
-  const result: { data?: T } = await res.json();
+  const result: { status?: string; id?: number; data?: T } = await res.json();
+
+  // OpenAPI returns { status: "success", id: N } — merge id into input data
+  if (result.status === 'success' && result.id) {
+    return { ...inputData, id: result.id } as T;
+  }
+
   return result.data || null;
 }
 
