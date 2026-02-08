@@ -176,9 +176,6 @@ export interface Translations {
       paysForItself: string;
       continuesGenerating: string;
       automatedTasksLabel: string;
-      miniRoi: string;
-      miniSavings: string;
-      miniPayback: string;
       weeksShort: string;
       monthsShort: string;
       paybackLabel: string;
@@ -793,9 +790,6 @@ export const translations: Record<Language, Translations> = {
         paysForItself: 'Pays for itself in ~',
         continuesGenerating: 'weeks, then continues generating value',
         automatedTasksLabel: 'Tasks Automated (by savings)',
-        miniRoi: 'ROI',
-        miniSavings: 'Weekly',
-        miniPayback: 'Payback',
         weeksShort: 'wks',
         monthsShort: 'mo',
         paybackLabel: 'Payback Period',
@@ -1552,9 +1546,6 @@ export const translations: Record<Language, Translations> = {
         paysForItself: 'Se paga solo en ~',
         continuesGenerating: 'semanas, luego continua generando valor',
         automatedTasksLabel: 'Tareas Automatizadas (por ahorro)',
-        miniRoi: 'ROI',
-        miniSavings: 'Semanal',
-        miniPayback: 'Retorno',
         weeksShort: 'sem',
         monthsShort: 'mes',
         paybackLabel: 'Periodo de Retorno',

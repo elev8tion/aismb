@@ -16,7 +16,6 @@ import RevenueImpactStep from './RevenueImpactStep';
 import ResultsPanel from './ResultsPanel';
 import ComparisonCard from './ComparisonCard';
 import EmailCapture from './EmailCapture';
-import MiniResultsBar from './MiniResultsBar';
 import InputSummary from './InputSummary';
 
 const TOTAL_STEPS = 4;
@@ -94,7 +93,7 @@ export default function ROICalculator() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Left Column: Step Wizard */}
-          <div className={`glass p-4 md:p-6 lg:p-8 ${step < 4 ? 'pb-24 lg:pb-8' : ''}`}>
+          <div className="glass p-4 md:p-6 lg:p-8">
             <StepIndicator currentStep={step} totalSteps={TOTAL_STEPS} onStepClick={goToStep} />
 
             {step === 1 && (
@@ -190,9 +189,6 @@ export default function ROICalculator() {
             </a>
           </div>
         </div>
-
-        {/* Sticky Mini Results Bar for Mobile */}
-        <MiniResultsBar results={results} visible={step < 4} />
 
         {/* Disclaimer */}
         <div className="mt-10 text-center">
