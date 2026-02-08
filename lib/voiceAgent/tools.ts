@@ -223,6 +223,39 @@ export const VOICE_AGENT_TOOLS: OpenAI.ChatCompletionTool[] = [
   },
 ];
 
+// ─── respond_to_user tool (escape valve for booking agent) ──────────────────
+
+const RESPOND_TO_USER_TOOL: OpenAI.ChatCompletionTool = {
+  type: 'function',
+  function: {
+    name: 'respond_to_user',
+    description: 'Send a conversational message to the user. Use this when you need to ask the user a question or provide a message without calling an availability or booking tool.',
+    parameters: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', description: 'The message to send to the user' },
+      },
+      required: ['message'],
+    },
+  },
+};
+
+// ─── Agent-specific tool subsets ────────────────────────────────────────────
+
+/** Booking Agent tools: 4 booking tools + respond_to_user escape valve */
+export const BOOKING_TOOLS: OpenAI.ChatCompletionTool[] = [
+  VOICE_AGENT_TOOLS[0], // get_available_dates
+  VOICE_AGENT_TOOLS[1], // get_available_slots
+  VOICE_AGENT_TOOLS[2], // create_consultation_booking
+  VOICE_AGENT_TOOLS[3], // create_assessment_checkout
+  RESPOND_TO_USER_TOOL,
+];
+
+/** ROI Agent tools: just calculate_roi */
+export const ROI_TOOLS: OpenAI.ChatCompletionTool[] = [
+  VOICE_AGENT_TOOLS[4], // calculate_roi
+];
+
 // ─── Tool Execution ─────────────────────────────────────────────────────────
 
 export async function executeTool(
@@ -241,6 +274,8 @@ export async function executeTool(
       return handleCreateAssessmentCheckout(args, ctx);
     case 'calculate_roi':
       return handleCalculateROI(args);
+    case 'respond_to_user':
+      return (args.message as string) || '';
     default:
       return JSON.stringify({ error: `Unknown tool: ${name}` });
   }

@@ -23,6 +23,7 @@ export const MODELS = {
 export const TOKEN_LIMITS = {
   withTools: 400,
   maxToolRounds: 3,
+  roiAgent: 300,
 } as const;
 
 // Rate limiting configuration

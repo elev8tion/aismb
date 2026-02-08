@@ -596,6 +596,14 @@ When responding in Spanish, adapt your strategy to the following nuances:
 5. **Call to Action:** For Spanish leads, the "Comprehension Meeting" is called "Reunión de Diagnóstico y Comprensión".
 `;
 
+/**
+ * Knowledge base for Info Agent — same as KNOWLEDGE_BASE but without
+ * the "TOOL USE GUIDELINES" section (that section is only relevant
+ * to agents with tool access).
+ */
+export const INFO_KNOWLEDGE_BASE = KNOWLEDGE_BASE
+  .replace(/## TOOL USE GUIDELINES[\s\S]*?(?=## SPANISH MARKET STRATEGY)/, '');
+
 // Common cached question IDs (for future caching implementation)
 export const CACHED_QUESTIONS = {
   PRICING: 'pricing',
