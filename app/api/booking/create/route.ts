@@ -83,7 +83,7 @@ async function createInNCB<T>(tableName: string, inputData: Partial<T>): Promise
   if (!res.ok) {
     const error = await res.text();
     console.error(`NCB create error for ${tableName}:`, res.status, error);
-    return null;
+    throw new Error(`NCB ${res.status}: ${error}`);
   }
 
   const result: { status?: string; id?: number; data?: T } = await res.json();
