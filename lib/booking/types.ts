@@ -9,29 +9,29 @@ export const ASSESSMENT_FEE_CENTS = 25000; // $250.00
 export const ASSESSMENT_DURATION = 180; // minutes (3 hours)
 
 export interface Booking {
-  id: string;
+  id: string | number;
   guest_name: string;
   guest_email: string;
-  guest_phone?: string;
+  guest_phone: string | null;
   booking_date: string; // YYYY-MM-DD
   start_time: string; // HH:mm
   end_time: string; // HH:mm
   timezone: string;
-  notes?: string;
-  company_name?: string;
-  industry?: string;
-  employee_count?: string;
-  challenge?: string;
-  referral_source?: string;
-  website_url?: string;
+  notes: string | null;
+  company_name: string | null;
+  industry: string | null;
+  employee_count: string | null;
+  challenge: string | null;
+  referral_source: string | null;
+  website_url: string | null;
   status: BookingStatus;
-  booking_type?: BookingType;
-  stripe_session_id?: string;
-  payment_status?: string;
-  payment_amount_cents?: number;
-  calendar_provider?: CalendarProvider;
-  calendar_event_id?: string;
-  meeting_link?: string;
+  booking_type: BookingType;
+  stripe_session_id: string | null;
+  payment_status: string | null;
+  payment_amount_cents: number | null;
+  calendar_provider: CalendarProvider | null;
+  calendar_event_id: string | null;
+  meeting_link: string | null;
   created_at: string;
 }
 
