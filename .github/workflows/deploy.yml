@@ -37,6 +37,8 @@ jobs:
           echo "$NCB_AUTH_API_URL" | npx wrangler@3.80.0 pages secret put NCB_AUTH_API_URL --project-name=kre8tion-app
           echo "$EMAILIT_API_KEY" | npx wrangler@3.80.0 pages secret put EMAILIT_API_KEY --project-name=kre8tion-app
           echo "$ADMIN_EMAIL" | npx wrangler@3.80.0 pages secret put ADMIN_EMAIL --project-name=kre8tion-app
+          echo "$NCB_OPENAPI_URL" | npx wrangler@3.80.0 pages secret put NCB_OPENAPI_URL --project-name=kre8tion-app
+          echo "$NCB_SECRET_KEY" | npx wrangler@3.80.0 pages secret put NCB_SECRET_KEY --project-name=kre8tion-app
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -46,6 +48,8 @@ jobs:
           NCB_AUTH_API_URL: ${{ secrets.NCB_AUTH_API_URL }}
           EMAILIT_API_KEY: ${{ secrets.EMAILIT_API_KEY }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          NCB_OPENAPI_URL: ${{ secrets.NCB_OPENAPI_URL }}
+          NCB_SECRET_KEY: ${{ secrets.NCB_SECRET_KEY }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

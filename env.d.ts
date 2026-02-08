@@ -15,6 +15,8 @@ declare global {
     NCB_INSTANCE: string;
     NCB_DATA_API_URL: string;
     NCB_AUTH_API_URL: string;
+    NCB_OPENAPI_URL: string;
+    NCB_SECRET_KEY: string;
     ADMIN_EMAIL: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;

@@ -1,0 +1,129 @@
+{
+  "instance": "36905_ai_smb_crm",
+  "tables": {
+    "bookings": {
+      "primaryKey": "id",
+      "hasUserId": false,
+      "rlsPolicy": "public",
+      "columns": {
+        "id": { "type": "integer", "autoIncrement": true },
+        "guest_name": { "type": "string", "nullable": false },
+        "guest_email": { "type": "string", "nullable": false, "indexed": true },
+        "guest_phone": { "type": "string", "nullable": true },
+        "booking_date": { "type": "datetime", "nullable": false, "indexed": true },
+        "start_time": { "type": "string", "nullable": false },
+        "end_time": { "type": "string", "nullable": false },
+        "timezone": { "type": "string", "default": "America/Los_Angeles" },
+        "notes": { "type": "string", "nullable": true },
+        "status": { "type": "enum", "default": "confirmed", "values": ["confirmed", "cancelled"] },
+        "company_name": { "type": "string", "nullable": true },
+        "industry": { "type": "string", "nullable": true },
+        "employee_count": { "type": "string", "nullable": true },
+        "challenge": { "type": "text", "nullable": true },
+        "referral_source": { "type": "string", "nullable": true },
+        "website_url": { "type": "string", "nullable": true },
+        "booking_type": { "type": "enum", "default": "consultation", "values": ["consultation", "assessment"] },
+        "stripe_session_id": { "type": "string", "nullable": true },
+        "payment_status": { "type": "string", "nullable": true },
+        "payment_amount_cents": { "type": "integer", "nullable": true },
+        "calendar_provider": { "type": "enum", "nullable": true },
+        "calendar_event_id": { "type": "string", "nullable": true },
+        "meeting_link": { "type": "string", "nullable": true },
+        "created_at": { "type": "datetime", "default": "current_timestamp()" }
+      }
+    },
+    "availability_settings": {
+      "primaryKey": "id",
+      "hasUserId": false,
+      "columns": {
+        "id": { "type": "integer", "autoIncrement": true },
+        "weekday": { "type": "integer", "unique": true },
+        "start_minutes": { "type": "integer" },
+        "end_minutes": { "type": "integer" },
+        "is_available": { "type": "integer", "default": 1 }
+      }
+    },
+    "blocked_dates": {
+      "primaryKey": "id",
+      "hasUserId": false,
+      "columns": {
+        "id": { "type": "integer", "autoIncrement": true },
+        "date": { "type": "datetime", "unique": true },
+        "reason": { "type": "string", "nullable": true }
+      }
+    },
+    "calendar_integrations": {
+      "primaryKey": "id",
+      "hasUserId": false,
+      "columns": {
+        "id": { "type": "integer", "autoIncrement": true },
+        "provider": { "type": "enum", "unique": true },
+        "access_token": { "type": "string", "nullable": true },
+        "refresh_token": { "type": "string", "nullable": true },
+        "expires_at": { "type": "datetime", "nullable": true },
+        "calendar_id": { "type": "string", "nullable": true },
+        "caldav_url": { "type": "string", "nullable": true },
+        "caldav_username": { "type": "string", "nullable": true },
+        "caldav_password": { "type": "string", "nullable": true },
+        "is_active": { "type": "integer", "default": 1 },
+        "created_at": { "type": "datetime", "default": "current_timestamp()" },
+        "updated_at": { "type": "datetime", "default": "current_timestamp()" }
+      }
+    },
+    "leads": {
+      "primaryKey": "id",
+      "hasUserId": true,
+      "columns": {
+        "id": { "type": "integer", "autoIncrement": true },
+        "user_id": { "type": "string", "fk": "ncba_user.id" },
+        "email": { "type": "string" },
+        "first_name": { "type": "string", "nullable": true },
+        "last_name": { "type": "string", "nullable": true },
+        "phone": { "type": "string", "nullable": true },
+        "company_name": { "type": "string", "nullable": true },
+        "source": { "type": "enum" },
+        "source_detail": { "type": "string", "nullable": true },
+        "industry": { "type": "enum", "nullable": true },
+        "employee_count": { "type": "enum", "nullable": true },
+        "status": { "type": "enum", "default": "new" },
+        "lead_score": { "type": "integer", "default": 0 }
+      }
+    },
+    "roi_calculations": {
+      "primaryKey": "id",
+      "hasUserId": true,
+      "columns": {
+        "id": { "type": "integer", "autoIncrement": true },
+        "user_id": { "type": "string", "fk": "ncba_user.id" },
+        "industry": { "type": "enum" },
+        "employee_count": { "type": "enum" },
+        "hourly_rate": { "type": "number" },
+        "weekly_admin_hours": { "type": "number" },
+        "calculations": { "type": "string", "nullable": true },
+        "selected_tier": { "type": "enum", "nullable": true },
+        "email": { "type": "string", "nullable": true }
+      }
+    },
+    "voice_sessions": {
+      "primaryKey": "id",
+      "hasUserId": true
+    },
+    "companies": { "primaryKey": "id", "hasUserId": true },
+    "contacts": { "primaryKey": "id", "hasUserId": true },
+    "opportunities": { "primaryKey": "id", "hasUserId": true },
+    "partnerships": { "primaryKey": "id", "hasUserId": true },
+    "payments": { "primaryKey": "id", "hasUserId": true },
+    "subscriptions": { "primaryKey": "id", "hasUserId": false },
+    "activities": { "primaryKey": "id", "hasUserId": true },
+    "delivered_systems": { "primaryKey": "id", "hasUserId": true },
+    "proposed_systems": { "primaryKey": "id", "hasUserId": true },
+    "user_profiles": { "primaryKey": "id", "hasUserId": true },
+    "team_assignments": { "primaryKey": "id", "hasUserId": true },
+    "customer_access": { "primaryKey": "id", "hasUserId": true },
+    "drafts": { "primaryKey": "id", "hasUserId": true }
+  },
+  "rls_config": {
+    "bookings": "public"
+  },
+  "auth_tables": ["ncba_user", "ncba_session", "ncba_account", "ncba_verification", "ncba_config", "ncba_rls_config"]
+}

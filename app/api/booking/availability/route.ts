@@ -23,19 +23,20 @@ export const runtime = 'edge';
 function getConfig() {
   const { env } = getRequestContext();
   const instance = env.NCB_INSTANCE;
-  const dataApiUrl = env.NCB_DATA_API_URL;
+  const openApiUrl = env.NCB_OPENAPI_URL;
+  const secretKey = env.NCB_SECRET_KEY;
 
-  if (!instance || !dataApiUrl) {
+  if (!instance || !openApiUrl || !secretKey) {
     throw new Error('Missing NCB environment variables');
   }
 
-  return { instance, dataApiUrl };
+  return { instance, openApiUrl, secretKey };
 }
 
 async function fetchFromNCB<T>(tableName: string, filters?: Record<string, string>): Promise<T[]> {
   const config = getConfig();
   const params = new URLSearchParams();
-  params.set('instance', config.instance);
+  params.set('Instance', config.instance);
 
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
@@ -43,13 +44,13 @@ async function fetchFromNCB<T>(tableName: string, filters?: Record<string, strin
     });
   }
 
-  const url = `${config.dataApiUrl}/read/${tableName}?${params.toString()}`;
+  const url = `${config.openApiUrl}/read/${tableName}?${params.toString()}`;
 
   const res = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'X-Database-Instance': config.instance,
+      'Authorization': `Bearer ${config.secretKey}`,
     },
   });
 
