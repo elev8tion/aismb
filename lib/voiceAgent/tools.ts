@@ -266,7 +266,9 @@ async function handleGetAvailableSlots(
   }
 
   const { settings, blockedDates } = await loadSettings(ctx.env);
-  const bookings = await fetchFromNCB<Booking>(ctx.env, 'bookings', { booking_date: date });
+  // Filter client-side — NCB datetime filter doesn't match date strings
+  const allBookings = await fetchFromNCB<Booking>(ctx.env, 'bookings');
+  const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
   const slots = getAvailableSlots(date, settings, blockedDates, bookings, timezone);
   const available = slots.filter((s) => s.available);
 
@@ -296,8 +298,9 @@ async function handleCreateConsultation(
     return JSON.stringify({ error: 'Missing required fields: date, time, name, email' });
   }
 
-  // Check slot availability
-  const bookings = await fetchFromNCB<Booking>(ctx.env, 'bookings', { booking_date: date });
+  // Check slot availability — filter client-side (NCB datetime filter issue)
+  const allBookings = await fetchFromNCB<Booking>(ctx.env, 'bookings');
+  const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
   const slotStart = timeToMinutes(time);
   const slotEnd = slotStart + MEETING_DURATION;
   const isBooked = bookings.some((b) => {

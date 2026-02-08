@@ -126,7 +126,9 @@ function validateBookingRequest(data: unknown): CreateBookingRequest | null {
 }
 
 async function isSlotAvailable(date: string, time: string, duration: number = MEETING_DURATION): Promise<boolean> {
-  const bookings = await fetchFromNCB<Booking>('bookings', { booking_date: date });
+  // Filter client-side — NCB datetime filter doesn't match date strings
+  const allBookings = await fetchFromNCB<Booking>('bookings');
+  const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
 
   const slotStart = timeToMinutes(time);
   const slotEnd = slotStart + duration;

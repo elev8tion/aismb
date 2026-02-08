@@ -119,12 +119,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch existing bookings for this date
+    // Fetch existing bookings and filter by date client-side
+    // (NCB datetime filter doesn't match date strings)
     let bookings: Booking[];
     try {
-      bookings = await fetchFromNCB<Booking>('bookings', {
-        booking_date: date,
-      });
+      const allBookings = await fetchFromNCB<Booking>('bookings');
+      bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
     } catch {
       bookings = [];
     }
