@@ -115,23 +115,27 @@ export async function POST(request: NextRequest) {
       taskBreakdown.slice(0, selectedTier.tasksAutomated).forEach((t) => automatedIds.add(t.id));
     }
 
-    // Sync to CRM (awaited — edge runtime kills unawaited promises)
-    await syncROICalcToCRM({
-      email,
-      industry,
-      employeeCount: employees,
-      hourlyRate: hourlyValue,
-      selectedTier: tier,
-      calculations: metrics,
-    }).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
-
-    // Get EmailIt API key from Cloudflare env
+    // Get env from Cloudflare context
+    let cfEnv: Record<string, string> | undefined;
     let emailitApiKey: string | undefined;
     try {
       const { env } = getRequestContext();
+      cfEnv = env as unknown as Record<string, string>;
       emailitApiKey = env.EMAILIT_API_KEY;
     } catch {
       console.warn('[Email] Cloudflare context unavailable (local dev), skipping emails');
+    }
+
+    // Sync to CRM (awaited — edge runtime kills unawaited promises)
+    if (cfEnv) {
+      await syncROICalcToCRM({
+        email,
+        industry,
+        employeeCount: employees,
+        hourlyRate: hourlyValue,
+        selectedTier: tier,
+        calculations: metrics,
+      }, cfEnv).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
     }
 
     console.log('[ROI] Email API key available:', !!emailitApiKey);

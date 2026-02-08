@@ -24,9 +24,9 @@ interface NCBRoiCalc {
   created_at?: string;
 }
 
-async function fetchFromNCB<T>(tableName: string, filters?: Record<string, string>): Promise<T[]> {
-  const instance = process.env.NCB_INSTANCE;
-  const dataApiUrl = process.env.NCB_DATA_API_URL;
+async function fetchFromNCB<T>(env: Record<string, string>, tableName: string, filters?: Record<string, string>): Promise<T[]> {
+  const instance = env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL;
 
   if (!instance || !dataApiUrl) return [];
 
@@ -47,12 +47,12 @@ async function fetchFromNCB<T>(tableName: string, filters?: Record<string, strin
   }
 }
 
-export async function getDailySummary(): Promise<string> {
+export async function getDailySummary(env: Record<string, string>): Promise<string> {
   const today = new Date().toISOString().split('T')[0];
 
-  const leads = await fetchFromNCB<NCBLead>('leads', { created_at: today });
-  const bookings = await fetchFromNCB<NCBBooking>('bookings', { booking_date: today });
-  const roiCalcs = await fetchFromNCB<NCBRoiCalc>('roi_calculations', { created_at: today });
+  const leads = await fetchFromNCB<NCBLead>(env, 'leads', { created_at: today });
+  const bookings = await fetchFromNCB<NCBBooking>(env, 'bookings', { booking_date: today });
+  const roiCalcs = await fetchFromNCB<NCBRoiCalc>(env, 'roi_calculations', { created_at: today });
 
   const highValueLeads = leads.filter(l => l.notes?.includes('high priority')).length;
 
@@ -63,8 +63,8 @@ export async function getDailySummary(): Promise<string> {
   return summary;
 }
 
-export async function getHighPriorityLeadsReport(): Promise<string> {
-  const leads = await fetchFromNCB<NCBLead>('leads');
+export async function getHighPriorityLeadsReport(env: Record<string, string>): Promise<string> {
+  const leads = await fetchFromNCB<NCBLead>(env, 'leads');
 
   const highPriority = leads.filter(l =>
     l.notes?.includes('high priority') ||
@@ -91,13 +91,13 @@ export async function getHighPriorityLeadsReport(): Promise<string> {
   return report;
 }
 
-export async function getLeadStats(): Promise<{
+export async function getLeadStats(env: Record<string, string>): Promise<{
   total: number;
   byIndustry: Record<string, number>;
   byStatus: Record<string, number>;
   highValue: number;
 }> {
-  const leads = await fetchFromNCB<NCBLead>('leads');
+  const leads = await fetchFromNCB<NCBLead>(env, 'leads');
 
   const stats = {
     total: leads.length,

@@ -44,13 +44,13 @@ export async function POST(request: NextRequest) {
     // 🛠️ MANAGEMENT INTENT DETECTION (For Solo Operator)
     if (q.includes('status of my leads') || q.includes('high priority leads') || q.includes('leads report')) {
       console.log('📈 Management Intent detected: High Priority Report');
-      const report = await getHighPriorityLeadsReport();
+      const report = await getHighPriorityLeadsReport(env as unknown as Record<string, string>);
       return NextResponse.json({ response: report, success: true, duration: Date.now() - startTime });
     }
 
     if (q.includes('daily summary') || q.includes('how are we doing today')) {
       console.log('📈 Management Intent detected: Daily Summary');
-      const summary = await getDailySummary();
+      const summary = await getDailySummary(env as unknown as Record<string, string>);
       return NextResponse.json({ response: summary, success: true, duration: Date.now() - startTime });
     }
 
@@ -157,7 +157,7 @@ the ROI is typically 300%+. [ACTION:SCROLL_TO_BOOKING]
         source: 'Voice Agent',
         sourceDetail: `${language === 'es' ? 'Spanish' : 'English'} (${leadScore.tier} priority)`,
         notes: `AI Scored as ${leadScore.tier} (${leadScore.score}/100). Factors: ${leadScore.factors.join(', ')}`
-      }).catch(err => console.error('Failed to sync lead:', err));
+      }, env as unknown as Record<string, string>).catch(err => console.error('Failed to sync lead:', err));
     }
 
     const duration = Date.now() - startTime;

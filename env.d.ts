@@ -14,6 +14,12 @@ declare global {
     STRIPE_ASSESSMENT_PRICE_ID: string;
     NCB_INSTANCE: string;
     NCB_DATA_API_URL: string;
+    NCB_AUTH_API_URL: string;
+    ADMIN_EMAIL: string;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+    GOOGLE_REDIRECT_URI: string;
+    SITE_URL: string;
   }
 }
 

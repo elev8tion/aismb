@@ -6,15 +6,17 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
 function getConfig() {
-  const instance = process.env.NCB_INSTANCE;
-  const dataApiUrl = process.env.NCB_DATA_API_URL;
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const { env } = getRequestContext();
+  const instance = env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL;
+  const clientId = env.GOOGLE_CLIENT_ID;
+  const clientSecret = env.GOOGLE_CLIENT_SECRET;
+  const redirectUri = env.GOOGLE_REDIRECT_URI;
 
   if (!instance || !dataApiUrl) {
     throw new Error('Missing NCB environment variables');

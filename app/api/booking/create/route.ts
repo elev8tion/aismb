@@ -23,8 +23,9 @@ import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
 export const runtime = 'edge';
 
 function getConfig() {
-  const instance = process.env.NCB_INSTANCE;
-  const dataApiUrl = process.env.NCB_DATA_API_URL;
+  const { env } = getRequestContext();
+  const instance = env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL;
 
   if (!instance || !dataApiUrl) {
     throw new Error('Missing NCB environment variables');
@@ -205,6 +206,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 🔄 SYNC TO CRM: Link booking to lead
+    const { env } = getRequestContext();
     console.log(`🎯 Syncing Booking to CRM Lead: ${booking.guest_email}`);
     syncBookingToCRM({
       email: booking.guest_email,
@@ -217,17 +219,16 @@ export async function POST(req: NextRequest) {
       industry: validatedData.industry,
       employeeCount: validatedData.employeeCount,
       challenge: validatedData.challenge,
-    }).catch(err => console.error('Failed to sync booking to CRM:', err));
+    }, env as unknown as Record<string, string>).catch(err => console.error('Failed to sync booking to CRM:', err));
 
     // 📬 ADMIN DOSSIER: Send briefing to you
     (async () => {
       try {
-        const { env } = getRequestContext();
-        const lead = await getLeadByEmail(booking.guest_email);
+        const lead = await getLeadByEmail(booking.guest_email, env as unknown as Record<string, string>);
         const leadScore = calculateLeadScore(lead || { email: booking.guest_email });
         
         await sendLeadDossierToAdmin({
-          adminEmail: process.env.ADMIN_EMAIL || 'connect@elev8tion.one',
+          adminEmail: env.ADMIN_EMAIL || 'connect@elev8tion.one',
           lead: {
             guestName: booking.guest_name,
             guestEmail: booking.guest_email,
@@ -264,7 +265,6 @@ export async function POST(req: NextRequest) {
     );
 
     // Send confirmation email via EmailIt (non-blocking)
-    const { env } = getRequestContext();
     if (isAssessment) {
       sendAssessmentConfirmation({
         to: booking.guest_email,

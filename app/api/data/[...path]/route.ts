@@ -17,13 +17,15 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
 function getConfig() {
-  const instance = process.env.NCB_INSTANCE;
-  const dataApiUrl = process.env.NCB_DATA_API_URL;
-  const authApiUrl = process.env.NCB_AUTH_API_URL;
+  const { env } = getRequestContext();
+  const instance = env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL;
+  const authApiUrl = env.NCB_AUTH_API_URL;
 
   if (!instance || !dataApiUrl || !authApiUrl) {
     throw new Error(`Missing environment variables: NCB_INSTANCE=${instance ? 'set' : 'MISSING'}, NCB_DATA_API_URL=${dataApiUrl ? 'set' : 'MISSING'}, NCB_AUTH_API_URL=${authApiUrl ? 'set' : 'MISSING'}`);

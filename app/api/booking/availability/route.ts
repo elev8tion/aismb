@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 import {
   getAvailableSlots,
   getAvailableDates,
@@ -20,8 +21,9 @@ import {
 export const runtime = 'edge';
 
 function getConfig() {
-  const instance = process.env.NCB_INSTANCE;
-  const dataApiUrl = process.env.NCB_DATA_API_URL;
+  const { env } = getRequestContext();
+  const instance = env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL;
 
   if (!instance || !dataApiUrl) {
     throw new Error('Missing NCB environment variables');

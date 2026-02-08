@@ -33,10 +33,11 @@ interface NCBRecord {
 async function ncbRequest<T>(
   method: 'GET' | 'POST' | 'PUT',
   path: string,
+  env: Record<string, string>,
   body?: Record<string, unknown>
 ): Promise<T | null> {
-  const instance = process.env.NCB_INSTANCE;
-  const dataApiUrl = process.env.NCB_DATA_API_URL;
+  const instance = env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL;
 
   if (!instance || !dataApiUrl) {
     console.error('Missing NCB environment variables');
@@ -72,11 +73,11 @@ async function ncbRequest<T>(
 /**
  * Create or update a lead in the CRM
  */
-export async function syncLeadToCRM(leadData: LeadData): Promise<NCBRecord | null> {
+export async function syncLeadToCRM(leadData: LeadData, env: Record<string, string>): Promise<NCBRecord | null> {
   if (!leadData.email) return null;
 
   // 1. Check if lead exists
-  const existingLeads = await ncbRequest<NCBRecord[]>('GET', `read/leads`, {
+  const existingLeads = await ncbRequest<NCBRecord[]>('GET', `read/leads`, env, {
     email: leadData.email
   });
 
@@ -84,14 +85,14 @@ export async function syncLeadToCRM(leadData: LeadData): Promise<NCBRecord | nul
     // 2. Update existing lead
     const leadId = existingLeads[0].id;
     console.log(`Updating existing lead ${leadId} (${leadData.email})`);
-    return await ncbRequest<NCBRecord>('PUT', `update/leads/${leadId}`, {
+    return await ncbRequest<NCBRecord>('PUT', `update/leads/${leadId}`, env, {
       ...leadData,
       updated_at: new Date().toISOString()
     });
   } else {
     // 3. Create new lead
     console.log(`Creating new lead for ${leadData.email}`);
-    return await ncbRequest<NCBRecord>('POST', 'create/leads', {
+    return await ncbRequest<NCBRecord>('POST', 'create/leads', env, {
       ...leadData,
       status: 'new',
       created_at: new Date().toISOString()
@@ -102,8 +103,8 @@ export async function syncLeadToCRM(leadData: LeadData): Promise<NCBRecord | nul
 /**
  * Retrieve lead data by email
  */
-export async function getLeadByEmail(email: string): Promise<NCBRecord | null> {
-  const leads = await ncbRequest<NCBRecord[]>('GET', `read/leads`, {
+export async function getLeadByEmail(email: string, env: Record<string, string>): Promise<NCBRecord | null> {
+  const leads = await ncbRequest<NCBRecord[]>('GET', `read/leads`, env, {
     email: email.toLowerCase()
   });
   return (leads && leads.length > 0) ? leads[0] : null;
@@ -119,17 +120,17 @@ export async function syncROICalcToCRM(data: {
   hourlyRate: number;
   selectedTier: string;
   calculations: Record<string, unknown>;
-}): Promise<NCBRecord | null> {
+}, env: Record<string, string>): Promise<NCBRecord | null> {
   // First, ensure the lead exists or update it
   await syncLeadToCRM({
     email: data.email,
     industry: data.industry,
     employeeCount: data.employeeCount,
     source: 'ROI Calculator'
-  });
+  }, env);
 
   // Then save the ROI calculation linked to the lead if possible
-  return await ncbRequest<NCBRecord>('POST', 'create/roi_calculations', {
+  return await ncbRequest<NCBRecord>('POST', 'create/roi_calculations', env, {
     email: data.email,
     industry: data.industry,
     employee_count: data.employeeCount,
@@ -154,7 +155,7 @@ export async function syncBookingToCRM(data: {
   industry?: string;
   employeeCount?: string;
   challenge?: string;
-}): Promise<boolean> {
+}, env: Record<string, string>): Promise<boolean> {
   await syncLeadToCRM({
     email: data.email,
     firstName: data.name.split(' ')[0],
@@ -165,7 +166,7 @@ export async function syncBookingToCRM(data: {
     employeeCount: data.employeeCount,
     notes: `Booked strategy call for ${data.date} at ${data.time}. Challenge: ${data.challenge || 'None'}`,
     source: 'Calendar Booking'
-  });
+  }, env);
 
   return true;
 }

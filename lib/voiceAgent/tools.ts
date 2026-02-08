@@ -373,12 +373,12 @@ async function handleCreateConsultation(
     companyName,
     industry,
     employeeCount,
-  }).catch((err) => console.error('Voice booking CRM sync failed:', err));
+  }, ctx.env).catch((err) => console.error('Voice booking CRM sync failed:', err));
 
   // Admin dossier
   (async () => {
     try {
-      const lead = await getLeadByEmail(email);
+      const lead = await getLeadByEmail(email, ctx.env);
       const leadScore = calculateLeadScore(lead || { email });
       await sendLeadDossierToAdmin({
         adminEmail: ctx.env.ADMIN_EMAIL || 'connect@elev8tion.one',
