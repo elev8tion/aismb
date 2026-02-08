@@ -182,17 +182,17 @@ export async function POST(req: NextRequest) {
     const bookingData: Partial<Booking> = {
       guest_name: validatedData.name,
       guest_email: validatedData.email,
-      guest_phone: validatedData.phone || '',
+      guest_phone: validatedData.phone || null,
       booking_date: validatedData.date,
       start_time: validatedData.time,
       end_time: endTime,
       timezone: validatedData.timezone,
-      company_name: validatedData.companyName || '',
-      industry: validatedData.industry || '',
-      employee_count: validatedData.employeeCount || '',
-      challenge: validatedData.challenge || '',
-      referral_source: validatedData.referralSource || '',
-      website_url: validatedData.websiteUrl || '',
+      company_name: validatedData.companyName || null,
+      industry: validatedData.industry || null,
+      employee_count: validatedData.employeeCount || null,
+      challenge: validatedData.challenge || null,
+      referral_source: validatedData.referralSource || null,
+      website_url: validatedData.websiteUrl || null,
       status: 'confirmed',
       booking_type: validatedData.bookingType || 'consultation',
       ...(validatedData.stripe_session_id && {
@@ -200,7 +200,6 @@ export async function POST(req: NextRequest) {
         payment_status: 'paid',
         payment_amount_cents: validatedData.payment_amount_cents,
       }),
-      created_at: new Date().toISOString(),
     };
 
     const booking = await createInNCB<Booking>('bookings', bookingData);
