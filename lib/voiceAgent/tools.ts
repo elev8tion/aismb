@@ -289,7 +289,7 @@ async function handleGetAvailableDates(ctx: ToolContext): Promise<string> {
   return JSON.stringify({
     available_dates: dates,
     count: dates.length,
-    note: 'Dates in YYYY-MM-DD format. Offer 3-4 upcoming options.',
+    IMPORTANT: 'This is the COMPLETE list of bookable dates. Any date NOT in this list is BLOCKED or FULLY BOOKED. Only offer dates from this list.',
   });
 }
 
@@ -310,12 +310,16 @@ async function handleGetAvailableSlots(
   const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
   const slots = getAvailableSlots(date, settings, blockedDates, bookings, timezone);
   const available = slots.filter((s) => s.available);
+  const booked = slots.filter((s) => !s.available);
 
   return JSON.stringify({
     date,
     timezone,
     available_slots: available.map((s) => ({ time: s.time, label: s.label })),
-    count: available.length,
+    available_count: available.length,
+    booked_slots: booked.map((s) => ({ time: s.time, label: s.label })),
+    booked_count: booked.length,
+    IMPORTANT: 'You ARE seeing real-time booking data. "available_slots" are OPEN and can be offered. "booked_slots" are TAKEN and must NOT be offered. If the user requested a time that appears in booked_slots, tell them it is already booked and suggest times from available_slots instead.',
   });
 }
 
