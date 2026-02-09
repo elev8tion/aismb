@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       }, cfEnv).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
     }
 
-    console.log('[ROI] Email API key available:', !!emailitApiKey);
+    console.log('[ROI] Email API key available:', !!emailitApiKey, 'len:', emailitApiKey?.length, 'prefix:', emailitApiKey?.slice(0, 4));
 
     if (!emailitApiKey) {
       console.error('[ROI] EMAILIT_API_KEY missing — cannot send emails');
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
     const stack = error instanceof Error ? error.stack : undefined;
     console.error('Lead capture error:', msg, stack);
     return NextResponse.json(
-      { error: 'Failed to process lead', detail: msg },
+      { error: 'Failed to process lead', detail: msg, keyLen: emailitApiKey?.length, keyPrefix: emailitApiKey?.slice(0, 4) },
       { status: 500 }
     );
   }
