@@ -214,9 +214,11 @@ export async function POST(request: NextRequest) {
       message: 'Report sent successfully',
     });
   } catch (error) {
-    console.error('Lead capture error:', error);
+    const msg = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    console.error('Lead capture error:', msg, stack);
     return NextResponse.json(
-      { error: 'Failed to process lead' },
+      { error: 'Failed to process lead', detail: msg },
       { status: 500 }
     );
   }
