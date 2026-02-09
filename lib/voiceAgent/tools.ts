@@ -424,11 +424,12 @@ async function handleCreateConsultation(
     }, ctx.env)
   );
 
-  // Admin dossier
+  // Admin dossier (1s delay to avoid EmailIt 2 req/s rate limit)
   sideEffects.push(
     (async () => {
       const lead = await getLeadByEmail(email, ctx.env);
       const leadScore = calculateLeadScore(lead || { email });
+      await new Promise((r) => setTimeout(r, 1000));
       await sendLeadDossierToAdmin({
         adminEmail: ctx.env.ADMIN_EMAIL || 'connect@elev8tion.one',
         lead: {

@@ -285,11 +285,12 @@ export async function POST(req: NextRequest) {
       }, env as unknown as Record<string, string>)
     );
 
-    // 📬 ADMIN DOSSIER: Send briefing
+    // 📬 ADMIN DOSSIER: Send briefing (1s delay to avoid EmailIt 2 req/s rate limit)
     sideEffects.push(
       (async () => {
         const lead = await getLeadByEmail(booking.guest_email, env as unknown as Record<string, string>);
         const leadScore = calculateLeadScore(lead || { email: booking.guest_email });
+        await new Promise((r) => setTimeout(r, 1000));
 
         await sendLeadDossierToAdmin({
           adminEmail: env.ADMIN_EMAIL || 'connect@elev8tion.one',
