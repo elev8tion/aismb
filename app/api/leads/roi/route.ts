@@ -61,6 +61,7 @@ interface ROILeadBody {
 }
 
 export async function POST(request: NextRequest) {
+  let emailitApiKey: string | undefined;
   try {
     const body = await request.json() as ROILeadBody;
     const { email, industry, employees, hourlyValue, tier, locale, metrics } = body;
@@ -117,7 +118,6 @@ export async function POST(request: NextRequest) {
 
     // Get env from Cloudflare context
     let cfEnv: Record<string, string> | undefined;
-    let emailitApiKey: string | undefined;
     try {
       const { env } = getRequestContext();
       cfEnv = env as unknown as Record<string, string>;
