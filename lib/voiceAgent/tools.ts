@@ -379,7 +379,8 @@ async function handleCreateConsultation(
     return JSON.stringify({ error: 'Failed to create booking. Please try again.' });
   }
 
-  // Fire-and-forget side effects
+  // Await ALL side-effects — Cloudflare edge runtime kills the execution context
+  // after the response is sent, so fire-and-forget promises never complete.
   const calendarLinks = generateAllCalendarLinks(
     String(booking.id),
     booking.guest_name,
@@ -392,34 +393,40 @@ async function handleCreateConsultation(
     'consultation',
   );
 
+  const sideEffects: Promise<unknown>[] = [];
+
   // Confirmation email
-  sendBookingConfirmation({
-    to: email,
-    guestName: name,
-    date,
-    startTime: time,
-    endTime,
-    timezone,
-    calendarLinks: { google: calendarLinks.google, outlook: calendarLinks.outlook },
-    emailitApiKey: ctx.env.EMAILIT_API_KEY,
-  }).catch((err) => console.error('Voice booking email failed:', err));
+  sideEffects.push(
+    sendBookingConfirmation({
+      to: email,
+      guestName: name,
+      date,
+      startTime: time,
+      endTime,
+      timezone,
+      calendarLinks: { google: calendarLinks.google, outlook: calendarLinks.outlook },
+      emailitApiKey: ctx.env.EMAILIT_API_KEY,
+    })
+  );
 
   // CRM sync
-  syncBookingToCRM({
-    email,
-    name,
-    phone,
-    date,
-    time,
-    timezone,
-    companyName,
-    industry,
-    employeeCount,
-  }, ctx.env).catch((err) => console.error('Voice booking CRM sync failed:', err));
+  sideEffects.push(
+    syncBookingToCRM({
+      email,
+      name,
+      phone,
+      date,
+      time,
+      timezone,
+      companyName,
+      industry,
+      employeeCount,
+    }, ctx.env)
+  );
 
   // Admin dossier
-  (async () => {
-    try {
+  sideEffects.push(
+    (async () => {
       const lead = await getLeadByEmail(email, ctx.env);
       const leadScore = calculateLeadScore(lead || { email });
       await sendLeadDossierToAdmin({
@@ -441,10 +448,16 @@ async function handleCreateConsultation(
         },
         emailitApiKey: ctx.env.EMAILIT_API_KEY,
       });
-    } catch (err) {
-      console.error('Voice booking dossier failed:', err);
+    })()
+  );
+
+  const results = await Promise.allSettled(sideEffects);
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      const labels = ['confirmation email', 'CRM sync', 'admin dossier'];
+      console.error(`[Voice Booking] ${labels[i] || `side-effect #${i}`} failed:`, r.reason);
     }
-  })();
+  });
 
   return JSON.stringify({
     success: true,
@@ -515,9 +528,9 @@ async function handleCreateAssessmentCheckout(
     return JSON.stringify({ error: 'Failed to create payment session.' });
   }
 
-  // Email the checkout link to the user
+  // Email the checkout link — must await on edge runtime
   if (ctx.env.EMAILIT_API_KEY) {
-    sendViaEmailIt({
+    await sendViaEmailIt({
       apiKey: ctx.env.EMAILIT_API_KEY,
       to: email,
       subject: 'Complete Your Onsite AI Assessment Booking — $250',

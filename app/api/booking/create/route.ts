@@ -211,28 +211,86 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 🔄 SYNC TO CRM: Link booking to lead
+    // Get env from Cloudflare context
     const { env } = getRequestContext();
-    console.log(`🎯 Syncing Booking to CRM Lead: ${booking.guest_email}`);
-    syncBookingToCRM({
-      email: booking.guest_email,
-      name: booking.guest_name,
-      phone: booking.guest_phone ?? undefined,
-      date: booking.booking_date,
-      time: booking.start_time,
-      timezone: booking.timezone,
-      companyName: validatedData.companyName,
-      industry: validatedData.industry,
-      employeeCount: validatedData.employeeCount,
-      challenge: validatedData.challenge,
-    }, env as unknown as Record<string, string>).catch(err => console.error('Failed to sync booking to CRM:', err));
 
-    // 📬 ADMIN DOSSIER: Send briefing to you
-    (async () => {
-      try {
+    // Generate calendar links for easy addition to any calendar
+    const calendarLinks = generateAllCalendarLinks(
+      String(booking.id),
+      booking.guest_name,
+      booking.guest_email,
+      booking.booking_date,
+      booking.start_time,
+      booking.end_time,
+      booking.timezone,
+      validatedData.challenge,
+      isAssessment ? 'assessment' : 'consultation'
+    );
+
+    // Await ALL side-effects before returning — Cloudflare edge runtime kills the
+    // execution context after the response is sent, so fire-and-forget promises
+    // never complete. Use Promise.allSettled so one failure doesn't block others.
+    const sideEffects: Promise<unknown>[] = [];
+
+    // 📧 CONFIRMATION EMAIL: Must complete before response
+    if (isAssessment) {
+      sideEffects.push(
+        sendAssessmentConfirmation({
+          to: booking.guest_email,
+          guestName: booking.guest_name,
+          date: booking.booking_date,
+          startTime: booking.start_time,
+          endTime: booking.end_time,
+          timezone: booking.timezone,
+          paymentAmountCents: validatedData.payment_amount_cents || 25000,
+          calendarLinks: {
+            google: calendarLinks.google,
+            outlook: calendarLinks.outlook,
+          },
+          emailitApiKey: env.EMAILIT_API_KEY,
+        })
+      );
+    } else {
+      sideEffects.push(
+        sendBookingConfirmation({
+          to: booking.guest_email,
+          guestName: booking.guest_name,
+          date: booking.booking_date,
+          startTime: booking.start_time,
+          endTime: booking.end_time,
+          timezone: booking.timezone,
+          calendarLinks: {
+            google: calendarLinks.google,
+            outlook: calendarLinks.outlook,
+          },
+          emailitApiKey: env.EMAILIT_API_KEY,
+        })
+      );
+    }
+
+    // 🔄 SYNC TO CRM: Link booking to lead
+    console.log(`[Booking] Syncing to CRM: ${booking.guest_email}`);
+    sideEffects.push(
+      syncBookingToCRM({
+        email: booking.guest_email,
+        name: booking.guest_name,
+        phone: booking.guest_phone ?? undefined,
+        date: booking.booking_date,
+        time: booking.start_time,
+        timezone: booking.timezone,
+        companyName: validatedData.companyName,
+        industry: validatedData.industry,
+        employeeCount: validatedData.employeeCount,
+        challenge: validatedData.challenge,
+      }, env as unknown as Record<string, string>)
+    );
+
+    // 📬 ADMIN DOSSIER: Send briefing
+    sideEffects.push(
+      (async () => {
         const lead = await getLeadByEmail(booking.guest_email, env as unknown as Record<string, string>);
         const leadScore = calculateLeadScore(lead || { email: booking.guest_email });
-        
+
         await sendLeadDossierToAdmin({
           adminEmail: env.ADMIN_EMAIL || 'connect@elev8tion.one',
           lead: {
@@ -252,55 +310,16 @@ export async function POST(req: NextRequest) {
           },
           emailitApiKey: env.EMAILIT_API_KEY,
         });
-      } catch (err) {
-        console.error('Failed to send admin dossier:', err);
-      }
-    })();
-
-    // Generate calendar links for easy addition to any calendar
-    const calendarLinks = generateAllCalendarLinks(
-      String(booking.id),
-      booking.guest_name,
-      booking.guest_email,
-      booking.booking_date,
-      booking.start_time,
-      booking.end_time,
-      booking.timezone,
-      validatedData.challenge,
-      isAssessment ? 'assessment' : 'consultation'
+      })()
     );
 
-    // Send confirmation email via EmailIt (non-blocking)
-    if (isAssessment) {
-      sendAssessmentConfirmation({
-        to: booking.guest_email,
-        guestName: booking.guest_name,
-        date: booking.booking_date,
-        startTime: booking.start_time,
-        endTime: booking.end_time,
-        timezone: booking.timezone,
-        paymentAmountCents: validatedData.payment_amount_cents || 25000,
-        calendarLinks: {
-          google: calendarLinks.google,
-          outlook: calendarLinks.outlook,
-        },
-        emailitApiKey: env.EMAILIT_API_KEY,
-      }).catch(err => console.error('Assessment email send failed:', err));
-    } else {
-      sendBookingConfirmation({
-        to: booking.guest_email,
-        guestName: booking.guest_name,
-        date: booking.booking_date,
-        startTime: booking.start_time,
-        endTime: booking.end_time,
-        timezone: booking.timezone,
-        calendarLinks: {
-          google: calendarLinks.google,
-          outlook: calendarLinks.outlook,
-        },
-        emailitApiKey: env.EMAILIT_API_KEY,
-      }).catch(err => console.error('Email send failed:', err));
-    }
+    const results = await Promise.allSettled(sideEffects);
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        const labels = ['confirmation email', 'CRM sync', 'admin dossier'];
+        console.error(`[Booking] ${labels[i] || `side-effect #${i}`} failed:`, r.reason);
+      }
+    });
 
     return NextResponse.json({
       success: true,

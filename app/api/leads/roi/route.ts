@@ -182,8 +182,8 @@ export async function POST(request: NextRequest) {
       emailitApiKey,
     });
 
-    // Admin dossier is secondary — don't block response if it fails
-    sendROILeadDossierToAdmin({
+    // Admin dossier — must await on edge runtime (context killed after response)
+    await sendROILeadDossierToAdmin({
       adminEmail: 'connect@elev8tion.one',
       lead: {
         email,

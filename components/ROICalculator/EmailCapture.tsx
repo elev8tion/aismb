@@ -19,11 +19,13 @@ export default function EmailCapture({ basics, taskHours, revenue, tier, results
   const [email, setEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sentSuccess, setSentSuccess] = useState(false);
+  const [sendError, setSendError] = useState(false);
 
   const handleSend = async () => {
     if (!email || !email.includes('@')) return;
 
     setIsSending(true);
+    setSendError(false);
     try {
       const selectedIndustry = rc.industries.find((i) => i.id === basics.industry);
       const selectedSize = rc.employeeSizes.find((s) => s.id === basics.employees);
@@ -74,9 +76,13 @@ export default function EmailCapture({ basics, taskHours, revenue, tier, results
       if (response.ok) {
         setSentSuccess(true);
         setEmail('');
+      } else {
+        console.error('ROI email API error:', response.status);
+        setSendError(true);
       }
     } catch (error) {
       console.error('Failed to send report', error);
+      setSendError(true);
     } finally {
       setIsSending(false);
     }
@@ -114,6 +120,13 @@ export default function EmailCapture({ basics, taskHours, revenue, tier, results
           {isSending ? rc.emailCapture.sending : rc.emailCapture.send}
         </button>
       </div>
+      {sendError && (
+        <p className="text-xs text-red-400 mt-2">
+          {language === 'es'
+            ? 'No se pudo enviar el informe. Por favor, intente de nuevo.'
+            : 'Failed to send report. Please try again.'}
+        </p>
+      )}
       <p className="text-xs text-white/40 mt-2">{rc.emailCapture.note}</p>
     </div>
   );
