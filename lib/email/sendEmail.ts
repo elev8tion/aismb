@@ -307,5 +307,6 @@ export async function sendROILeadDossierToAdmin(
     console.log(`[Email] ROI lead dossier sent to admin for ${params.lead.email}`);
   } catch (error) {
     console.error('[Email] Failed to send ROI lead dossier:', error);
+    throw error; // Propagate so caller can surface the error
   }
 }

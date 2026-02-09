@@ -183,35 +183,42 @@ export async function POST(request: NextRequest) {
     });
 
     // Admin dossier — must await on edge runtime (context killed after response)
-    await sendROILeadDossierToAdmin({
-      adminEmail: 'connect@elev8tion.one',
-      lead: {
-        email,
-        industry,
-        employees,
-        hourlyLaborCost: hourlyValue,
-        tier: tierName,
-        totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
-        weeklyLaborSavings: metrics.weeklyLaborSavings,
-        monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
-        annualBenefit: metrics.annualBenefit,
-        investment: metrics.investment,
-        roi: metrics.roi,
-        paybackWeeks: metrics.paybackWeeks,
-        taskBreakdown: taskBreakdown.map((t) => ({
-          name: t.name,
-          hoursPerWeek: t.hoursPerWeek,
-          weeklySavings: t.weeklySavings,
-        })),
-      },
-      emailitApiKey,
-    }).catch((err) => console.error('[Email] Failed to send ROI dossier:', err));
+    let dossierError: string | undefined;
+    try {
+      await sendROILeadDossierToAdmin({
+        adminEmail: 'connect@elev8tion.one',
+        lead: {
+          email,
+          industry,
+          employees,
+          hourlyLaborCost: hourlyValue,
+          tier: tierName,
+          totalWeeklyHoursSaved: metrics.totalWeeklyHoursSaved,
+          weeklyLaborSavings: metrics.weeklyLaborSavings,
+          monthlyRevenueRecovery: metrics.monthlyRevenueRecovery ?? 0,
+          annualBenefit: metrics.annualBenefit,
+          investment: metrics.investment,
+          roi: metrics.roi,
+          paybackWeeks: metrics.paybackWeeks,
+          taskBreakdown: taskBreakdown.map((t) => ({
+            name: t.name,
+            hoursPerWeek: t.hoursPerWeek,
+            weeklySavings: t.weeklySavings,
+          })),
+        },
+        emailitApiKey,
+      });
+    } catch (err) {
+      dossierError = err instanceof Error ? err.message : String(err);
+      console.error('[Email] Failed to send ROI dossier:', dossierError);
+    }
 
     console.log('ROI LEAD PROCESSED:', { email, industry, employees, tier, roi: `${metrics?.roi}%` });
 
     return NextResponse.json({
       success: true,
       message: 'Report sent successfully',
+      ...(dossierError ? { dossierError } : {}),
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
