@@ -182,8 +182,10 @@ export async function POST(request: NextRequest) {
       emailitApiKey,
     });
 
+    // Brief pause to avoid EmailIt per-second rate limit (2 req/s)
+    await new Promise((r) => setTimeout(r, 1000));
+
     // Admin dossier — must await on edge runtime (context killed after response)
-    let dossierError: string | undefined;
     try {
       await sendROILeadDossierToAdmin({
         adminEmail: 'connect@elev8tion.one',
@@ -209,8 +211,7 @@ export async function POST(request: NextRequest) {
         emailitApiKey,
       });
     } catch (err) {
-      dossierError = err instanceof Error ? err.message : String(err);
-      console.error('[Email] Failed to send ROI dossier:', dossierError);
+      console.error('[Email] Failed to send ROI dossier:', err instanceof Error ? err.message : err);
     }
 
     console.log('ROI LEAD PROCESSED:', { email, industry, employees, tier, roi: `${metrics?.roi}%` });
@@ -218,7 +219,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Report sent successfully',
-      ...(dossierError ? { dossierError } : {}),
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
