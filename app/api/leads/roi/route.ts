@@ -61,7 +61,6 @@ interface ROILeadBody {
 }
 
 export async function POST(request: NextRequest) {
-  let emailitApiKey: string | undefined;
   try {
     const body = await request.json() as ROILeadBody;
     const { email, industry, employees, hourlyValue, tier, locale, metrics } = body;
@@ -118,6 +117,7 @@ export async function POST(request: NextRequest) {
 
     // Get env from Cloudflare context
     let cfEnv: Record<string, string> | undefined;
+    let emailitApiKey: string | undefined;
     try {
       const { env } = getRequestContext();
       cfEnv = env as unknown as Record<string, string>;
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       }, cfEnv).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
     }
 
-    console.log('[ROI] Email API key available:', !!emailitApiKey, 'len:', emailitApiKey?.length, 'prefix:', emailitApiKey?.slice(0, 4));
+    console.log('[ROI] Email API key available:', !!emailitApiKey);
 
     if (!emailitApiKey) {
       console.error('[ROI] EMAILIT_API_KEY missing — cannot send emails');
@@ -215,10 +215,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    const stack = error instanceof Error ? error.stack : undefined;
-    console.error('Lead capture error:', msg, stack);
+    console.error('Lead capture error:', msg);
     return NextResponse.json(
-      { error: 'Failed to process lead', detail: msg, keyLen: emailitApiKey?.length, keyPrefix: emailitApiKey?.slice(0, 4) },
+      { error: 'Failed to process lead' },
       { status: 500 }
     );
   }
