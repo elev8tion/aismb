@@ -39,6 +39,8 @@ interface ROILeadBody {
   hourlyValue: number;
   tier: string;
   locale?: string;
+  timeOnCalculator?: number;
+  adjustmentsCount?: number;
   metrics: {
     taskHours?: Record<string, number>;
     monthlyRevenue?: number;
@@ -63,7 +65,7 @@ interface ROILeadBody {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as ROILeadBody;
-    const { email, industry, employees, hourlyValue, tier, locale, metrics } = body;
+    const { email, industry, employees, hourlyValue, tier, locale, metrics, timeOnCalculator, adjustmentsCount } = body;
     const lang = locale === 'es' ? 'es' : 'en';
     const taskNames = TASK_NAMES[lang];
 
@@ -127,6 +129,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Sync to CRM (awaited — edge runtime kills unawaited promises)
+    // Set report_sent_at now since emails are sent synchronously right after
     if (cfEnv) {
       await syncROICalcToCRM({
         email,
@@ -135,6 +138,9 @@ export async function POST(request: NextRequest) {
         hourlyRate: hourlyValue,
         selectedTier: tier,
         calculations: metrics,
+        timeOnCalculator,
+        adjustmentsCount,
+        reportSentAt: new Date().toISOString(),
       }, cfEnv).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
     }
 

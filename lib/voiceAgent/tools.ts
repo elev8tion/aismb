@@ -421,6 +421,7 @@ async function handleCreateConsultation(
       companyName,
       industry,
       employeeCount,
+      bookingId: booking.id,
     }, ctx.env)
   );
 

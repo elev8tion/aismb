@@ -282,6 +282,7 @@ export async function POST(req: NextRequest) {
         industry: validatedData.industry,
         employeeCount: validatedData.employeeCount,
         challenge: validatedData.challenge,
+        bookingId: booking.id,
       }, env as unknown as Record<string, string>)
     );
 

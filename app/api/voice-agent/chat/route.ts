@@ -3,7 +3,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { createOpenAI } from '@/lib/openai/config';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
 import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
-import { extractLeadInfo, syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
+import { extractLeadInfo, syncLeadToCRM, syncVoiceSessionToNCB } from '@/lib/voiceAgent/leadManager';
 import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
 import { getHighPriorityLeadsReport, getDailySummary } from '@/lib/voiceAgent/analyticsAgent';
 import { classifyIntent } from '@/lib/voiceAgent/intentRouter';
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
 
     // Load session + conversation history
     const sessionStorage = getSessionStorage(env.VOICE_SESSIONS);
-    const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
+    const session = await sessionStorage.getSession(sessionId);
+    const conversationHistory = session?.conversationHistory || [];
 
     // Lead profiling & scoring (pre-response analysis)
     const leadInfo = extractLeadInfo([...conversationHistory, { role: 'user', content: sanitizedQuestion }]);
@@ -84,9 +85,19 @@ export async function POST(request: NextRequest) {
         break;
     }
 
-    // ─── Save conversation + sync lead (UNCHANGED) ──────────────────────
+    // ─── Save conversation + sync to NCB ────────────────────────────────
     await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);
     await sessionStorage.addMessage(sessionId, 'assistant', response);
+
+    // Sync voice session to NCB (upsert — updates on every turn)
+    const updatedSession = await sessionStorage.getSession(sessionId);
+    syncVoiceSessionToNCB({
+      sessionId,
+      messages: updatedSession?.conversationHistory || [],
+      language: language || 'en',
+      startTime: updatedSession?.createdAt || startTime,
+      intent,
+    }, env as unknown as Record<string, string>).catch(err => console.error('Failed to sync voice session:', err));
 
     if (leadInfo.email) {
       console.log(`Syncing Scored Lead (${leadScore.score}/100):`, leadInfo.email);
@@ -95,7 +106,9 @@ export async function POST(request: NextRequest) {
         email: leadInfo.email!,
         source: 'Voice Agent',
         sourceDetail: `${language === 'es' ? 'Spanish' : 'English'} (${leadScore.tier} priority)`,
-        notes: `AI Scored as ${leadScore.tier} (${leadScore.score}/100). Factors: ${leadScore.factors.join(', ')}`
+        notes: `AI Scored as ${leadScore.tier} (${leadScore.score}/100). Factors: ${leadScore.factors.join(', ')}`,
+        lead_score: leadScore.score,
+        voice_session_id: sessionId,
       }, env as unknown as Record<string, string>).catch(err => console.error('Failed to sync lead:', err));
     }
 
