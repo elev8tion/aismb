@@ -10,11 +10,9 @@ interface Props {
   revenue: RevenueImpactState;
   tier: string;
   results: ROIResults;
-  mountTime: number;
-  adjustmentsCount: number;
 }
 
-export default function EmailCapture({ basics, taskHours, revenue, tier, results, mountTime, adjustmentsCount }: Props) {
+export default function EmailCapture({ basics, taskHours, revenue, tier, results }: Props) {
   const { t, language } = useTranslations();
   const rc = t.roiCalculator;
 
@@ -33,8 +31,6 @@ export default function EmailCapture({ basics, taskHours, revenue, tier, results
       const selectedSize = rc.employeeSizes.find((s) => s.id === basics.employees);
       const selectedTier = rc.tiers.find((ti) => ti.id === tier);
 
-      const timeOnCalculator = Math.round((Date.now() - mountTime) / 1000);
-
       const response = await fetch('/api/leads/roi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,8 +41,6 @@ export default function EmailCapture({ basics, taskHours, revenue, tier, results
           hourlyValue: basics.hourlyLaborCost,
           tier: selectedTier?.id,
           locale: language,
-          timeOnCalculator,
-          adjustmentsCount,
           metrics: {
             taskHours,
             monthlyRevenue: revenue.monthlyRevenue,

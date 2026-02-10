@@ -33,10 +33,6 @@ export default function ROICalculator() {
   const [step, setStep] = useState(1);
   const [tier, setTier] = useState('foundation');
 
-  // Engagement tracking
-  const [mountTime] = useState(() => Date.now());
-  const [adjustmentsCount, setAdjustmentsCount] = useState(0);
-
   const [basics, setBasics] = useState<BusinessBasicsState>({
     industry: 'other',
     employees: '5-10',
@@ -60,26 +56,18 @@ export default function ROICalculator() {
   });
 
   const handleBasicsChange = useCallback(
-    (updates: Partial<BusinessBasicsState>) => {
-      setAdjustmentsCount((c) => c + 1);
-      setBasics((prev) => ({ ...prev, ...updates }));
-    },
+    (updates: Partial<BusinessBasicsState>) => setBasics((prev) => ({ ...prev, ...updates })),
     []
   );
 
   const handleTaskHoursChange = useCallback(
-    (taskId: string, hours: number) => {
-      setAdjustmentsCount((c) => c + 1);
-      setTaskHours((prev) => ({ ...prev, [taskId]: hours }));
-    },
+    (taskId: string, hours: number) =>
+      setTaskHours((prev) => ({ ...prev, [taskId]: hours })),
     []
   );
 
   const handleRevenueChange = useCallback(
-    (updates: Partial<RevenueImpactState>) => {
-      setAdjustmentsCount((c) => c + 1);
-      setRevenue((prev) => ({ ...prev, ...updates }));
-    },
+    (updates: Partial<RevenueImpactState>) => setRevenue((prev) => ({ ...prev, ...updates })),
     []
   );
 
@@ -149,8 +137,6 @@ export default function ROICalculator() {
                     revenue={revenue}
                     tier={tier}
                     results={results}
-                    mountTime={mountTime}
-                    adjustmentsCount={adjustmentsCount}
                   />
                 </div>
 
@@ -162,8 +148,6 @@ export default function ROICalculator() {
                     revenue={revenue}
                     tier={tier}
                     results={results}
-                    mountTime={mountTime}
-                    adjustmentsCount={adjustmentsCount}
                   />
                   <InputSummary basics={basics} taskHours={taskHours} revenue={revenue} />
                 </div>
@@ -195,8 +179,6 @@ export default function ROICalculator() {
                 revenue={revenue}
                 tier={tier}
                 results={results}
-                mountTime={mountTime}
-                adjustmentsCount={adjustmentsCount}
               />
             )}
             <a
