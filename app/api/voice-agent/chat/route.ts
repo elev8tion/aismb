@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { createOpenAI } from '@/lib/openai/config';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
+import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
+import { KVCostMonitor } from '@/lib/security/costMonitor.kv';
+import { responseCache } from '@/lib/voiceAgent/responseCache';
 import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
 import { extractLeadInfo, syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
 import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
@@ -16,6 +19,19 @@ export async function POST(request: NextRequest) {
   // Get OpenAI API key and KV namespace from Cloudflare env
   const { env } = getRequestContext();
   const openai = createOpenAI(env.OPENAI_API_KEY);
+
+  // Rate limiting (KV-backed)
+  if (env.RATE_LIMIT_KV) {
+    const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+    const clientIP = getClientIP(request);
+    const rateCheck = await rateLimiter.check(clientIP);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: rateCheck.reason || 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateCheck.resetTime - Date.now()) / 1000)) } },
+      );
+    }
+  }
 
   try {
     const body = await request.json();
@@ -66,6 +82,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ response: report, success: true, duration: Date.now() - startTime });
     }
 
+    // ─── Cache check (info intent only — booking/ROI are stateful) ─────
+    if (intent === 'info') {
+      const cached = responseCache.get(sanitizedQuestion);
+      if (cached) {
+        await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);
+        await sessionStorage.addMessage(sessionId, 'assistant', cached.textResponse);
+        return NextResponse.json({
+          response: cached.textResponse,
+          success: true,
+          cached: true,
+          duration: Date.now() - startTime,
+        });
+      }
+    }
+
     // ─── Dispatch to specialist agent ───────────────────────────────────
     const toolCtx: ToolContext = { env: env as unknown as Record<string, string> };
     const agentOptions = { language, leadScoreTier: leadScore.tier };
@@ -81,6 +112,8 @@ export async function POST(request: NextRequest) {
       case 'info':
       default:
         response = await runInfoAgent(openai, sanitizedQuestion, conversationHistory, agentOptions);
+        // Cache info responses for instant replay on common questions
+        responseCache.set(sanitizedQuestion, response);
         break;
     }
 
@@ -97,6 +130,18 @@ export async function POST(request: NextRequest) {
         sourceDetail: `${language === 'es' ? 'Spanish' : 'English'} (${leadScore.tier} priority)`,
         notes: `AI Scored as ${leadScore.tier} (${leadScore.score}/100). Factors: ${leadScore.factors.join(', ')}`
       }, env as unknown as Record<string, string>).catch(err => console.error('Failed to sync lead:', err));
+    }
+
+    // Cost tracking (KV-backed, best-effort)
+    if (env.COST_MONITOR_KV) {
+      const costMonitor = new KVCostMonitor(env.COST_MONITOR_KV);
+      costMonitor.track({
+        endpoint: '/api/voice-agent/chat',
+        model: 'gpt-4o-mini',
+        inputTokens: sanitizedQuestion.length,
+        outputTokens: response.length,
+        ip: getClientIP(request),
+      }).catch((err) => console.error('[CostMonitor] tracking failed:', err));
     }
 
     const duration = Date.now() - startTime;

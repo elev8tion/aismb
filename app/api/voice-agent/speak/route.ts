@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { validateText } from '@/lib/security/requestValidator';
+import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -9,6 +10,19 @@ export async function POST(request: NextRequest) {
   // Get OpenAI API key from Cloudflare env
   const { env } = getRequestContext();
   const openai = createOpenAI(env.OPENAI_API_KEY);
+
+  // Rate limiting (KV-backed)
+  if (env.RATE_LIMIT_KV) {
+    const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+    const clientIP = getClientIP(request);
+    const rateCheck = await rateLimiter.check(clientIP);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: rateCheck.reason || 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateCheck.resetTime - Date.now()) / 1000)) } },
+      );
+    }
+  }
 
   try {
     const { text, language } = await request.json() as { text: string; language?: 'en' | 'es' };
