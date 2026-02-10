@@ -6,6 +6,14 @@ import {
   MEETING_DURATION,
   DEFAULT_AVAILABILITY,
 } from './types';
+import {
+  formatTimeLabel as _formatTimeLabel,
+  formatDateDisplay as _formatDateDisplay,
+} from '@/lib/shared/formatters';
+
+// Re-export shared formatters for backward compatibility
+export const formatTimeLabel = _formatTimeLabel;
+export const formatDateDisplay = _formatDateDisplay;
 
 /**
  * Convert minutes from midnight to HH:mm format
@@ -22,16 +30,6 @@ export function minutesToTime(minutes: number): string {
 export function timeToMinutes(time: string): number {
   const [hours, mins] = time.split(':').map(Number);
   return hours * 60 + mins;
-}
-
-/**
- * Format time for display (e.g., "9:00 AM")
- */
-export function formatTimeLabel(time: string): string {
-  const [hours, mins] = time.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const displayHours = hours % 12 || 12;
-  return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
 }
 
 /**
@@ -199,18 +197,6 @@ export function calculateEndTime(startTime: string, durationMinutes: number = ME
   return minutesToTime(endMinutes);
 }
 
-/**
- * Format date for display (e.g., "Monday, January 15, 2025")
- */
-export function formatDateDisplay(dateStr: string): string {
-  const date = new Date(dateStr + 'T12:00:00');
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
 
 /**
  * Format date in short form (e.g., "Jan 15")

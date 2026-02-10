@@ -1,4 +1,5 @@
-import { ICalendarProvider, generateICS } from './provider';
+import { ICalendarProvider } from './provider';
+import { generateICSContent } from '../calendarLinks';
 import { CalendarEventData, CalendarEventResult, CalendarIntegration } from '../types';
 
 /**
@@ -84,7 +85,7 @@ export class CalDAVProvider implements ICalendarProvider {
     const uid = `${eventId}@kre8tion.com`;
 
     // Generate ICS content
-    const icsContent = generateICS(event, uid);
+    const icsContent = generateICSContent(event, uid);
 
     // Construct the event URL
     const calendarUrl = integration.caldav_url.endsWith('/')
@@ -125,7 +126,7 @@ export class CalDAVProvider implements ICalendarProvider {
     const baseEventId = eventId.replace('@kre8tion.com', '');
 
     // Generate updated ICS content
-    const icsContent = generateICS(event, eventId);
+    const icsContent = generateICSContent(event, eventId);
 
     // Construct the event URL
     const calendarUrl = integration.caldav_url.endsWith('/')

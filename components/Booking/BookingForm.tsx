@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BookingFormData, BookingType } from '@/lib/booking/types';
+import { formatDateDisplay, formatTimeLabel } from '@/lib/shared/formatters';
 
 interface BookingFormProps {
   date: string;
@@ -62,19 +63,8 @@ export default function BookingForm({
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Format date and time for display
-  const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  const formattedTime = (() => {
-    const [hours, mins] = time.split(':').map(Number);
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = hours % 12 || 12;
-    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
-  })();
+  const formattedDate = formatDateDisplay(date);
+  const formattedTime = formatTimeLabel(time);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};

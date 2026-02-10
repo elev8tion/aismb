@@ -3,6 +3,8 @@
  * Edge-compatible HTML template generators for booking emails.
  */
 
+import { formatDateDisplay, formatTimeLabel } from '@/lib/shared/formatters';
+
 export interface BookingConfirmationData {
   guestName: string;
   date: string;
@@ -11,24 +13,6 @@ export interface BookingConfirmationData {
   timezone: string;
   googleCalLink: string;
   outlookCalLink: string;
-}
-
-function formatDateReadable(dateStr: string): string {
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const dateObj = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-  return `${days[dateObj.getUTCDay()]}, ${months[month - 1]} ${day}, ${year}`;
-}
-
-function formatTimeReadable(timeStr: string): string {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-  return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
 
 function escapeHtml(str: string): string {
@@ -41,9 +25,9 @@ function escapeHtml(str: string): string {
 }
 
 export function bookingConfirmationTemplate(data: BookingConfirmationData): string {
-  const formattedDate = formatDateReadable(data.date);
-  const formattedStart = formatTimeReadable(data.startTime);
-  const formattedEnd = formatTimeReadable(data.endTime);
+  const formattedDate = formatDateDisplay(data.date);
+  const formattedStart = formatTimeLabel(data.startTime);
+  const formattedEnd = formatTimeLabel(data.endTime);
   const safeName = escapeHtml(data.guestName);
   const safeTimezone = escapeHtml(data.timezone);
   const safeGoogleLink = escapeHtml(data.googleCalLink);
@@ -192,9 +176,9 @@ export interface AssessmentConfirmationData {
 }
 
 export function assessmentConfirmationTemplate(data: AssessmentConfirmationData): string {
-  const formattedDate = formatDateReadable(data.date);
-  const formattedStart = formatTimeReadable(data.startTime);
-  const formattedEnd = formatTimeReadable(data.endTime);
+  const formattedDate = formatDateDisplay(data.date);
+  const formattedStart = formatTimeLabel(data.startTime);
+  const formattedEnd = formatTimeLabel(data.endTime);
   const safeName = escapeHtml(data.guestName);
   const safeTimezone = escapeHtml(data.timezone);
   const safeGoogleLink = escapeHtml(data.googleCalLink);

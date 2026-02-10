@@ -2,6 +2,12 @@
 
 import { Booking } from '@/lib/booking/types';
 import { formatDateDisplay, formatTimeLabel } from '@/lib/booking/availability';
+import {
+  generateGoogleCalendarLink,
+  generateOutlookCalendarLink,
+  generateICSContent,
+  type CalendarLinkData,
+} from '@/lib/booking/calendarLinks';
 
 interface CalendarLinks {
   google: string;
@@ -39,43 +45,20 @@ export default function BookingConfirmation({
   const startTimeLabel = formatTimeLabel(booking.start_time);
   const endTimeLabel = formatTimeLabel(booking.end_time);
 
-  // Use provided calendar links, or generate fallback URLs if not provided
-  const googleUrl = calendarLinks?.google || generateFallbackGoogleUrl();
-  const outlookUrl = calendarLinks?.outlook || generateFallbackOutlookUrl();
+  // Build CalendarLinkData from the booking for fallback generation
+  const linkData: CalendarLinkData = {
+    title: `Strategy Call - ${booking.guest_name}`,
+    description: `AI KRE8TION Partners Strategy Call\n\nGuest: ${booking.guest_name}\nEmail: ${booking.guest_email}`,
+    startDate: booking.booking_date,
+    startTime: booking.start_time,
+    endTime: booking.end_time,
+    timezone: booking.timezone,
+  };
+
+  // Use provided calendar links, or generate fallback URLs from the shared module
+  const googleUrl = calendarLinks?.google || generateGoogleCalendarLink(linkData);
+  const outlookUrl = calendarLinks?.outlook || generateOutlookCalendarLink(linkData);
   const icsUrl = calendarLinks?.ics;
-
-  // Fallback Google Calendar URL generator (if API doesn't provide)
-  function generateFallbackGoogleUrl(): string {
-    const startDateTime = `${booking.booking_date.replace(/-/g, '')}T${booking.start_time.replace(':', '')}00`;
-    const endDateTime = `${booking.booking_date.replace(/-/g, '')}T${booking.end_time.replace(':', '')}00`;
-
-    const params = new URLSearchParams({
-      action: 'TEMPLATE',
-      text: `Strategy Call - ${booking.guest_name}`,
-      dates: `${startDateTime}/${endDateTime}`,
-      details: `AI KRE8TION Partners Strategy Call\n\nGuest: ${booking.guest_name}\nEmail: ${booking.guest_email}`,
-      ctz: booking.timezone,
-    });
-
-    return `https://calendar.google.com/calendar/render?${params.toString()}`;
-  }
-
-  // Fallback Outlook URL generator (if API doesn't provide)
-  function generateFallbackOutlookUrl(): string {
-    const startISO = `${booking.booking_date}T${booking.start_time}:00`;
-    const endISO = `${booking.booking_date}T${booking.end_time}:00`;
-
-    const params = new URLSearchParams({
-      path: '/calendar/action/compose',
-      rru: 'addevent',
-      subject: `Strategy Call - ${booking.guest_name}`,
-      body: `AI KRE8TION Partners Strategy Call\n\nGuest: ${booking.guest_name}\nEmail: ${booking.guest_email}`,
-      startdt: startISO,
-      enddt: endISO,
-    });
-
-    return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`;
-  }
 
   // Download ICS file
   const downloadICS = () => {
@@ -88,8 +71,9 @@ export default function BookingConfirmation({
       link.click();
       document.body.removeChild(link);
     } else {
-      // Fallback: generate ICS content locally
-      const icsContent = generateFallbackICS();
+      // Fallback: generate ICS content from the shared module
+      const uid = `booking-${booking.id}@kre8tion.com`;
+      const icsContent = generateICSContent(linkData, uid);
       const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -101,38 +85,6 @@ export default function BookingConfirmation({
       URL.revokeObjectURL(url);
     }
   };
-
-  function generateFallbackICS(): string {
-    const formatICSDate = (date: string, time: string): string => {
-      return `${date.replace(/-/g, '')}T${time.replace(':', '')}00`;
-    };
-
-    const now = new Date();
-    const nowFormatted = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const uid = `booking-${booking.id}@kre8tion.com`;
-
-    return `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//AI KRE8TION Partners//Booking//EN
-CALSCALE:GREGORIAN
-METHOD:REQUEST
-BEGIN:VEVENT
-UID:${uid}
-DTSTAMP:${nowFormatted}
-DTSTART;TZID=${booking.timezone}:${formatICSDate(booking.booking_date, booking.start_time)}
-DTEND;TZID=${booking.timezone}:${formatICSDate(booking.booking_date, booking.end_time)}
-SUMMARY:Strategy Call - ${booking.guest_name}
-DESCRIPTION:AI KRE8TION Partners Strategy Call\\n\\nGuest: ${booking.guest_name}\\nEmail: ${booking.guest_email}
-STATUS:CONFIRMED
-SEQUENCE:0
-BEGIN:VALARM
-TRIGGER:-PT15M
-ACTION:DISPLAY
-DESCRIPTION:Reminder
-END:VALARM
-END:VEVENT
-END:VCALENDAR`;
-  }
 
   return (
     <div className="w-full text-center">
