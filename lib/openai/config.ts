@@ -19,6 +19,13 @@ export const MODELS = {
   voice: 'echo',
 } as const;
 
+// Per-token / per-minute costs (single source of truth for cost monitoring)
+export const MODEL_COSTS = {
+  [MODELS.chat]: { input: 0.10 / 1_000_000, output: 0.40 / 1_000_000 },
+  [MODELS.tts]: { input: 0.60 / 1_000_000, output: 12.00 / 1_000_000 },
+  [MODELS.transcription]: { perMinute: 0.006 },
+} as const;
+
 // Token limits for chat completions
 export const TOKEN_LIMITS = {
   withTools: 400,

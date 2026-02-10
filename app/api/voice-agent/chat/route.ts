@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
-import { createOpenAI } from '@/lib/openai/config';
+import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
 import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 import { KVCostMonitor } from '@/lib/security/costMonitor.kv';
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       const costMonitor = new KVCostMonitor(env.COST_MONITOR_KV);
       costMonitor.track({
         endpoint: '/api/voice-agent/chat',
-        model: 'gpt-4o-mini',
+        model: MODELS.chat,
         inputTokens: sanitizedQuestion.length,
         outputTokens: response.length,
         ip: getClientIP(request),

@@ -1,5 +1,7 @@
 // KV-backed Cost Monitor for Edge Runtime
 
+import { MODELS, MODEL_COSTS } from '@/lib/openai/config';
+
 interface UsageEntry {
   timestamp: number;
   endpoint: string;
@@ -10,19 +12,6 @@ interface UsageEntry {
   cached?: boolean;
   ip?: string;
 }
-
-const PRICING = {
-  'gpt-4o-mini': {
-    input: 0.15 / 1_000_000,
-    output: 0.60 / 1_000_000,
-  },
-  'whisper-1': {
-    perMinute: 0.006,
-  },
-  'tts-1': {
-    perCharacter: 15 / 1_000_000,
-  },
-} as const;
 
 export class KVCostMonitor {
   private kv: KVNamespace;
@@ -53,9 +42,9 @@ export class KVCostMonitor {
     await this.kv.put(dailyKey, JSON.stringify(dailyTotal + cost), { expirationTtl: 172800 });
 
     if (dailyTotal + cost >= this.dailyCostLimit) {
-      console.error(`🚨 DAILY COST LIMIT EXCEEDED: $${(dailyTotal + cost).toFixed(2)}`);
+      console.error(`DAILY COST LIMIT EXCEEDED: $${(dailyTotal + cost).toFixed(2)}`);
     } else if (dailyTotal + cost >= this.alertThreshold) {
-      console.warn(`⚠️ COST ALERT: $${(dailyTotal + cost).toFixed(2)}`);
+      console.warn(`COST ALERT: $${(dailyTotal + cost).toFixed(2)}`);
     }
 
     return cost;
@@ -64,21 +53,24 @@ export class KVCostMonitor {
   private calculateCost(entry: Omit<UsageEntry, 'timestamp' | 'cost'>): number {
     if (entry.cached) return 0;
 
-    let cost = 0;
+    const chatCost = MODEL_COSTS[MODELS.chat];
+    const ttsCost = MODEL_COSTS[MODELS.tts];
+    const whisperCost = MODEL_COSTS[MODELS.transcription];
+
     switch (entry.model) {
-      case 'gpt-4o-mini':
-        cost = (entry.inputTokens * PRICING['gpt-4o-mini'].input) +
-               (entry.outputTokens * PRICING['gpt-4o-mini'].output);
-        break;
-      case 'whisper-1':
+      case MODELS.chat:
+        return (entry.inputTokens * chatCost.input) +
+               (entry.outputTokens * chatCost.output);
+      case MODELS.transcription: {
         const estimatedMinutes = (entry.inputTokens * 0.75) / 150;
-        cost = estimatedMinutes * PRICING['whisper-1'].perMinute;
-        break;
-      case 'tts-1':
-        cost = entry.outputTokens * PRICING['tts-1'].perCharacter;
-        break;
+        return estimatedMinutes * whisperCost.perMinute;
+      }
+      case MODELS.tts:
+        return (entry.inputTokens * ttsCost.input) +
+               (entry.outputTokens * ttsCost.output);
+      default:
+        return 0;
     }
-    return cost;
   }
 
   async getDailyCost(): Promise<number> {
@@ -96,16 +88,15 @@ export class KVCostMonitor {
 
 export function estimateWhisperCost(durationSeconds: number): number {
   const minutes = durationSeconds / 60;
-  return minutes * PRICING['whisper-1'].perMinute;
+  return minutes * MODEL_COSTS[MODELS.transcription].perMinute;
 }
 
-export function estimateGPTCost(inputTokens: number, outputTokens: number): number {
-  return (
-    inputTokens * PRICING['gpt-4o-mini'].input +
-    outputTokens * PRICING['gpt-4o-mini'].output
-  );
+export function estimateChatCost(inputTokens: number, outputTokens: number): number {
+  const cost = MODEL_COSTS[MODELS.chat];
+  return (inputTokens * cost.input) + (outputTokens * cost.output);
 }
 
-export function estimateTTSCost(textLength: number): number {
-  return textLength * PRICING['tts-1'].perCharacter;
+export function estimateTTSCost(inputTokens: number, outputTokens: number): number {
+  const cost = MODEL_COSTS[MODELS.tts];
+  return (inputTokens * cost.input) + (outputTokens * cost.output);
 }
