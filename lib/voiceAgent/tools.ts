@@ -131,13 +131,7 @@ export const VOICE_AGENT_TOOLS: OpenAI.ChatCompletionTool[] = [
     function: {
       name: 'get_available_dates',
       description: 'Get available dates for booking in the next 30 days',
-      parameters: {
-        type: 'object',
-        properties: {
-          timezone: { type: 'string', description: 'IANA timezone (default: America/Los_Angeles)' },
-        },
-        required: [],
-      },
+      parameters: { type: 'object', properties: {}, required: [] },
     },
   },
   {
@@ -271,7 +265,7 @@ export async function executeTool(
 ): Promise<string> {
   switch (name) {
     case 'get_available_dates':
-      return handleGetAvailableDates(args, ctx);
+      return handleGetAvailableDates(ctx);
     case 'get_available_slots':
       return handleGetAvailableSlots(args, ctx);
     case 'create_consultation_booking':
@@ -289,14 +283,9 @@ export async function executeTool(
 
 // ─── Handlers ───────────────────────────────────────────────────────────────
 
-async function handleGetAvailableDates(
-  args: Record<string, unknown>,
-  ctx: ToolContext,
-): Promise<string> {
-  const timezone = (args.timezone as string) || 'America/Los_Angeles';
+async function handleGetAvailableDates(ctx: ToolContext): Promise<string> {
   const { settings, blockedDates } = await loadSettings(ctx.env);
-  const allBookings = await fetchFromNCB<Booking>(ctx.env, 'bookings');
-  const dates = getAvailableDates(30, settings, blockedDates, allBookings, timezone);
+  const dates = getAvailableDates(30, settings, blockedDates);
   return JSON.stringify({
     available_dates: dates,
     count: dates.length,
