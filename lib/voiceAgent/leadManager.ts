@@ -5,6 +5,8 @@
  * and synchronizes it with the NCB CRM database.
  */
 
+import { ncbRequest } from '@/lib/ncb/client';
+
 export interface LeadData {
   email: string;
   firstName?: string;
@@ -25,50 +27,6 @@ interface NCBRecord {
   employeeCount?: string;
   notes?: string;
   [key: string]: unknown;
-}
-
-/**
- * NCB API Utility for server-side CRM operations
- */
-async function ncbRequest<T>(
-  method: 'GET' | 'POST' | 'PUT',
-  path: string,
-  env: Record<string, string>,
-  body?: Record<string, unknown>
-): Promise<T | null> {
-  const instance = env.NCB_INSTANCE;
-  const openApiUrl = env.NCB_OPENAPI_URL;
-  const secretKey = env.NCB_SECRET_KEY;
-
-  if (!instance || !openApiUrl || !secretKey) {
-    console.error('Missing NCB environment variables');
-    return null;
-  }
-
-  const url = `${openApiUrl}/${path}?Instance=${instance}`;
-
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${secretKey}`,
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error(`NCB API Error (${path}):`, res.status, errorText);
-      return null;
-    }
-
-    const result = (await res.json()) as { data?: T };
-    return (result.data || result) as T;
-  } catch (error) {
-    console.error(`NCB API Exception (${path}):`, error);
-    return null;
-  }
 }
 
 /**

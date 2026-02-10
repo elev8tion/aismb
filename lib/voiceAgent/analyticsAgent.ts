@@ -4,6 +4,8 @@
  * Provides summaries of leads, ROI calculations, and bookings.
  */
 
+import { fetchFromNCB } from '@/lib/ncb/client';
+
 interface NCBLead {
   id: string;
   firstName?: string;
@@ -22,30 +24,6 @@ interface NCBBooking {
 interface NCBRoiCalc {
   id: string;
   created_at?: string;
-}
-
-async function fetchFromNCB<T>(env: Record<string, string>, tableName: string, filters?: Record<string, string>): Promise<T[]> {
-  const instance = env.NCB_INSTANCE;
-  const openApiUrl = env.NCB_OPENAPI_URL;
-  const secretKey = env.NCB_SECRET_KEY;
-
-  if (!instance || !openApiUrl || !secretKey) return [];
-
-  const params = new URLSearchParams({ Instance: instance });
-  if (filters) {
-    Object.entries(filters).forEach(([k, v]) => params.set(k, v));
-  }
-
-  try {
-    const res = await fetch(`${openApiUrl}/read/${tableName}?${params.toString()}`, {
-      headers: { 'Authorization': `Bearer ${secretKey}` }
-    });
-    if (!res.ok) return [];
-    const data = (await res.json()) as { data?: T[] };
-    return (data.data || []) as T[];
-  } catch {
-    return [];
-  }
 }
 
 export async function getDailySummary(env: Record<string, string>): Promise<string> {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { syncROICalcToCRM } from '@/lib/voiceAgent/leadManager';
 import { sendROIReport, sendROILeadDossierToAdmin } from '@/lib/email/sendEmail';
-import { TASK_CATEGORIES, TIER_DATA } from '@/components/ROICalculator/types';
+import { TASK_CATEGORIES, TIER_DATA } from '@/lib/shared/roiTypes';
 
 const TASK_NAMES: Record<string, Record<string, string>> = {
   en: {

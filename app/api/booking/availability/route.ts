@@ -17,54 +17,15 @@ import {
   Booking,
   DEFAULT_AVAILABILITY,
 } from '@/lib/booking/types';
+import { fetchFromNCB } from '@/lib/ncb/client';
 
 export const runtime = 'edge';
 
-function getConfig() {
-  const { env } = getRequestContext();
-  const instance = env.NCB_INSTANCE;
-  const openApiUrl = env.NCB_OPENAPI_URL;
-  const secretKey = env.NCB_SECRET_KEY;
-
-  if (!instance || !openApiUrl || !secretKey) {
-    throw new Error('Missing NCB environment variables');
-  }
-
-  return { instance, openApiUrl, secretKey };
-}
-
-async function fetchFromNCB<T>(tableName: string, filters?: Record<string, string>): Promise<T[]> {
-  const config = getConfig();
-  const params = new URLSearchParams();
-  params.set('Instance', config.instance);
-
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      params.set(key, value);
-    });
-  }
-
-  const url = `${config.openApiUrl}/read/${tableName}?${params.toString()}`;
-
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.secretKey}`,
-    },
-  });
-
-  if (!res.ok) {
-    console.error(`NCB fetch error for ${tableName}:`, res.status);
-    return [];
-  }
-
-  const data: { data?: T[] } = await res.json();
-  return data.data || (data as unknown as T[]) || [];
-}
-
 export async function GET(req: NextRequest) {
   try {
+    const { env } = getRequestContext();
+    const cfEnv = env as unknown as Record<string, string>;
+
     const { searchParams } = new URL(req.url);
     const date = searchParams.get('date');
     const timezone = searchParams.get('timezone') || 'America/Los_Angeles';
@@ -73,7 +34,7 @@ export async function GET(req: NextRequest) {
     // Fetch availability settings (or use defaults)
     let settings: AvailabilitySetting[];
     try {
-      settings = await fetchFromNCB<AvailabilitySetting>('availability_settings');
+      settings = await fetchFromNCB<AvailabilitySetting>(cfEnv, 'availability_settings');
       if (!settings || settings.length === 0) {
         // Use default availability
         settings = DEFAULT_AVAILABILITY.map((s, idx) => ({
@@ -91,7 +52,7 @@ export async function GET(req: NextRequest) {
     // Fetch blocked dates
     let blockedDates: BlockedDate[];
     try {
-      blockedDates = await fetchFromNCB<BlockedDate>('blocked_dates');
+      blockedDates = await fetchFromNCB<BlockedDate>(cfEnv, 'blocked_dates');
     } catch {
       blockedDates = [];
     }
@@ -126,7 +87,7 @@ export async function GET(req: NextRequest) {
     // (NCB datetime filter doesn't match date strings)
     let bookings: Booking[];
     try {
-      const allBookings = await fetchFromNCB<Booking>('bookings');
+      const allBookings = await fetchFromNCB<Booking>(cfEnv, 'bookings');
       bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
     } catch {
       bookings = [];

@@ -21,83 +21,15 @@ import {
   formatTimeLabel,
   formatDateDisplay,
 } from '@/lib/booking/availability';
-import { generateAllCalendarLinks } from '@/lib/booking/calendarLinks';
-import {
-  sendBookingConfirmation,
-  sendLeadDossierToAdmin,
-  sendViaEmailIt,
-} from '@/lib/email/sendEmail';
-import { syncBookingToCRM, getLeadByEmail } from '@/lib/voiceAgent/leadManager';
-import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
+import { sendViaEmailIt } from '@/lib/email/sendEmail';
 import { calculateROI } from '@/lib/voiceAgent/roiCalculator';
+import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
+import { runBookingPipeline } from '@/lib/booking/createBooking';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface ToolContext {
   env: Record<string, string>;
-}
-
-// ─── NCB Helpers (copied from API routes — no internal fetch needed) ────────
-
-function getNCBConfig(env: Record<string, string>) {
-  const instance = env.NCB_INSTANCE;
-  const openApiUrl = env.NCB_OPENAPI_URL;
-  const secretKey = env.NCB_SECRET_KEY;
-  if (!instance || !openApiUrl || !secretKey) throw new Error('Missing NCB environment variables');
-  return { instance, openApiUrl, secretKey };
-}
-
-async function fetchFromNCB<T>(
-  env: Record<string, string>,
-  tableName: string,
-  filters?: Record<string, string>,
-): Promise<T[]> {
-  const config = getNCBConfig(env);
-  const params = new URLSearchParams();
-  params.set('Instance', config.instance);
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => params.set(key, value));
-  }
-  const url = `${config.openApiUrl}/read/${tableName}?${params.toString()}`;
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.secretKey}`,
-    },
-  });
-  if (!res.ok) return [];
-  const data: { data?: T[] } = await res.json();
-  return data.data || [];
-}
-
-async function createInNCB<T>(
-  env: Record<string, string>,
-  tableName: string,
-  inputData: Partial<T>,
-): Promise<T | null> {
-  const config = getNCBConfig(env);
-  const params = new URLSearchParams();
-  params.set('Instance', config.instance);
-  const url = `${config.openApiUrl}/create/${tableName}?${params.toString()}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.secretKey}`,
-    },
-    body: JSON.stringify(inputData),
-  });
-  if (!res.ok) {
-    const error = await res.text();
-    console.error(`NCB create error for ${tableName}:`, res.status, error);
-    return null;
-  }
-  const result: { status?: string; id?: number; data?: T } = await res.json();
-  if (result.status === 'success' && result.id) {
-    return { ...inputData, id: result.id } as T;
-  }
-  return result.data || null;
 }
 
 // ─── Availability helpers ───────────────────────────────────────────────────
@@ -379,85 +311,15 @@ async function handleCreateConsultation(
     return JSON.stringify({ error: 'Failed to create booking. Please try again.' });
   }
 
-  // Await ALL side-effects — Cloudflare edge runtime kills the execution context
-  // after the response is sent, so fire-and-forget promises never complete.
-  const calendarLinks = generateAllCalendarLinks(
-    String(booking.id),
-    booking.guest_name,
-    booking.guest_email,
-    booking.booking_date,
-    booking.start_time,
-    booking.end_time,
-    booking.timezone,
-    undefined,
-    'consultation',
-  );
-
-  const sideEffects: Promise<unknown>[] = [];
-
-  // Confirmation email
-  sideEffects.push(
-    sendBookingConfirmation({
-      to: email,
-      guestName: name,
-      date,
-      startTime: time,
-      endTime,
-      timezone,
-      calendarLinks: { google: calendarLinks.google, outlook: calendarLinks.outlook },
-      emailitApiKey: ctx.env.EMAILIT_API_KEY,
-    })
-  );
-
-  // CRM sync
-  sideEffects.push(
-    syncBookingToCRM({
-      email,
-      name,
-      phone,
-      date,
-      time,
-      timezone,
-      companyName,
-      industry,
-      employeeCount,
-    }, ctx.env)
-  );
-
-  // Admin dossier (1s delay to avoid EmailIt 2 req/s rate limit)
-  sideEffects.push(
-    (async () => {
-      const lead = await getLeadByEmail(email, ctx.env);
-      const leadScore = calculateLeadScore(lead || { email });
-      await new Promise((r) => setTimeout(r, 1000));
-      await sendLeadDossierToAdmin({
-        adminEmail: ctx.env.ADMIN_EMAIL || 'connect@elev8tion.one',
-        lead: {
-          guestName: name,
-          guestEmail: email,
-          companyName: companyName || 'Unknown',
-          industry: industry || 'Unknown',
-          employeeCount: employeeCount || 'Unknown',
-          roiScore: leadScore.score,
-          priority: leadScore.tier,
-          painPoints: leadScore.factors,
-          summary: (lead as Record<string, unknown>)?.notes as string || 'Booked via voice agent.',
-          challenge: '',
-          referralSource: 'Voice Agent',
-          websiteUrl: '',
-          appointmentTime: `${date} at ${time}`,
-        },
-        emailitApiKey: ctx.env.EMAILIT_API_KEY,
-      });
-    })()
-  );
-
-  const results = await Promise.allSettled(sideEffects);
-  results.forEach((r, i) => {
-    if (r.status === 'rejected') {
-      const labels = ['confirmation email', 'CRM sync', 'admin dossier'];
-      console.error(`[Voice Booking] ${labels[i] || `side-effect #${i}`} failed:`, r.reason);
-    }
+  // Run the shared booking pipeline (calendar links, emails, CRM sync, admin dossier)
+  await runBookingPipeline({
+    booking,
+    bookingType: 'consultation',
+    env: ctx.env,
+    companyName,
+    industry,
+    employeeCount,
+    referralSource: 'Voice Agent',
   });
 
   return JSON.stringify({

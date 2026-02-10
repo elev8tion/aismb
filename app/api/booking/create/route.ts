@@ -15,86 +15,10 @@ import {
   ASSESSMENT_DURATION,
 } from '@/lib/booking/types';
 import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
-import { generateAllCalendarLinks } from '@/lib/booking/calendarLinks';
-import { sendBookingConfirmation, sendAssessmentConfirmation, sendLeadDossierToAdmin } from '@/lib/email/sendEmail';
-import { syncBookingToCRM, getLeadByEmail } from '@/lib/voiceAgent/leadManager';
-import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
+import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
+import { runBookingPipeline } from '@/lib/booking/createBooking';
 
 export const runtime = 'edge';
-
-function getConfig() {
-  const { env } = getRequestContext();
-  const instance = env.NCB_INSTANCE;
-  const openApiUrl = env.NCB_OPENAPI_URL;
-  const secretKey = env.NCB_SECRET_KEY;
-
-  if (!instance || !openApiUrl || !secretKey) {
-    throw new Error('Missing NCB environment variables');
-  }
-
-  return { instance, openApiUrl, secretKey };
-}
-
-async function fetchFromNCB<T>(tableName: string, filters?: Record<string, string>): Promise<T[]> {
-  const config = getConfig();
-  const params = new URLSearchParams();
-  params.set('Instance', config.instance);
-
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      params.set(key, value);
-    });
-  }
-
-  const url = `${config.openApiUrl}/read/${tableName}?${params.toString()}`;
-
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.secretKey}`,
-    },
-  });
-
-  if (!res.ok) {
-    return [];
-  }
-
-  const data: { data?: T[] } = await res.json();
-  return data.data || [];
-}
-
-async function createInNCB<T>(tableName: string, inputData: Partial<T>): Promise<T | null> {
-  const config = getConfig();
-  const params = new URLSearchParams();
-  params.set('Instance', config.instance);
-
-  const url = `${config.openApiUrl}/create/${tableName}?${params.toString()}`;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.secretKey}`,
-    },
-    body: JSON.stringify(inputData),
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    console.error(`NCB create error for ${tableName}:`, res.status, error);
-    return null;
-  }
-
-  const result: { status?: string; id?: number; data?: T } = await res.json();
-
-  // OpenAPI returns { status: "success", id: N } — merge id into input data
-  if (result.status === 'success' && result.id) {
-    return { ...inputData, id: result.id } as T;
-  }
-
-  return result.data || null;
-}
 
 function validateBookingRequest(data: unknown): CreateBookingRequest | null {
   if (!data || typeof data !== 'object') return null;
@@ -133,9 +57,9 @@ function validateBookingRequest(data: unknown): CreateBookingRequest | null {
   };
 }
 
-async function isSlotAvailable(date: string, time: string, duration: number = MEETING_DURATION): Promise<boolean> {
+async function isSlotAvailable(env: Record<string, string>, date: string, time: string, duration: number = MEETING_DURATION): Promise<boolean> {
   // Filter client-side — NCB datetime filter doesn't match date strings
-  const allBookings = await fetchFromNCB<Booking>('bookings');
+  const allBookings = await fetchFromNCB<Booking>(env, 'bookings');
   const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
 
   const slotStart = timeToMinutes(time);
@@ -153,6 +77,9 @@ async function isSlotAvailable(date: string, time: string, duration: number = ME
 
 export async function POST(req: NextRequest) {
   try {
+    const { env } = getRequestContext();
+    const cfEnv = env as unknown as Record<string, string>;
+
     const body = await req.json();
     const validatedData = validateBookingRequest(body);
 
@@ -167,7 +94,7 @@ export async function POST(req: NextRequest) {
     const duration = isAssessment ? ASSESSMENT_DURATION : MEETING_DURATION;
 
     // Double-check slot availability to prevent race conditions
-    const available = await isSlotAvailable(validatedData.date, validatedData.time, duration);
+    const available = await isSlotAvailable(cfEnv, validatedData.date, validatedData.time, duration);
     if (!available) {
       return NextResponse.json(
         { success: false, error: 'This time slot is no longer available. Please select another time.' },
@@ -202,7 +129,7 @@ export async function POST(req: NextRequest) {
       }),
     };
 
-    const booking = await createInNCB<Booking>('bookings', bookingData);
+    const booking = await createInNCB<Booking>(cfEnv, 'bookings', bookingData);
 
     if (!booking) {
       return NextResponse.json(
@@ -211,115 +138,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get env from Cloudflare context
-    const { env } = getRequestContext();
-
-    // Generate calendar links for easy addition to any calendar
-    const calendarLinks = generateAllCalendarLinks(
-      String(booking.id),
-      booking.guest_name,
-      booking.guest_email,
-      booking.booking_date,
-      booking.start_time,
-      booking.end_time,
-      booking.timezone,
-      validatedData.challenge,
-      isAssessment ? 'assessment' : 'consultation'
-    );
-
-    // Await ALL side-effects before returning — Cloudflare edge runtime kills the
-    // execution context after the response is sent, so fire-and-forget promises
-    // never complete. Use Promise.allSettled so one failure doesn't block others.
-    const sideEffects: Promise<unknown>[] = [];
-
-    // 📧 CONFIRMATION EMAIL: Must complete before response
-    if (isAssessment) {
-      sideEffects.push(
-        sendAssessmentConfirmation({
-          to: booking.guest_email,
-          guestName: booking.guest_name,
-          date: booking.booking_date,
-          startTime: booking.start_time,
-          endTime: booking.end_time,
-          timezone: booking.timezone,
-          paymentAmountCents: validatedData.payment_amount_cents || 25000,
-          calendarLinks: {
-            google: calendarLinks.google,
-            outlook: calendarLinks.outlook,
-          },
-          emailitApiKey: env.EMAILIT_API_KEY,
-        })
-      );
-    } else {
-      sideEffects.push(
-        sendBookingConfirmation({
-          to: booking.guest_email,
-          guestName: booking.guest_name,
-          date: booking.booking_date,
-          startTime: booking.start_time,
-          endTime: booking.end_time,
-          timezone: booking.timezone,
-          calendarLinks: {
-            google: calendarLinks.google,
-            outlook: calendarLinks.outlook,
-          },
-          emailitApiKey: env.EMAILIT_API_KEY,
-        })
-      );
-    }
-
-    // 🔄 SYNC TO CRM: Link booking to lead
-    console.log(`[Booking] Syncing to CRM: ${booking.guest_email}`);
-    sideEffects.push(
-      syncBookingToCRM({
-        email: booking.guest_email,
-        name: booking.guest_name,
-        phone: booking.guest_phone ?? undefined,
-        date: booking.booking_date,
-        time: booking.start_time,
-        timezone: booking.timezone,
-        companyName: validatedData.companyName,
-        industry: validatedData.industry,
-        employeeCount: validatedData.employeeCount,
-        challenge: validatedData.challenge,
-      }, env as unknown as Record<string, string>)
-    );
-
-    // 📬 ADMIN DOSSIER: Send briefing (1s delay to avoid EmailIt 2 req/s rate limit)
-    sideEffects.push(
-      (async () => {
-        const lead = await getLeadByEmail(booking.guest_email, env as unknown as Record<string, string>);
-        const leadScore = calculateLeadScore(lead || { email: booking.guest_email });
-        await new Promise((r) => setTimeout(r, 1000));
-
-        await sendLeadDossierToAdmin({
-          adminEmail: env.ADMIN_EMAIL || 'connect@elev8tion.one',
-          lead: {
-            guestName: booking.guest_name,
-            guestEmail: booking.guest_email,
-            companyName: validatedData.companyName || (lead?.companyName as string) || 'Unknown',
-            industry: validatedData.industry || (lead?.industry as string) || 'Unknown',
-            employeeCount: validatedData.employeeCount || (lead?.employeeCount as string) || 'Unknown',
-            roiScore: leadScore.score,
-            priority: leadScore.tier,
-            painPoints: leadScore.factors,
-            summary: lead?.notes || 'No conversation summary available.',
-            challenge: validatedData.challenge || '',
-            referralSource: validatedData.referralSource || '',
-            websiteUrl: validatedData.websiteUrl || '',
-            appointmentTime: `${booking.booking_date} at ${booking.start_time}`
-          },
-          emailitApiKey: env.EMAILIT_API_KEY,
-        });
-      })()
-    );
-
-    const results = await Promise.allSettled(sideEffects);
-    results.forEach((r, i) => {
-      if (r.status === 'rejected') {
-        const labels = ['confirmation email', 'CRM sync', 'admin dossier'];
-        console.error(`[Booking] ${labels[i] || `side-effect #${i}`} failed:`, r.reason);
-      }
+    // Run the shared booking pipeline (calendar links, emails, CRM sync, admin dossier)
+    const { calendarLinks } = await runBookingPipeline({
+      booking,
+      bookingType: validatedData.bookingType || 'consultation',
+      env: cfEnv,
+      companyName: validatedData.companyName,
+      industry: validatedData.industry,
+      employeeCount: validatedData.employeeCount,
+      challenge: validatedData.challenge,
+      referralSource: validatedData.referralSource,
+      websiteUrl: validatedData.websiteUrl,
+      paymentAmountCents: validatedData.payment_amount_cents,
     });
 
     return NextResponse.json({
@@ -334,7 +164,6 @@ export async function POST(req: NextRequest) {
         guest_email: booking.guest_email,
         status: booking.status,
       },
-      // Calendar links - click to add to your calendar (no OAuth needed)
       calendarLinks: {
         google: calendarLinks.google,
         outlook: calendarLinks.outlook,
