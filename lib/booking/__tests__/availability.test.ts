@@ -126,8 +126,13 @@ describe('isSlotBooked', () => {
   const bookings: Booking[] = [
     {
       id: '1', guest_name: 'Test', guest_email: 'test@test.com',
+      guest_phone: null, notes: null, company_name: null, industry: null,
+      employee_count: null, challenge: null, referral_source: null, website_url: null,
       booking_date: '2026-02-10', start_time: '10:00', end_time: '10:30',
-      timezone: 'America/New_York', status: 'confirmed', created_at: '',
+      timezone: 'America/New_York', status: 'confirmed', booking_type: 'consultation',
+      stripe_session_id: null, payment_status: null, payment_amount_cents: null,
+      calendar_provider: null, calendar_event_id: null, meeting_link: null,
+      created_at: '',
     },
   ];
 
@@ -182,8 +187,13 @@ describe('getAvailableSlots', () => {
   it('marks booked slots as unavailable', () => {
     const bookings: Booking[] = [{
       id: '1', guest_name: 'Test', guest_email: 'test@test.com',
+      guest_phone: null, notes: null, company_name: null, industry: null,
+      employee_count: null, challenge: null, referral_source: null, website_url: null,
       booking_date: '2026-02-09', start_time: '09:00', end_time: '09:30',
-      timezone: 'America/New_York', status: 'confirmed', created_at: '',
+      timezone: 'America/New_York', status: 'confirmed', booking_type: 'consultation',
+      stripe_session_id: null, payment_status: null, payment_amount_cents: null,
+      calendar_provider: null, calendar_event_id: null, meeting_link: null,
+      created_at: '',
     }];
     const slots = getAvailableSlots('2026-02-09', [], [], bookings);
     const slot9am = slots.find(s => s.time === '09:00');
