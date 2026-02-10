@@ -8,6 +8,34 @@ import {
 } from './types';
 
 /**
+ * Get the current date string (YYYY-MM-DD) and time-of-day minutes
+ * in a specific IANA timezone. Uses Intl APIs so it works on
+ * Cloudflare edge runtime (no Node.js date libraries needed).
+ */
+export function getNowInTimezone(timezone: string): { dateStr: string; minutes: number } {
+  const now = new Date();
+
+  // en-CA locale formats as YYYY-MM-DD
+  const dateStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+
+  // en-GB 24-hour format gives HH:mm
+  const timeStr = new Intl.DateTimeFormat('en-GB', {
+    timeZone: timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(now);
+
+  const [h, m] = timeStr.split(':').map(Number);
+  return { dateStr, minutes: h * 60 + m };
+}
+
+/**
  * Convert minutes from midnight to HH:mm format
  */
 export function minutesToTime(minutes: number): string {
@@ -96,7 +124,7 @@ export function getAvailableSlots(
   settings: AvailabilitySetting[],
   blockedDates: BlockedDate[],
   existingBookings: Booking[],
-  _timezone: string = 'America/Los_Angeles'
+  timezone: string = 'America/Los_Angeles'
 ): TimeSlot[] {
   const slots: TimeSlot[] = [];
 
@@ -122,15 +150,14 @@ export function getAvailableSlots(
   let currentMinutes = daySettings.start_minutes;
   const endMinutes = daySettings.end_minutes;
 
-  // Check if date is today - if so, only show future slots
-  const now = new Date();
-  const today = now.toISOString().split('T')[0];
+  // Check if date is today (in user's timezone) — only show future slots
+  const { dateStr: todayStr, minutes: nowMinutes } = getNowInTimezone(timezone);
   let minStartMinutes = 0;
 
-  if (dateStr === today) {
-    // Convert current time to minutes, add 60 min buffer for same-day bookings
-    const currentMins = now.getHours() * 60 + now.getMinutes() + 60;
-    minStartMinutes = Math.ceil(currentMins / 30) * 30; // Round up to next 30-min slot
+  if (dateStr === todayStr) {
+    // Add 60 min buffer for same-day bookings, round up to next 30-min slot
+    const currentMins = nowMinutes + 60;
+    minStartMinutes = Math.ceil(currentMins / 30) * 30;
   }
 
   while (currentMinutes + MEETING_DURATION <= endMinutes) {
@@ -158,18 +185,25 @@ export function getAvailableSlots(
 }
 
 /**
- * Get available dates for the next N days
+ * Get available dates for the next N days.
+ * When existingBookings are provided, dates where every slot is taken are excluded.
  */
 export function getAvailableDates(
   daysAhead: number = 30,
   settings: AvailabilitySetting[],
-  blockedDates: BlockedDate[]
+  blockedDates: BlockedDate[],
+  existingBookings: Booking[] = [],
+  timezone: string = 'America/Los_Angeles'
 ): string[] {
   const dates: string[] = [];
-  const today = new Date();
+
+  // Use timezone-aware "today" so the 30-day window starts from the
+  // correct local date (not UTC, which can be a day ahead in the evening).
+  const { dateStr: todayStr } = getNowInTimezone(timezone);
+  const todayDate = new Date(todayStr + 'T12:00:00'); // noon avoids date rollover
 
   for (let i = 1; i <= daysAhead; i++) {
-    const date = new Date(today);
+    const date = new Date(todayDate);
     date.setDate(date.getDate() + i);
     const dateStr = date.toISOString().split('T')[0];
 
@@ -179,12 +213,22 @@ export function getAvailableDates(
     }
 
     // Check if day of week is available
-    const weekday = date.getDay();
+    const weekday = getDayOfWeek(dateStr);
     const daySettings = getWeekdaySettings(weekday, settings);
 
-    if (daySettings && daySettings.is_available) {
-      dates.push(dateStr);
+    if (!daySettings || !daySettings.is_available) {
+      continue;
     }
+
+    // If bookings were provided, verify at least one slot is still open
+    if (existingBookings.length > 0) {
+      const slots = getAvailableSlots(dateStr, settings, blockedDates, existingBookings, timezone);
+      if (!slots.some((s) => s.available)) {
+        continue;
+      }
+    }
+
+    dates.push(dateStr);
   }
 
   return dates;
