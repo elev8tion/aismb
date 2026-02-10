@@ -122,13 +122,21 @@ export async function POST(request: NextRequest) {
     await sessionStorage.addMessage(sessionId, 'assistant', response);
 
     if (leadInfo.email) {
+      // Derive outcome from the routed intent
+      const outcome = intent === 'booking' ? 'booking_initiated'
+        : intent === 'roi' ? 'roi_calculated'
+        : 'info_provided';
+
       console.log(`Syncing Scored Lead (${leadScore.score}/100):`, leadInfo.email);
       syncLeadToCRM({
         ...leadInfo,
         email: leadInfo.email!,
         source: 'Voice Agent',
         sourceDetail: `${language === 'es' ? 'Spanish' : 'English'} (${leadScore.tier} priority)`,
-        notes: `AI Scored as ${leadScore.tier} (${leadScore.score}/100). Factors: ${leadScore.factors.join(', ')}`
+        notes: `AI Scored as ${leadScore.tier} (${leadScore.score}/100). Factors: ${leadScore.factors.join(', ')}`,
+        intents: intent,
+        qualified_score: leadScore.score,
+        outcome,
       }, env as unknown as Record<string, string>).catch(err => console.error('Failed to sync lead:', err));
     }
 

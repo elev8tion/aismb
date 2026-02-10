@@ -18,6 +18,13 @@ export interface LeadData {
   source?: string;
   sourceDetail?: string;
   notes?: string;
+  // Rich CRM fields populated from voice agent analysis
+  sentiment?: string;
+  intents?: string;
+  pain_points?: string;
+  objections?: string;
+  outcome?: string;
+  qualified_score?: number;
 }
 
 interface NCBRecord {
@@ -26,6 +33,12 @@ interface NCBRecord {
   industry?: string;
   employeeCount?: string;
   notes?: string;
+  sentiment?: string;
+  intents?: string;
+  pain_points?: string;
+  objections?: string;
+  outcome?: string;
+  qualified_score?: number;
   [key: string]: unknown;
 }
 
@@ -130,6 +143,41 @@ export async function syncBookingToCRM(data: {
   return true;
 }
 
+// ─── Keyword patterns for extraction ─────────────────────────────────────────
+
+const PAIN_POINT_PATTERNS = [
+  /(?:waste|wasting|losing)\s+(?:time|hours|money)/i,
+  /too much (?:time|paperwork|manual)/i,
+  /(?:can't|cannot|don't) keep up/i,
+  /(?:overwhelmed|understaffed|short-?staffed|burned out)/i,
+  /(?:scheduling|dispatching|invoicing|billing)\s+(?:is|takes|nightmare|headache|mess)/i,
+  /no-?shows?/i,
+  /(?:missed|missing|late)\s+(?:calls?|appointments?|follow-?ups?)/i,
+  /(?:customer|client)\s+(?:complaints?|frustrated|unhappy)/i,
+  /(?:slow|inefficient|disorganized|outdated)\s+(?:process|system|workflow)/i,
+  /(?:can't|cannot)\s+(?:scale|grow|keep track)/i,
+];
+
+const OBJECTION_PATTERNS = [
+  /(?:too (?:expensive|costly|much)|can't afford|budget|price)/i,
+  /(?:not sure|don't know|skeptical|sounds? too good)/i,
+  /(?:not ready|maybe later|need to think|give me time)/i,
+  /(?:tried (?:something|this) before|didn't work|failed)/i,
+  /(?:my team|staff|employees?) (?:won't|wouldn't|can't)\s+(?:use|adopt|learn)/i,
+  /(?:what if|what happens if|guarantee|risk)/i,
+];
+
+const POSITIVE_SIGNALS = [
+  'excited', 'interested', 'love', 'amazing', 'great', 'perfect',
+  'sounds good', 'let\'s do it', 'sign me up', 'ready', 'when can we start',
+  'impressed', 'exactly what', 'need this',
+];
+
+const NEGATIVE_SIGNALS = [
+  'not interested', 'no thanks', 'waste of time', 'scam', 'don\'t need',
+  'too expensive', 'pass', 'not for me', 'don\'t think so',
+];
+
 /**
  * Extract lead data from conversation history using simple pattern matching
  */
@@ -141,6 +189,8 @@ export function extractLeadInfo(messages: { role: string, content: string }[]): 
     .map(m => m.content)
     .join(' ');
 
+  const conversationLower = conversation.toLowerCase();
+
   // Email extraction
   const emailMatch = conversation.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
   if (emailMatch) info.email = emailMatch[0].toLowerCase();
@@ -148,7 +198,7 @@ export function extractLeadInfo(messages: { role: string, content: string }[]): 
   // Industry detection (basic keywords)
   const industries = ['hvac', 'plumbing', 'construction', 'real estate', 'retail', 'property management', 'legal'];
   for (const industry of industries) {
-    if (conversation.toLowerCase().includes(industry)) {
+    if (conversationLower.includes(industry)) {
       info.industry = industry.charAt(0).toUpperCase() + industry.slice(1);
       break;
     }
@@ -157,6 +207,41 @@ export function extractLeadInfo(messages: { role: string, content: string }[]): 
   // Employee count detection
   const empMatch = conversation.match(/\b(5-10|10-25|25-50|50\+)\b/);
   if (empMatch) info.employeeCount = empMatch[0];
+
+  // Sentiment detection
+  let positiveCount = 0;
+  let negativeCount = 0;
+  for (const signal of POSITIVE_SIGNALS) {
+    if (conversationLower.includes(signal)) positiveCount++;
+  }
+  for (const signal of NEGATIVE_SIGNALS) {
+    if (conversationLower.includes(signal)) negativeCount++;
+  }
+  if (positiveCount > 0 || negativeCount > 0) {
+    info.sentiment = positiveCount > negativeCount ? 'positive'
+      : negativeCount > positiveCount ? 'negative'
+      : 'neutral';
+  }
+
+  // Pain point extraction
+  const painPoints: string[] = [];
+  for (const pattern of PAIN_POINT_PATTERNS) {
+    const match = conversation.match(pattern);
+    if (match) painPoints.push(match[0]);
+  }
+  if (painPoints.length > 0) {
+    info.pain_points = painPoints.slice(0, 5).join('; ');
+  }
+
+  // Objection extraction
+  const objections: string[] = [];
+  for (const pattern of OBJECTION_PATTERNS) {
+    const match = conversation.match(pattern);
+    if (match) objections.push(match[0]);
+  }
+  if (objections.length > 0) {
+    info.objections = objections.slice(0, 5).join('; ');
+  }
 
   return info;
 }
