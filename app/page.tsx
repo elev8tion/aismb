@@ -6,18 +6,12 @@ import ProblemSection from '@/components/ProblemSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import UseCaseSelector from '@/components/UseCaseSelector';
 import CaseStudiesSection from '@/components/CaseStudiesSection';
-import dynamic from 'next/dynamic';
 import PricingSection from '@/components/PricingSection';
 import FAQSection from '@/components/FAQSection';
 import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
-const VoiceAgentFAB = dynamic(() => import('@/components/VoiceAgentFAB'), {
-  ssr: false,
-});
-const ROICalculator = dynamic(() => import('@/components/ROICalculator'), {
-  loading: () => <div className="h-64" />,
-});
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { LazyROICalculator, LazyVoiceAgentFAB } from '@/components/LazyClientComponents';
 
 export default function Home() {
   return (
@@ -30,9 +24,7 @@ export default function Home() {
         <HowItWorksSection />
         <UseCaseSelector />
         <CaseStudiesSection />
-        <ErrorBoundary>
-          <ROICalculator />
-        </ErrorBoundary>
+        <LazyROICalculator />
         <ErrorBoundary>
           <PricingSection />
         </ErrorBoundary>
@@ -43,9 +35,7 @@ export default function Home() {
         <Footer />
 
         {/* Voice Agent FAB */}
-        <ErrorBoundary fallback={null}>
-          <VoiceAgentFAB />
-        </ErrorBoundary>
+        <LazyVoiceAgentFAB />
       </main>
     </ClientLayout>
   );
