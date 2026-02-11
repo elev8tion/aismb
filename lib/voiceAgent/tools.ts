@@ -41,14 +41,16 @@ async function loadSettings(env: Record<string, string>) {
     if (!settings?.length) {
       settings = DEFAULT_AVAILABILITY.map((s, idx) => ({ id: `default-${idx}`, ...s }));
     }
-  } catch {
+  } catch (err) {
+    console.error('Failed to load availability settings, using defaults:', err);
     settings = DEFAULT_AVAILABILITY.map((s, idx) => ({ id: `default-${idx}`, ...s }));
   }
 
   let blockedDates: BlockedDate[];
   try {
     blockedDates = await fetchFromNCB<BlockedDate>(env, 'blocked_dates');
-  } catch {
+  } catch (err) {
+    console.error('Failed to load blocked dates:', err);
     blockedDates = [];
   }
 

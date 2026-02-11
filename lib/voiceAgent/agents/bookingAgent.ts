@@ -11,6 +11,7 @@ import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/ch
 import { BOOKING_AGENT_PROMPT, SPANISH_INSTRUCTION } from './prompts';
 import { BOOKING_TOOLS, executeTool, type ToolContext } from '../tools';
 import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
+import { historyToMessages } from './utils';
 
 /** Booking tools WITHOUT respond_to_user — used on first call to force availability check */
 const AVAILABILITY_ONLY_TOOLS = BOOKING_TOOLS.filter(
@@ -42,10 +43,7 @@ export async function runBookingAgent(
   messages.push({ role: 'system', content: BOOKING_AGENT_PROMPT });
 
   // Conversation history
-  messages.push(...history.map((m) => ({
-    role: m.role as 'user' | 'assistant',
-    content: m.content,
-  })));
+  messages.push(...historyToMessages(history));
 
   // Current question
   messages.push({ role: 'user', content: question });

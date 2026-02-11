@@ -10,6 +10,7 @@ import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/ch
 import { ROI_AGENT_PROMPT, SPANISH_INSTRUCTION } from './prompts';
 import { ROI_TOOLS, executeTool, type ToolContext } from '../tools';
 import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
+import { historyToMessages } from './utils';
 import type { ConversationMessage } from '../sessionStorage';
 
 export interface ROIAgentOptions {
@@ -34,10 +35,7 @@ export async function runROIAgent(
   messages.push({ role: 'system', content: ROI_AGENT_PROMPT });
 
   // Conversation history
-  messages.push(...history.map((m) => ({
-    role: m.role as 'user' | 'assistant',
-    content: m.content,
-  })));
+  messages.push(...historyToMessages(history));
 
   // Current question
   messages.push({ role: 'user', content: question });

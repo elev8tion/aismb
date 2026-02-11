@@ -5,12 +5,12 @@
  */
 
 import type OpenAI from 'openai';
-import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
 import { INFO_AGENT_PROMPT, SPANISH_INSTRUCTION, HIGH_VALUE_NUDGE } from './prompts';
 import { INFO_KNOWLEDGE_BASE } from '../knowledgeBase';
 import { classifyQuestion } from '../questionClassifier';
 import { MODELS, buildChatParams } from '@/lib/openai/config';
 import type { ConversationMessage } from '../sessionStorage';
+import { historyToMessages } from './utils';
 
 export interface InfoAgentOptions {
   language?: 'en' | 'es';
@@ -42,10 +42,7 @@ export async function runInfoAgent(
   messages.push({ role: 'system', content: INFO_KNOWLEDGE_BASE });
 
   // Conversation history
-  messages.push(...history.map((m) => ({
-    role: m.role as 'user' | 'assistant',
-    content: m.content,
-  })));
+  messages.push(...historyToMessages(history));
 
   // Current question
   messages.push({ role: 'user', content: question });
@@ -54,7 +51,7 @@ export async function runInfoAgent(
     buildChatParams(MODELS.chat, messages, {
       temperature: 0.7,
       max_tokens: classification.maxTokens,
-    }) as unknown as ChatCompletionCreateParamsNonStreaming
+    })
   );
 
   return completion.choices[0]?.message?.content || 'I apologize, I could not generate a response.';

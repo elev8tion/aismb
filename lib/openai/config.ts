@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
 
 /**
  * Create OpenAI client with API key from Cloudflare env
@@ -46,12 +47,12 @@ export const RATE_LIMIT = {
  */
 export function buildChatParams(
   model: string,
-  messages: unknown[],
-  options: { temperature?: number; max_tokens?: number; tools?: unknown[] } = {}
-) {
+  messages: ChatCompletionCreateParamsNonStreaming['messages'],
+  options: { temperature?: number; max_tokens?: number; tools?: ChatCompletionCreateParamsNonStreaming['tools'] } = {}
+): ChatCompletionCreateParamsNonStreaming {
   const isOSeries = /^o[0-9]/.test(model);
 
-  const params: Record<string, unknown> = {
+  const params: Record<string, unknown> & { model: string; messages: ChatCompletionCreateParamsNonStreaming['messages'] } = {
     model,
     messages,
   };
@@ -74,5 +75,5 @@ export function buildChatParams(
     }
   }
 
-  return params;
+  return params as ChatCompletionCreateParamsNonStreaming;
 }
