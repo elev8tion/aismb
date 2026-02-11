@@ -38,3 +38,41 @@ export const RATE_LIMIT = {
   maxRequestsPerMinute: 10,
   windowMs: 60 * 1000,
 };
+
+/**
+ * Build chat completion params, handling o-series model differences.
+ * o-series models (o1, o3, o4-mini) reject `temperature` and use
+ * `max_completion_tokens` instead of `max_tokens`.
+ */
+export function buildChatParams(
+  model: string,
+  messages: Array<{ role: string; content: string }>,
+  options: { temperature?: number; max_tokens?: number; tools?: unknown[] } = {}
+) {
+  const isOSeries = /^o[0-9]/.test(model);
+
+  const params: Record<string, unknown> = {
+    model,
+    messages,
+  };
+
+  if (options.tools) {
+    params.tools = options.tools;
+  }
+
+  if (isOSeries) {
+    if (options.max_tokens) {
+      params.max_completion_tokens = options.max_tokens;
+    }
+    // o-series does not accept temperature
+  } else {
+    if (options.temperature !== undefined) {
+      params.temperature = options.temperature;
+    }
+    if (options.max_tokens) {
+      params.max_tokens = options.max_tokens;
+    }
+  }
+
+  return params;
+}
