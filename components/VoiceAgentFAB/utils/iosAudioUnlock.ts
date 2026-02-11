@@ -24,8 +24,19 @@ export class IOSAudioPlayer {
   /**
    * Call this during a user interaction (tap/click) to unlock audio playback.
    * This creates a silent audio element and "warms it up" for iOS Safari.
+   * MUST always resume AudioContext even if already unlocked — iOS can
+   * suspend it between gestures.
    */
   unlock(): void {
+    // Always resume AudioContext during user gesture (iOS can suspend it anytime)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      try {
+        void this.audioContext.resume();
+      } catch (err) {
+        console.warn('AudioContext resume during unlock failed (non-fatal):', err);
+      }
+    }
+
     if (this.isUnlocked && this.audio) {
       return;
     }
