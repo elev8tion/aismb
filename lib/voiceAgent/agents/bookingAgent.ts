@@ -7,9 +7,10 @@
  */
 
 import type OpenAI from 'openai';
+import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
 import { BOOKING_AGENT_PROMPT, SPANISH_INSTRUCTION } from './prompts';
 import { BOOKING_TOOLS, executeTool, type ToolContext } from '../tools';
-import { MODELS, TOKEN_LIMITS } from '@/lib/openai/config';
+import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
 
 /** Booking tools WITHOUT respond_to_user — used on first call to force availability check */
 const AVAILABILITY_ONLY_TOOLS = BOOKING_TOOLS.filter(
@@ -55,13 +56,13 @@ export async function runBookingAgent(
   //   so the LLM can collect info, create booking, or check more slots as needed
   const isFirstRequest = !options.isContinuation;
   const completion = await openai.chat.completions.create({
-    model: MODELS.chat,
-    messages,
-    temperature: 0.5,
-    max_tokens: TOKEN_LIMITS.withTools,
-    tools: isFirstRequest ? AVAILABILITY_ONLY_TOOLS : BOOKING_TOOLS,
+    ...buildChatParams(MODELS.chat, messages, {
+      temperature: 0.5,
+      max_tokens: TOKEN_LIMITS.withTools,
+      tools: isFirstRequest ? AVAILABILITY_ONLY_TOOLS : BOOKING_TOOLS,
+    }),
     tool_choice: isFirstRequest ? 'required' : 'auto',
-  });
+  } as ChatCompletionCreateParamsNonStreaming);
 
   let responseMessage = completion.choices[0]?.message;
   let toolRound = 0;
@@ -95,13 +96,13 @@ export async function runBookingAgent(
 
     // Follow-up calls use tool_choice 'auto' so the LLM can respond with text
     const followUp = await openai.chat.completions.create({
-      model: MODELS.chat,
-      messages,
-      temperature: 0.5,
-      max_tokens: TOKEN_LIMITS.withTools,
-      tools: BOOKING_TOOLS,
+      ...buildChatParams(MODELS.chat, messages, {
+        temperature: 0.5,
+        max_tokens: TOKEN_LIMITS.withTools,
+        tools: BOOKING_TOOLS,
+      }),
       tool_choice: 'auto',
-    });
+    } as ChatCompletionCreateParamsNonStreaming);
     responseMessage = followUp.choices[0]?.message;
   }
 

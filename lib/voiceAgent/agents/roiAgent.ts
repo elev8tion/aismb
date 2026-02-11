@@ -6,9 +6,10 @@
  */
 
 import type OpenAI from 'openai';
+import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
 import { ROI_AGENT_PROMPT, SPANISH_INSTRUCTION } from './prompts';
 import { ROI_TOOLS, executeTool, type ToolContext } from '../tools';
-import { MODELS, TOKEN_LIMITS } from '@/lib/openai/config';
+import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
 import type { ConversationMessage } from '../sessionStorage';
 
 export interface ROIAgentOptions {
@@ -42,13 +43,13 @@ export async function runROIAgent(
   messages.push({ role: 'user', content: question });
 
   const completion = await openai.chat.completions.create({
-    model: MODELS.chat,
-    messages,
-    temperature: 0.7,
-    max_tokens: TOKEN_LIMITS.roiAgent,
-    tools: ROI_TOOLS,
+    ...buildChatParams(MODELS.chat, messages, {
+      temperature: 0.7,
+      max_tokens: TOKEN_LIMITS.roiAgent,
+      tools: ROI_TOOLS,
+    }),
     tool_choice: 'auto',
-  });
+  } as ChatCompletionCreateParamsNonStreaming);
 
   let responseMessage = completion.choices[0]?.message;
   let toolRound = 0;
@@ -70,13 +71,13 @@ export async function runROIAgent(
     }
 
     const followUp = await openai.chat.completions.create({
-      model: MODELS.chat,
-      messages,
-      temperature: 0.7,
-      max_tokens: TOKEN_LIMITS.roiAgent,
-      tools: ROI_TOOLS,
+      ...buildChatParams(MODELS.chat, messages, {
+        temperature: 0.7,
+        max_tokens: TOKEN_LIMITS.roiAgent,
+        tools: ROI_TOOLS,
+      }),
       tool_choice: 'auto',
-    });
+    } as ChatCompletionCreateParamsNonStreaming);
     responseMessage = followUp.choices[0]?.message;
   }
 

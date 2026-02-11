@@ -46,7 +46,7 @@ export const RATE_LIMIT = {
  */
 export function buildChatParams(
   model: string,
-  messages: Array<{ role: string; content: string }>,
+  messages: unknown[],
   options: { temperature?: number; max_tokens?: number; tools?: unknown[] } = {}
 ) {
   const isOSeries = /^o[0-9]/.test(model);
