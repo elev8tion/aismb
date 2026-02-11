@@ -13,9 +13,9 @@ export class CalDAVProvider implements ICalendarProvider {
   private dataApiUrl: string;
   private instance: string;
 
-  constructor() {
-    this.dataApiUrl = process.env.NCB_DATA_API_URL || '';
-    this.instance = process.env.NCB_INSTANCE || '';
+  constructor(env: Record<string, string>) {
+    this.dataApiUrl = env.NCB_DATA_API_URL || '';
+    this.instance = env.NCB_INSTANCE || '';
   }
 
   /**

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         console.warn(`[EmailIt Webhook] Bounce for ${payload.email}: ${payload.reason}`);
         // Alert admin about bounces
         const { env } = getRequestContext();
-        const apiKey = env.EMAILIT_API_KEY || process.env.EMAILIT_API_KEY;
+        const apiKey = env.EMAILIT_API_KEY;
         if (apiKey) {
           try {
             await sendViaEmailIt({
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       case 'email.inbound': {
         // Forward inbound reply to admin
         const { env: inboundEnv } = getRequestContext();
-        const inboundApiKey = inboundEnv.EMAILIT_API_KEY || process.env.EMAILIT_API_KEY;
+        const inboundApiKey = inboundEnv.EMAILIT_API_KEY;
         if (inboundApiKey) {
           try {
             await sendViaEmailIt({

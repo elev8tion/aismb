@@ -16,8 +16,8 @@ export const runtime = 'edge';
 
 function getNCBConfig() {
   const { env } = getRequestContext();
-  const instance = env.NCB_INSTANCE || process.env.NCB_INSTANCE;
-  const dataApiUrl = env.NCB_DATA_API_URL || process.env.NCB_DATA_API_URL;
+  const instance = env.NCB_INSTANCE;
+  const dataApiUrl = env.NCB_DATA_API_URL;
   if (!instance || !dataApiUrl) throw new Error('Missing NCB environment variables');
   return { instance, dataApiUrl };
 }

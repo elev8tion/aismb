@@ -11,10 +11,14 @@ export class GoogleCalendarProvider implements ICalendarProvider {
   private integration: CalendarIntegration | null = null;
   private dataApiUrl: string;
   private instance: string;
+  private clientId: string;
+  private clientSecret: string;
 
-  constructor() {
-    this.dataApiUrl = process.env.NCB_DATA_API_URL || '';
-    this.instance = process.env.NCB_INSTANCE || '';
+  constructor(env: Record<string, string>) {
+    this.dataApiUrl = env.NCB_DATA_API_URL || '';
+    this.instance = env.NCB_INSTANCE || '';
+    this.clientId = env.GOOGLE_CLIENT_ID || '';
+    this.clientSecret = env.GOOGLE_CLIENT_SECRET || '';
   }
 
   /**
@@ -72,8 +76,8 @@ export class GoogleCalendarProvider implements ICalendarProvider {
 
     // Refresh the token
     try {
-      const clientId = process.env.GOOGLE_CLIENT_ID;
-      const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+      const clientId = this.clientId;
+      const clientSecret = this.clientSecret;
 
       const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -294,9 +298,9 @@ export class GoogleCalendarProvider implements ICalendarProvider {
 /**
  * Generate Google OAuth URL for initial authorization
  */
-export function generateGoogleOAuthUrl(state?: string): string {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+export function generateGoogleOAuthUrl(env: Record<string, string>, state?: string): string {
+  const clientId = env.GOOGLE_CLIENT_ID;
+  const redirectUri = env.GOOGLE_REDIRECT_URI;
 
   const scopes = [
     'https://www.googleapis.com/auth/calendar',
