@@ -138,8 +138,6 @@ export async function POST(request: NextRequest) {
       }, cfEnv).catch((err) => console.error('Failed to sync ROI lead to CRM:', err));
     }
 
-    console.log('[ROI] Email API key available:', !!emailitApiKey);
-
     if (!emailitApiKey) {
       console.error('[ROI] EMAILIT_API_KEY missing — cannot send emails');
       return NextResponse.json({
@@ -213,8 +211,6 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       console.error('[Email] Failed to send ROI dossier:', err instanceof Error ? err.message : err);
     }
-
-    console.log('ROI LEAD PROCESSED:', { email, industry, employees, tier, roi: `${metrics?.roi}%` });
 
     return NextResponse.json({
       success: true,

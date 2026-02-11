@@ -137,8 +137,6 @@ class ResponseCache {
     // Increment hit count for analytics
     entry.hitCount++;
 
-    console.log(`✅ Cache HIT: "${key}" (hits: ${entry.hitCount})`);
-
     return {
       textResponse: entry.textResponse,
       audioUint8Array: entry.audioUint8Array,
@@ -151,7 +149,6 @@ class ResponseCache {
   set(question: string, textResponse: string, audioUint8Array?: Uint8Array): void {
     const key = this.normalizeQuestion(question);
     if (!key) {
-      console.log(`⚠️ Question not cacheable: "${question}"`);
       return; // Don't cache non-standard questions
     }
 
@@ -170,7 +167,6 @@ class ResponseCache {
       hitCount: 0,
     });
 
-    console.log(`💾 Cached response for: "${key}"`);
   }
 
   /**
@@ -194,7 +190,6 @@ class ResponseCache {
    */
   clear(): void {
     this.cache.clear();
-    console.log('🗑️ Cache cleared');
   }
 
   /**
@@ -211,9 +206,6 @@ class ResponseCache {
       }
     }
 
-    if (cleared > 0) {
-      console.log(`🗑️ Cleared ${cleared} expired cache entries`);
-    }
   }
 }
 

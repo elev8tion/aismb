@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    console.log('Chat API received:', body);
 
     const { question, sessionId, language } = body as {
       question: string;
@@ -68,7 +67,6 @@ export async function POST(request: NextRequest) {
 
     // ─── Intent classification (deterministic, no LLM) ──────────────────
     const { intent, isContinuation } = classifyIntent(sanitizedQuestion, conversationHistory);
-    console.log(`Intent: ${intent}${isContinuation ? ' (continuation)' : ''} for: "${sanitizedQuestion.slice(0, 60)}"`);
 
     // ─── Management intent (handled directly, no LLM) ───────────────────
     if (intent === 'management') {
@@ -127,7 +125,6 @@ export async function POST(request: NextRequest) {
         : intent === 'roi' ? 'roi_calculated'
         : 'info_provided';
 
-      console.log(`Syncing Scored Lead (${leadScore.score}/100):`, leadInfo.email);
       syncLeadToCRM({
         ...leadInfo,
         email: leadInfo.email!,

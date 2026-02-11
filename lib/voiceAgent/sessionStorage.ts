@@ -52,7 +52,6 @@ class InMemorySessionStorage implements SessionStorage {
     for (const [sessionId, session] of this.sessions.entries()) {
       if (now - session.lastAccessedAt > this.SESSION_TTL) {
         this.sessions.delete(sessionId);
-        console.log(`🗑️ Cleaned up expired session: ${sessionId}`);
       }
     }
   }
@@ -88,7 +87,6 @@ class InMemorySessionStorage implements SessionStorage {
     };
 
     this.sessions.set(sessionId, session);
-    console.log(`📝 Created new session: ${sessionId}`);
     return session;
   }
 
@@ -108,7 +106,6 @@ class InMemorySessionStorage implements SessionStorage {
     // Limit to last 10 messages to control token usage
     if (session.conversationHistory.length > 10) {
       session.conversationHistory = session.conversationHistory.slice(-10);
-      console.log(`✂️ Trimmed session ${sessionId} to last 10 messages`);
     }
 
     await this.saveSession(session);
@@ -117,7 +114,6 @@ class InMemorySessionStorage implements SessionStorage {
 
   async deleteSession(sessionId: string): Promise<void> {
     this.sessions.delete(sessionId);
-    console.log(`🗑️ Deleted session: ${sessionId}`);
   }
 
   async getConversationHistory(sessionId: string): Promise<ConversationMessage[]> {
@@ -183,7 +179,6 @@ class KVSessionStorage implements SessionStorage {
     };
 
     await this.saveSession(session);
-    console.log(`📝 Created new KV session: ${sessionId}`);
     return session;
   }
 
@@ -203,7 +198,6 @@ class KVSessionStorage implements SessionStorage {
     // Limit to last 10 messages to control token usage
     if (session.conversationHistory.length > 10) {
       session.conversationHistory = session.conversationHistory.slice(-10);
-      console.log(`✂️ Trimmed KV session ${sessionId} to last 10 messages`);
     }
 
     await this.saveSession(session);
@@ -213,7 +207,6 @@ class KVSessionStorage implements SessionStorage {
   async deleteSession(sessionId: string): Promise<void> {
     try {
       await this.kv.delete(`session:${sessionId}`);
-      console.log(`🗑️ Deleted KV session: ${sessionId}`);
     } catch (error) {
       console.error('Failed to delete session from KV:', error);
     }
@@ -237,13 +230,11 @@ let inMemoryStorage: InMemorySessionStorage | null = null;
  */
 export function getSessionStorage(kv?: KVNamespace): SessionStorage {
   if (kv) {
-    console.log('💾 Using Cloudflare KV for session storage');
     return new KVSessionStorage(kv);
   }
 
   // Use singleton in-memory storage
   if (!inMemoryStorage) {
-    console.log('💾 Using in-memory storage for local development');
     inMemoryStorage = new InMemorySessionStorage();
   }
 

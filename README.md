@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI KRE8TION Partners — kre8tion.com
 
-## Getting Started
+Next.js 15 App Router landing page deployed on **Cloudflare Pages**. Features an AI-powered voice agent that handles conversational booking, ROI calculation, lead qualification with CRM sync, email confirmations, and Stripe-powered assessment payments.
 
-First, run the development server:
+## Architecture
+
+- **Runtime**: Cloudflare Workers edge runtime — uses `getRequestContext().env` (not `process.env`)
+- **KV Namespaces**: `VOICE_SESSIONS`, `RATE_LIMIT_KV`, `COST_MONITOR_KV`, `RESPONSE_CACHE_KV`
+- **OpenAI**: `gpt-4.1-nano` (chat), `whisper-1` (STT), `gpt-4o-mini-tts` (TTS)
+- **CRM**: NocodeBackend (NCB) — OpenAPI for guest writes, Data Proxy for authenticated CRUD
+- **Email**: EmailIt transactional API (`bookings@kre8tion.com`)
+- **Payments**: Stripe Checkout for $250 on-site assessment fee
+
+### Key Modules
+
+| Module | Purpose |
+|--------|---------|
+| `lib/shared/roiEngine.ts` | ROI calculation math |
+| `lib/booking/createBooking.ts` | Booking pipeline (NCB + email + calendar) |
+| `lib/ncb/client.ts` | NCB API client |
+| `lib/booking/calendarLinks.ts` | Google/Outlook calendar link generation |
+| `lib/shared/formatters.ts` | Date/time formatting utilities |
+| `lib/voiceAgent/` | Voice agent: intent routing, agents, lead scoring, session storage |
+| `lib/email/sendEmail.ts` | EmailIt transactional sender + templates |
+| `lib/security/` | Rate limiting, cost monitoring, input validation |
+
+## Local Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install --legacy-peer-deps
+npx wrangler dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Copy `.env.example` to `.env.local` and fill in your keys. KV namespace bindings are configured in `wrangler.toml`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.example` for the full list. Key variables:
 
-## Learn More
+- `OPENAI_API_KEY` — OpenAI API access
+- `NCB_*` — NocodeBackend instance and API URLs
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — Stripe payments
+- `EMAILIT_API_KEY` — EmailIt transactional email
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google Calendar OAuth (optional)
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Auto-deploys via GitHub Actions on push to `main`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+push to main → GitHub Actions → npm run pages:build → wrangler pages deploy
+```
 
-## Deploy on Vercel
+Manual deploy:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run pages:build
+npx wrangler pages deploy .vercel/output/static --project-name=kre8tion-app --commit-dirty=true --no-bundle
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Check deploy status: `gh run list --limit 3`
+
+## Testing
+
+```bash
+npm run test        # watch mode
+npm run test:run    # single run
+```

@@ -138,7 +138,6 @@ export default function VoiceAgentFAB() {
   // Process full voice interaction flow
   const processVoiceInteraction = useCallback(async (transcribedText: string) => {
     const currentLanguage = languageRef.current;
-    console.log(`🌐 processVoiceInteraction called with language: ${currentLanguage}`);
     setTranscript(transcribedText);
     setVoiceState('processing');
 

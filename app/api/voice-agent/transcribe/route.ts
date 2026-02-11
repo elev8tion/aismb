@@ -29,8 +29,6 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audio') as File;
     const language = (formData.get('language') as string | null)?.toLowerCase();
 
-    console.log(`🌐 Transcribe language received: ${language || 'not set'}`);
-
     if (!audioFile) {
       return NextResponse.json(
         { error: 'No audio file provided' },
@@ -48,14 +46,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log received audio details for debugging
-    const audioInfo = {
-      size: audioFile.size,
-      type: audioFile.type,
-      name: audioFile.name,
-    };
-    console.log(`📤 Transcribing audio:`, JSON.stringify(audioInfo));
-
     // Convert File to Uint8Array for OpenAI API (edge runtime compatible)
     const buffer = new Uint8Array(await audioFile.arrayBuffer());
 
@@ -72,7 +62,6 @@ export async function POST(request: NextRequest) {
     };
     const extension = getExtension(audioFile.type);
     const fileName = `audio.${extension}`;
-    console.log(`📁 Creating file: ${fileName} from MIME type: ${audioFile.type}`);
     const file = new File([buffer], fileName, { type: audioFile.type });
 
     // Call OpenAI Whisper API (optionally hint language if provided)
@@ -83,10 +72,7 @@ export async function POST(request: NextRequest) {
       ...(language === 'es' || language === 'en' ? { language } : {}),
     });
 
-    console.log('Transcription result:', transcription.text);
-
     const duration = Date.now() - startTime;
-    console.log(`⏱️ Transcription completed in ${duration}ms`);
 
     return NextResponse.json({
       text: transcription.text,

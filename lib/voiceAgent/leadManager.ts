@@ -56,14 +56,12 @@ export async function syncLeadToCRM(leadData: LeadData, env: Record<string, stri
   if (existingLeads && existingLeads.length > 0) {
     // 2. Update existing lead
     const leadId = existingLeads[0].id;
-    console.log(`Updating existing lead ${leadId} (${leadData.email})`);
     return await ncbRequest<NCBRecord>('PUT', `update/leads/${leadId}`, env, {
       ...leadData,
       updated_at: new Date().toISOString()
     });
   } else {
     // 3. Create new lead
-    console.log(`Creating new lead for ${leadData.email}`);
     return await ncbRequest<NCBRecord>('POST', 'create/leads', env, {
       ...leadData,
       status: 'new',

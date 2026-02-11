@@ -27,8 +27,6 @@ export async function POST(request: NextRequest) {
   try {
     const { text, language } = await request.json() as { text: string; language?: 'en' | 'es' };
 
-    console.log(`🌐 Speak language received: ${language || 'not set'}`);
-
     // Input validation
     const validation = validateText(text);
     if (!validation.valid) {
@@ -40,8 +38,6 @@ export async function POST(request: NextRequest) {
     }
 
     const sanitizedText = validation.sanitized!;
-
-    console.log('🔊 Generating TTS audio...');
 
     const selectedVoice = (() => {
       if (language === 'es') return MODELS.voice; // keep current unless changed later
@@ -61,7 +57,6 @@ export async function POST(request: NextRequest) {
     const buffer = new Uint8Array(await mp3.arrayBuffer());
 
     const duration = Date.now() - startTime;
-    console.log(`⏱️ TTS generated in ${duration}ms`);
 
     // Return audio file
     return new NextResponse(buffer, {

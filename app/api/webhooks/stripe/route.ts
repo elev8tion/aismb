@@ -126,16 +126,13 @@ export async function POST(req: NextRequest) {
       // Dedup: check if booking already created by success page
       const exists = await bookingExistsForSession(session.id);
       if (exists) {
-        console.log(`Webhook: Booking already exists for session ${session.id}`);
         return NextResponse.json({ received: true });
       }
 
       const metadata = session.metadata as Record<string, string>;
       const created = await createBookingFromSession(metadata, session.id);
 
-      if (created) {
-        console.log(`Webhook: Created booking for session ${session.id}`);
-      } else {
+      if (!created) {
         console.error(`Webhook: Failed to create booking for session ${session.id}`);
       }
     }

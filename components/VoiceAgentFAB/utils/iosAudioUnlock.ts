@@ -99,7 +99,6 @@ export class IOSAudioPlayer {
       this.gainNode.connect(this.audioContext.destination);
 
       this.isAudioContextConnected = true;
-      console.log(`🔊 Audio gain boost enabled: ${this.VOLUME_BOOST}x`);
     } catch (err) {
       console.warn('Failed to set up audio gain boost:', err);
     }

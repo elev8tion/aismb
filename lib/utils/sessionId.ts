@@ -36,9 +36,6 @@ export function getSessionId(): string {
     if (!sessionId) {
       sessionId = generateSessionId();
       sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
-      console.log('📝 Created new session:', sessionId);
-    } else {
-      console.log('📝 Using existing session:', sessionId);
     }
 
     return sessionId;
@@ -60,7 +57,6 @@ export function clearSessionId(): void {
 
   try {
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    console.log('🗑️ Cleared session ID');
   } catch (error) {
     console.warn('Failed to clear session ID:', error);
   }

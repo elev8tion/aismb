@@ -32,18 +32,11 @@ export async function POST(req: NextRequest) {
     const payload: EmailItEvent = await req.json();
     const eventType = payload.event;
 
-    console.log(`[EmailIt Webhook] Received event: ${eventType}`, {
-      email: payload.email,
-      subject: payload.subject,
-    });
-
     switch (eventType) {
       case 'email.opened':
-        console.log(`[EmailIt Webhook] Email opened by ${payload.email}: "${payload.subject}"`);
         break;
 
       case 'email.clicked':
-        console.log(`[EmailIt Webhook] Link clicked by ${payload.email}: ${payload.url}`);
         break;
 
       case 'email.bounced': {
@@ -76,7 +69,6 @@ export async function POST(req: NextRequest) {
         break;
 
       case 'email.inbound': {
-        console.log(`[EmailIt Webhook] Inbound email from ${payload.from}: "${payload.subject}"`);
         // Forward inbound reply to admin
         const { env: inboundEnv } = getRequestContext();
         const inboundApiKey = inboundEnv.EMAILIT_API_KEY || process.env.EMAILIT_API_KEY;
@@ -101,7 +93,7 @@ ${payload.html || `<pre>${payload.text || 'No content'}</pre>`}`,
       }
 
       default:
-        console.log(`[EmailIt Webhook] Unhandled event type: ${eventType}`);
+        break;
     }
 
     return NextResponse.json({ received: true });

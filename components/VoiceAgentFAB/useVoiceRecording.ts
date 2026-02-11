@@ -129,7 +129,6 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
         const file = new File([audioBlob], `recording.${extension}`, { type: mimeType });
         formData.append('audio', file);
         const currentLanguage = languageRef.current;
-        console.log(`🌐 sendToAPI called with language: ${currentLanguage}`);
         if (currentLanguage) {
           formData.append('language', currentLanguage);
         }
@@ -229,7 +228,6 @@ export function useVoiceRecording(options: VoiceRecordingOptions = {}) {
 
       // Set timeout for max duration
       timeoutRef.current = setTimeout(() => {
-        console.log('Max recording duration reached, stopping automatically');
         stopRecording();
       }, maxDurationMs);
     } catch (error) {

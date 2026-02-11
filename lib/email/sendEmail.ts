@@ -118,7 +118,6 @@ export async function sendBookingConfirmation(
       tags: ['kre8tion', 'landing', 'booking'],
     });
 
-    console.log(`[Email] Confirmation sent to ${params.to}`);
   } catch (error) {
     console.error('[Email] Failed to send confirmation email:', error);
   }
@@ -177,7 +176,6 @@ export async function sendAssessmentConfirmation(
       tags: ['kre8tion', 'landing', 'assessment'],
     });
 
-    console.log(`[Email] Assessment confirmation sent to ${params.to}`);
   } catch (error) {
     console.error('[Email] Failed to send assessment email:', error);
   }
@@ -217,7 +215,6 @@ export async function sendLeadDossierToAdmin(
       tags: ['kre8tion', 'landing', 'lead-dossier'],
     });
 
-    console.log(`[Email] Lead dossier sent to admin for ${params.lead.guestEmail}`);
   } catch (error) {
     console.error('[Email] Failed to send lead dossier:', error);
   }
@@ -263,7 +260,6 @@ export async function sendROIReport(
       tags: ['kre8tion', 'landing', 'roi-report'],
     });
 
-    console.log(`[Email] ROI report sent to ${params.to}`);
   } catch (error) {
     console.error('[Email] Failed to send ROI report:', error);
     throw error; // Propagate so caller can return proper error to user
@@ -304,7 +300,6 @@ export async function sendROILeadDossierToAdmin(
       tags: ['kre8tion', 'landing', 'roi-dossier'],
     });
 
-    console.log(`[Email] ROI lead dossier sent to admin for ${params.lead.email}`);
   } catch (error) {
     console.error('[Email] Failed to send ROI lead dossier:', error);
     throw error; // Propagate so route-level catch can log/handle
