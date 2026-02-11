@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { validateText } from '@/lib/security/requestValidator';
 import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
+import { getEnv } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-
-  // Get OpenAI API key from Cloudflare env
-  const { env } = getRequestContext();
-  const openai = createOpenAI(env.OPENAI_API_KEY);
-
-  // Rate limiting (KV-backed)
-  if (env.RATE_LIMIT_KV) {
-    const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
-    const clientIP = getClientIP(request);
-    const rateCheck = await rateLimiter.check(clientIP);
-    if (!rateCheck.allowed) {
-      return NextResponse.json(
-        { error: rateCheck.reason || 'Rate limit exceeded' },
-        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateCheck.resetTime - Date.now()) / 1000)) } },
-      );
-    }
-  }
+  const env = getEnv();
 
   try {
+    // Rate limiting (KV-backed)
+    if (env.RATE_LIMIT_KV) {
+      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+      const clientIP = getClientIP(request);
+      const rateCheck = await rateLimiter.check(clientIP);
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { error: rateCheck.reason || 'Rate limit exceeded' },
+          { status: 429, headers: { 'Retry-After': String(Math.ceil((rateCheck.resetTime - Date.now()) / 1000)) } },
+        );
+      }
+    }
+
     const { text, language } = await request.json() as { text: string; language?: 'en' | 'es' };
 
     // Input validation
@@ -43,6 +40,11 @@ export async function POST(request: NextRequest) {
       if (language === 'es') return MODELS.voice; // keep current unless changed later
       return MODELS.voice;
     })();
+
+    if (!env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'Server misconfiguration: Missing OPENAI_API_KEY' }, { status: 500 });
+    }
+    const openai = createOpenAI(env.OPENAI_API_KEY);
 
     // Call OpenAI TTS API
     const mp3 = await openai.audio.speech.create({

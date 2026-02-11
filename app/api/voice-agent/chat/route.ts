@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
 import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
@@ -12,28 +11,26 @@ import { getHighPriorityLeadsReport, getDailySummary } from '@/lib/voiceAgent/an
 import { classifyIntent } from '@/lib/voiceAgent/intentRouter';
 import { runInfoAgent, runBookingAgent, runROIAgent } from '@/lib/voiceAgent/agents';
 import type { ToolContext } from '@/lib/voiceAgent/tools';
+import { getEnv } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-
-  // Get OpenAI API key and KV namespace from Cloudflare env
-  const { env } = getRequestContext();
-  const openai = createOpenAI(env.OPENAI_API_KEY);
-
-  // Rate limiting (KV-backed)
-  if (env.RATE_LIMIT_KV) {
-    const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
-    const clientIP = getClientIP(request);
-    const rateCheck = await rateLimiter.check(clientIP);
-    if (!rateCheck.allowed) {
-      return NextResponse.json(
-        { error: rateCheck.reason || 'Rate limit exceeded' },
-        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateCheck.resetTime - Date.now()) / 1000)) } },
-      );
-    }
-  }
+  const env = getEnv();
 
   try {
+    // Rate limiting (KV-backed). Only if proper KV binding exists.
+    if (env.RATE_LIMIT_KV) {
+      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+      const clientIP = getClientIP(request);
+      const rateCheck = await rateLimiter.check(clientIP);
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { error: rateCheck.reason || 'Rate limit exceeded' },
+          { status: 429, headers: { 'Retry-After': String(Math.ceil((rateCheck.resetTime - Date.now()) / 1000)) } },
+        );
+      }
+    }
+
     const body = await request.json();
 
     const { question, sessionId, language } = body as {
@@ -100,6 +97,12 @@ export async function POST(request: NextRequest) {
     const agentOptions = { language, leadScoreTier: leadScore.tier };
     let response: string;
 
+    // Create OpenAI client after validating env
+    if (!env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'Server misconfiguration: Missing OPENAI_API_KEY' }, { status: 500 });
+    }
+    const openai = createOpenAI(env.OPENAI_API_KEY);
+
     switch (intent) {
       case 'booking':
         response = await runBookingAgent(openai, sanitizedQuestion, conversationHistory, toolCtx, { ...agentOptions, isContinuation });
@@ -154,7 +157,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Chat error:', error);
-    return NextResponse.json({ error: 'Failed to generate response' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: `Failed to generate response: ${msg}` }, { status: 500 });
   }
 }
 
