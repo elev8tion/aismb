@@ -17,6 +17,7 @@ import {
 import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
 import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
 import { runBookingPipeline } from '@/lib/booking/createBooking';
+import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 
 export const runtime = 'edge';
 
@@ -28,7 +29,7 @@ function validateBookingRequest(data: unknown): CreateBookingRequest | null {
   if (typeof req.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(req.date)) return null;
   if (typeof req.time !== 'string' || !/^\d{2}:\d{2}$/.test(req.time)) return null;
   if (typeof req.name !== 'string' || req.name.trim().length < 2) return null;
-  if (typeof req.email !== 'string' || !req.email.includes('@')) return null;
+  if (typeof req.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(req.email)) return null;
   if (typeof req.timezone !== 'string') return null;
 
   const bookingType = req.bookingType === 'assessment' ? 'assessment' : 'consultation';
@@ -79,6 +80,19 @@ export async function POST(req: NextRequest) {
   try {
     const { env } = getRequestContext();
     const cfEnv = env as unknown as Record<string, string>;
+
+    // Rate limiting (booking creates get their own prefix for stricter tracking)
+    if (env.RATE_LIMIT_KV) {
+      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+      const clientIP = getClientIP(req);
+      const rateCheck = await rateLimiter.check(`booking:${clientIP}`);
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { success: false, error: rateCheck.reason || 'Rate limit exceeded' },
+          { status: 429 }
+        );
+      }
+    }
 
     const body = await req.json();
     const validatedData = validateBookingRequest(body);

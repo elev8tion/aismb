@@ -12,6 +12,7 @@ import FAQSection from '@/components/FAQSection';
 import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
 import VoiceAgentFAB from '@/components/VoiceAgentFAB';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 export default function Home() {
   return (
@@ -24,14 +25,22 @@ export default function Home() {
         <HowItWorksSection />
         <UseCaseSelector />
         <CaseStudiesSection />
-        <ROICalculator />
-        <PricingSection />
+        <ErrorBoundary>
+          <ROICalculator />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <PricingSection />
+        </ErrorBoundary>
         <FAQSection />
-        <FinalCTA />
+        <ErrorBoundary>
+          <FinalCTA />
+        </ErrorBoundary>
         <Footer />
 
         {/* Voice Agent FAB */}
-        <VoiceAgentFAB />
+        <ErrorBoundary fallback={null}>
+          <VoiceAgentFAB />
+        </ErrorBoundary>
       </main>
     </ClientLayout>
   );

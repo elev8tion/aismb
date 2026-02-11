@@ -18,6 +18,7 @@ import {
   DEFAULT_AVAILABILITY,
 } from '@/lib/booking/types';
 import { fetchFromNCB } from '@/lib/ncb/client';
+import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 
 export const runtime = 'edge';
 
@@ -25,6 +26,19 @@ export async function GET(req: NextRequest) {
   try {
     const { env } = getRequestContext();
     const cfEnv = env as unknown as Record<string, string>;
+
+    // Rate limiting
+    if (env.RATE_LIMIT_KV) {
+      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+      const clientIP = getClientIP(req);
+      const rateCheck = await rateLimiter.check(clientIP);
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { error: rateCheck.reason || 'Rate limit exceeded' },
+          { status: 429 }
+        );
+      }
+    }
 
     const { searchParams } = new URL(req.url);
     const date = searchParams.get('date');
