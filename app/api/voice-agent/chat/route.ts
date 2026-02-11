@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting (KV-backed). Only if proper KV binding exists.
     if (env.RATE_LIMIT_KV) {
-      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV as unknown as KVNamespace);
       const clientIP = getClientIP(request);
       const rateCheck = await rateLimiter.check(clientIP);
       if (!rateCheck.allowed) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (injection.detected) console.warn(`Warning: Possible prompt injection: ${injection.pattern}`);
 
     // Load session + conversation history
-    const sessionStorage = getSessionStorage(env.VOICE_SESSIONS);
+    const sessionStorage = getSessionStorage(env.VOICE_SESSIONS as unknown as KVNamespace);
     const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
 
     // Lead profiling & scoring (pre-response analysis)
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     if (!env.OPENAI_API_KEY) {
       return NextResponse.json({ error: 'Server misconfiguration: Missing OPENAI_API_KEY' }, { status: 500 });
     }
-    const openai = createOpenAI(env.OPENAI_API_KEY);
+    const openai = createOpenAI(env.OPENAI_API_KEY as string);
 
     switch (intent) {
       case 'booking':
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     // Cost tracking (KV-backed, best-effort)
     if (env.COST_MONITOR_KV) {
-      const costMonitor = new KVCostMonitor(env.COST_MONITOR_KV);
+      const costMonitor = new KVCostMonitor(env.COST_MONITOR_KV as unknown as KVNamespace);
       costMonitor.track({
         endpoint: '/api/voice-agent/chat',
         model: MODELS.chat,

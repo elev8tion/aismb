@@ -3,18 +3,18 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 // Unified environment accessor for Edge (Cloudflare) and local dev.
 // - In production/edge: returns Cloudflare env bindings via getRequestContext().env
 // - In local dev or non-edge: falls back to process.env for string values
-export function getEnv(): Record<string, any> {
+export function getEnv(): Record<string, unknown> {
   try {
     const { env } = getRequestContext();
     if (env && typeof env === 'object') {
-      return env as unknown as Record<string, any>;
+      return env as unknown as Record<string, unknown>;
     }
   } catch {
     // getRequestContext not available — fall back below
   }
 
   const p = typeof process !== 'undefined' ? process.env : undefined;
-  const record: Record<string, any> = {};
+  const record: Record<string, unknown> = {};
 
   if (p) {
     // Core keys used by voice agent and booking flows
@@ -39,4 +39,3 @@ export function getEnv(): Record<string, any> {
 
   return record;
 }
-

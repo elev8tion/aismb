@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting (KV-backed)
     if (env.RATE_LIMIT_KV) {
-      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV);
+      const rateLimiter = new KVRateLimiter(env.RATE_LIMIT_KV as unknown as KVNamespace);
       const clientIP = getClientIP(request);
       const rateCheck = await rateLimiter.check(clientIP);
       if (!rateCheck.allowed) {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (!env.OPENAI_API_KEY) {
       return NextResponse.json({ error: 'Server misconfiguration: Missing OPENAI_API_KEY' }, { status: 500 });
     }
-    const openai = createOpenAI(env.OPENAI_API_KEY);
+    const openai = createOpenAI(env.OPENAI_API_KEY as string);
 
     // Call OpenAI TTS API
     const mp3 = await openai.audio.speech.create({
