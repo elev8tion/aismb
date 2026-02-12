@@ -8,14 +8,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
 import { ASSESSMENT_FEE_CENTS, ASSESSMENT_DURATION } from '@/lib/booking/types';
 import { calculateEndTime } from '@/lib/booking/availability';
 
 export const runtime = 'edge';
 
 function getNCBConfig() {
-  const { env } = getRequestContext();
+  const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
   const instance = env.NCB_INSTANCE;
   const dataApiUrl = env.NCB_DATA_API_URL;
   if (!instance || !dataApiUrl) throw new Error('Missing NCB environment variables');
@@ -91,7 +91,7 @@ async function createBookingFromSession(metadata: Record<string, string>, sessio
 
 export async function POST(req: NextRequest) {
   try {
-    const { env } = getRequestContext();
+    const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
     const stripeKey = env.STRIPE_SECRET_KEY;
     const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 

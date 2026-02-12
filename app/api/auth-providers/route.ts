@@ -11,12 +11,12 @@
  */
 
 import { NextResponse } from "next/server";
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
 export async function GET() {
-  const { env } = getRequestContext();
+  const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
   const url = `${env.NCB_AUTH_API_URL}/providers?instance=${env.NCB_INSTANCE}`;
   const res = await fetch(url);
   const data: Record<string, unknown> = await res.json();

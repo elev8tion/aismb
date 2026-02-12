@@ -8,7 +8,7 @@
  * Run with tracing: TRACE=true npm test -- voiceAgent.system.test.ts
  */
 
-import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test Configuration

@@ -1,0 +1,344 @@
+{
+  "report": {
+    "totalScenarios": 6,
+    "totalSteps": 33,
+    "successSteps": 11,
+    "errorSteps": 1,
+    "warningSteps": 3,
+    "byScenario": {
+      "Simple English Conversation": {
+        "totalSteps": 7,
+        "success": 3,
+        "errors": 0,
+        "errorDetails": []
+      },
+      "Spanish Language Mode": {
+        "totalSteps": 4,
+        "success": 1,
+        "errors": 1,
+        "errorDetails": [
+          {
+            "step": "Language verification",
+            "error": {
+              "response": "Ofrecemos servicios de co-creación de sistemas inteligentes adaptados a cualquier tipo de negocio, independientemente de la industria. Trabajamos contigo para identificar oportunidades donde la inteligencia artificial puede transformar tus operaciones. Nuestros servicios incluyen:\n\n1. **AI Discovery:** Ideal para probar conceptos y empezar con la inteligencia artificial. Incluye la creación de un agente de voz personalizado y dos sistemas fundamentales.\n\n2. **Foundation Builder:** Nuestra opción más popular. Te ayudamos a construir cinco sistemas inteligentes y te proporcionamos formación integral durante ocho semanas.\n\n3. **Systems Architect:** Para empresas más establecidas, donde creamos hasta ocho sistemas y brindamos sesiones de estrategia mensual.\n\n4. **AI-Native Enterprise:** Para transformaciones completas en organizaciones grandes, desarrollando sistemas ilimitados y entrenando a tu equipo.\n\nTodos nuestros servicios se enfocan en la transferencia de capacidades y en tu"
+            }
+          }
+        ]
+      },
+      "Lead Extraction Flow": {
+        "totalSteps": 4,
+        "success": 1,
+        "errors": 0,
+        "errorDetails": []
+      },
+      "Rate Limiting": {
+        "totalSteps": 4,
+        "success": 1,
+        "errors": 0,
+        "errorDetails": []
+      },
+      "Input Validation": {
+        "totalSteps": 9,
+        "success": 3,
+        "errors": 0,
+        "errorDetails": []
+      },
+      "Error Recovery": {
+        "totalSteps": 5,
+        "success": 2,
+        "errors": 0,
+        "errorDetails": []
+      }
+    }
+  },
+  "traces": [
+    {
+      "timestamp": "2026-02-12T23:22:46.970Z",
+      "scenario": "Simple English Conversation",
+      "step": "Initialize",
+      "status": "start",
+      "data": {
+        "sessionId": "test-1770938566970-en"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:46.971Z",
+      "scenario": "Simple English Conversation",
+      "step": "Send first message",
+      "status": "start",
+      "data": {
+        "question": "What services do you offer?"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:50.491Z",
+      "scenario": "Simple English Conversation",
+      "step": "First message response",
+      "status": "success",
+      "data": {
+        "status": 200,
+        "hasResponse": true,
+        "duration": 3372
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:50.491Z",
+      "scenario": "Simple English Conversation",
+      "step": "Send follow-up message",
+      "status": "start",
+      "data": {
+        "question": "How much does it cost?"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:53.548Z",
+      "scenario": "Simple English Conversation",
+      "step": "Follow-up response",
+      "status": "success",
+      "data": {
+        "status": 200,
+        "hasResponse": true,
+        "duration": 3048
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:53.548Z",
+      "scenario": "Simple English Conversation",
+      "step": "Check session memory",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:22:53.548Z",
+      "scenario": "Simple English Conversation",
+      "step": "Session memory verified",
+      "status": "success"
+    },
+    {
+      "timestamp": "2026-02-12T23:22:53.549Z",
+      "scenario": "Spanish Language Mode",
+      "step": "Initialize",
+      "status": "start",
+      "data": {
+        "sessionId": "test-1770938573549-es"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:53.550Z",
+      "scenario": "Spanish Language Mode",
+      "step": "Send Spanish message",
+      "status": "start",
+      "data": {
+        "question": "¿Qué servicios ofrecen?"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:57.647Z",
+      "scenario": "Spanish Language Mode",
+      "step": "Spanish response received",
+      "status": "success",
+      "data": {
+        "status": 200,
+        "hasResponse": true,
+        "responsePreview": "Ofrecemos servicios de co-creación de sistemas inteligentes adaptados a cualquier tipo de negocio, i"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:57.648Z",
+      "scenario": "Spanish Language Mode",
+      "step": "Language verification",
+      "status": "error",
+      "data": {
+        "note": "Response contains English words"
+      },
+      "error": {
+        "response": "Ofrecemos servicios de co-creación de sistemas inteligentes adaptados a cualquier tipo de negocio, independientemente de la industria. Trabajamos contigo para identificar oportunidades donde la inteligencia artificial puede transformar tus operaciones. Nuestros servicios incluyen:\n\n1. **AI Discovery:** Ideal para probar conceptos y empezar con la inteligencia artificial. Incluye la creación de un agente de voz personalizado y dos sistemas fundamentales.\n\n2. **Foundation Builder:** Nuestra opción más popular. Te ayudamos a construir cinco sistemas inteligentes y te proporcionamos formación integral durante ocho semanas.\n\n3. **Systems Architect:** Para empresas más establecidas, donde creamos hasta ocho sistemas y brindamos sesiones de estrategia mensual.\n\n4. **AI-Native Enterprise:** Para transformaciones completas en organizaciones grandes, desarrollando sistemas ilimitados y entrenando a tu equipo.\n\nTodos nuestros servicios se enfocan en la transferencia de capacidades y en tu"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:57.649Z",
+      "scenario": "Lead Extraction Flow",
+      "step": "Initialize",
+      "status": "start",
+      "data": {
+        "sessionId": "test-1770938577649-lead",
+        "testEmail": "test-1770938577649@example.com"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:22:57.649Z",
+      "scenario": "Lead Extraction Flow",
+      "step": "Send message with lead info",
+      "status": "start",
+      "data": {
+        "question": "I run an HVAC business with 15 employees. My email is test-1770938577649@example.com and we're struggling with scheduling."
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:01.226Z",
+      "scenario": "Lead Extraction Flow",
+      "step": "Response received",
+      "status": "success",
+      "data": {
+        "status": 200,
+        "duration": 3566
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:01.226Z",
+      "scenario": "Lead Extraction Flow",
+      "step": "Lead extraction",
+      "status": "warning",
+      "data": {
+        "note": "Lead extraction occurs server-side. Check logs for: 🎯 Lead extracted",
+        "expectedEmail": "test-1770938577649@example.com",
+        "expectedIndustry": "HVAC",
+        "expectedPainPoint": "scheduling"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:01.227Z",
+      "scenario": "Rate Limiting",
+      "step": "Initialize",
+      "status": "start",
+      "data": {
+        "sessionId": "test-1770938581227-rate",
+        "limit": 10
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:01.230Z",
+      "scenario": "Rate Limiting",
+      "step": "Sending 12 rapid requests",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.822Z",
+      "scenario": "Rate Limiting",
+      "step": "Rate limit test results",
+      "status": "success",
+      "data": {
+        "totalRequests": 12,
+        "successful": 12,
+        "rateLimited": 0
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.822Z",
+      "scenario": "Rate Limiting",
+      "step": "Rate limiting",
+      "status": "warning",
+      "data": {
+        "note": "All requests succeeded - rate limiting may not be active"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.823Z",
+      "scenario": "Input Validation",
+      "step": "Initialize",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.823Z",
+      "scenario": "Input Validation",
+      "step": "Test missing sessionId",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.830Z",
+      "scenario": "Input Validation",
+      "step": "Missing sessionId validation",
+      "status": "success",
+      "data": {
+        "note": "Correctly rejected"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.830Z",
+      "scenario": "Input Validation",
+      "step": "Test empty question",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.834Z",
+      "scenario": "Input Validation",
+      "step": "Empty question validation",
+      "status": "success",
+      "data": {
+        "note": "Correctly rejected"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:02.834Z",
+      "scenario": "Input Validation",
+      "step": "Test very long question",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:04.762Z",
+      "scenario": "Input Validation",
+      "step": "Long question validation",
+      "status": "warning",
+      "data": {
+        "note": "Accepts very long questions"
+      },
+      "error": {
+        "length": 1500
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:04.763Z",
+      "scenario": "Input Validation",
+      "step": "Test prompt injection detection",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:05.934Z",
+      "scenario": "Input Validation",
+      "step": "Prompt injection handling",
+      "status": "success",
+      "data": {
+        "note": "Request processed (detection logged server-side)",
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:05.934Z",
+      "scenario": "Error Recovery",
+      "step": "Initialize",
+      "status": "start",
+      "data": {
+        "sessionId": "test-1770938585934-recovery"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:05.934Z",
+      "scenario": "Error Recovery",
+      "step": "Test invalid language code",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:06.467Z",
+      "scenario": "Error Recovery",
+      "step": "Invalid language handling",
+      "status": "success",
+      "data": {
+        "note": "Defaults to English or processes anyway"
+      }
+    },
+    {
+      "timestamp": "2026-02-12T23:23:06.467Z",
+      "scenario": "Error Recovery",
+      "step": "Test recovery after error",
+      "status": "start"
+    },
+    {
+      "timestamp": "2026-02-12T23:23:10.651Z",
+      "scenario": "Error Recovery",
+      "step": "System recovery",
+      "status": "success",
+      "data": {
+        "note": "System recovered after error"
+      }
+    }
+  ]
+}

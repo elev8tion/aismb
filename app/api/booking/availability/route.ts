@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
 import {
   getAvailableSlots,
   getAvailableDates,
@@ -24,7 +24,7 @@ export const runtime = 'edge';
 
 export async function GET(req: NextRequest) {
   try {
-    const { env } = getRequestContext();
+    const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
     const cfEnv = env as unknown as Record<string, string>;
 
     // Rate limiting

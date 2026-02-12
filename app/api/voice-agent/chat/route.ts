@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
 import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
 import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
@@ -13,8 +13,9 @@ import { sendViaEmailIt } from '@/lib/email/sendEmail';
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
-  // Get OpenAI API key and KV namespace from Cloudflare env
-  const { env } = getRequestContext();
+  // Get env from Cloudflare context OR fallback to process.env for local dev
+  const ctx = getOptionalRequestContext();
+  const env = (ctx?.env || process.env) as any;
   const openai = createOpenAI(env.OPENAI_API_KEY);
 
   try {

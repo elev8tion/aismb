@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
 import { syncROICalcToCRM } from '@/lib/voiceAgent/leadManager';
 import { sendROIReport, sendROILeadDossierToAdmin } from '@/lib/email/sendEmail';
 import { TASK_CATEGORIES, TIER_DATA } from '@/lib/shared/roiTypes';
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     let cfEnv: Record<string, string> | undefined;
     let emailitApiKey: string | undefined;
     try {
-      const { env } = getRequestContext();
+      const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
       cfEnv = env as unknown as Record<string, string>;
       emailitApiKey = env.EMAILIT_API_KEY;
     } catch {

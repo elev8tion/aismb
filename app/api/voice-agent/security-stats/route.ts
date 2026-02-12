@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
 
 export async function GET() {
   try {
-    const { env } = getRequestContext();
+    const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
 
     return NextResponse.json({
       success: true,

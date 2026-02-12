@@ -17,12 +17,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
 function getConfig() {
-  const { env } = getRequestContext();
+  const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
   const instance = env.NCB_INSTANCE;
   const apiUrl = env.NCB_AUTH_API_URL;
 
