@@ -5,6 +5,10 @@ import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
 import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
 import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
+import { getFeatureFlags, logFeatureFlags } from '@/lib/featureFlags';
+import { extractLeadInfo, syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
+import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
+import { sendViaEmailIt } from '@/lib/email/sendEmail';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -105,6 +109,69 @@ export async function POST(request: NextRequest) {
     await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);
     await sessionStorage.addMessage(sessionId, 'assistant', response);
     console.log(`💾 Saved conversation to session ${sessionId}`);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FEATURE FLAGS: Lead Intelligence Pipeline
+    // ═══════════════════════════════════════════════════════════════════════════
+    const flags = getFeatureFlags(env);
+    logFeatureFlags(flags);
+
+    if (flags.VOICE_LEAD_EXTRACTION) {
+      const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
+      const leadInfo = extractLeadInfo(conversationHistory);
+
+      if (leadInfo.email) {
+        console.log(`🎯 Lead extracted: ${leadInfo.email}`);
+
+        // ─── Lead Scoring ─────────────────────────────────────────────
+        if (flags.VOICE_LEAD_SCORING) {
+          const scoreResult = calculateLeadScore(leadInfo);
+          console.log(`📊 Lead score: ${scoreResult.score}/100 (${scoreResult.tier}) - ${scoreResult.factors.join(', ')}`);
+
+          // ─── CRM Sync ─────────────────────────────────────────────
+          if (flags.VOICE_CRM_SYNC) {
+            const enrichedLead = {
+              ...leadInfo,
+              qualified_score: scoreResult.score,
+              notes: `Voice Agent | Score: ${scoreResult.tier} (${scoreResult.factors.join(', ')})`,
+              source: 'Voice Agent',
+              sourceDetail: `Session ${sessionId.slice(0, 8)}`,
+            };
+
+            try {
+              const crmLead = await syncLeadToCRM(enrichedLead, env);
+              if (crmLead) {
+                console.log(`✅ Lead synced to CRM: ID ${crmLead.id}`);
+
+                // ─── Admin Alerts (High-Value Leads Only) ─────────
+                if (flags.VOICE_ADMIN_ALERTS && scoreResult.tier === 'high' && env.ADMIN_EMAIL && env.EMAILIT_API_KEY) {
+                  await sendViaEmailIt({
+                    apiKey: env.EMAILIT_API_KEY,
+                    to: env.ADMIN_EMAIL,
+                    subject: `🔥 High-Value Lead from Voice Agent`,
+                    html: `
+                      <h2>New High-Value Lead</h2>
+                      <p><strong>Email:</strong> ${enrichedLead.email}</p>
+                      <p><strong>Industry:</strong> ${enrichedLead.industry || 'N/A'}</p>
+                      <p><strong>Employee Count:</strong> ${enrichedLead.employeeCount || 'N/A'}</p>
+                      <p><strong>Score:</strong> ${scoreResult.score}/100 (${scoreResult.tier})</p>
+                      <p><strong>Factors:</strong> ${scoreResult.factors.join(', ')}</p>
+                      ${leadInfo.pain_points ? `<p><strong>Pain Points:</strong> ${leadInfo.pain_points}</p>` : ''}
+                      ${leadInfo.sentiment ? `<p><strong>Sentiment:</strong> ${leadInfo.sentiment}</p>` : ''}
+                      <p><a href="https://app.kre8tion.com/leads">View in CRM →</a></p>
+                    `,
+                    tags: ['kre8tion', 'landing', 'voice-alert'],
+                  });
+                  console.log(`📧 Admin alert sent for high-value lead`);
+                }
+              }
+            } catch (error) {
+              console.error('❌ Failed to sync lead to CRM:', error);
+            }
+          }
+        }
+      }
+    }
 
     const duration = Date.now() - startTime;
     console.log(`⏱️ Response generated in ${duration}ms`);
