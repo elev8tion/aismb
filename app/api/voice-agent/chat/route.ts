@@ -157,8 +157,23 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Chat error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error('Env keys available:', Object.keys(env));
+    console.error('OPENAI_API_KEY present:', !!env.OPENAI_API_KEY);
+    console.error('VOICE_SESSIONS present:', !!env.VOICE_SESSIONS);
+
     const msg = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: `Failed to generate response: ${msg}` }, { status: 500 });
+    const stack = error instanceof Error ? error.stack : undefined;
+
+    return NextResponse.json({
+      error: `Failed to generate response: ${msg}`,
+      details: stack,
+      envDebug: {
+        hasOpenAI: !!env.OPENAI_API_KEY,
+        hasVoiceSessions: !!env.VOICE_SESSIONS,
+        envKeys: Object.keys(env)
+      }
+    }, { status: 500 });
   }
 }
 
