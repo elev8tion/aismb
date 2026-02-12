@@ -8,34 +8,34 @@ pages_build_output_dir = ".vercel/output/static"
 # KV Namespaces
 [[kv_namespaces]]
 binding = "VOICE_SESSIONS"
-id = "2afab9ebf67e4d12874cdaa464079816"
-preview_id = "f1161b244e974e6a8fe4690d35ca4da3"
+id = "f7b3080dbe754bbb9ad62cfd1c2f1cb4"
+preview_id = "56da859da3c34b0ca0db9db04f94b6b1"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "3da863a3e1854b8f84c0066a37b6c847"
+id = "b6a9073764734bf2b7b56634f13ddd83"
 
 [[kv_namespaces]]
 binding = "COST_MONITOR_KV"
-id = "091326b587024f5d9ff870616992706e"
+id = "3155bdd32f01439eab3e67d8bc281faa"
 
 [[kv_namespaces]]
 binding = "RESPONSE_CACHE_KV"
-id = "88589fbf9e604e5f8564fb82849909bd"
+id = "d57cae66e7304561b142ae1b5f73b0e8"
 
 # Production environment
 [env.production]
 vars = { ENVIRONMENT = "production" }
 kv_namespaces = [
-  { binding = "VOICE_SESSIONS", id = "2afab9ebf67e4d12874cdaa464079816" },
-  { binding = "RATE_LIMIT_KV", id = "3da863a3e1854b8f84c0066a37b6c847" },
-  { binding = "COST_MONITOR_KV", id = "091326b587024f5d9ff870616992706e" },
-  { binding = "RESPONSE_CACHE_KV", id = "88589fbf9e604e5f8564fb82849909bd" }
+  { binding = "VOICE_SESSIONS", id = "f7b3080dbe754bbb9ad62cfd1c2f1cb4" },
+  { binding = "RATE_LIMIT_KV", id = "b6a9073764734bf2b7b56634f13ddd83" },
+  { binding = "COST_MONITOR_KV", id = "3155bdd32f01439eab3e67d8bc281faa" },
+  { binding = "RESPONSE_CACHE_KV", id = "d57cae66e7304561b142ae1b5f73b0e8" }
 ]
 
 # Preview environment
 [env.preview]
 vars = { ENVIRONMENT = "preview" }
 kv_namespaces = [
-  { binding = "VOICE_SESSIONS", id = "f1161b244e974e6a8fe4690d35ca4da3" }
+  { binding = "VOICE_SESSIONS", id = "56da859da3c34b0ca0db9db04f94b6b1" }
 ]
