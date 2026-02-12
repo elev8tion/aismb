@@ -73,10 +73,10 @@ These are already configured in `wrangler.toml`:
 
 | Binding | ID | Purpose |
 |---------|-----|---------|
-| `VOICE_SESSIONS` | `2afab9ebf67e4d12874cdaa464079816` | Conversation memory |
-| `RATE_LIMIT_KV` | `3da863a3e1854b8f84c0066a37b6c847` | API rate limiting |
-| `COST_MONITOR_KV` | `091326b587024f5d9ff870616992706e` | Cost tracking |
-| `RESPONSE_CACHE_KV` | `88589fbf9e604e5f8564fb82849909bd` | Response caching |
+| `VOICE_SESSIONS` | `23e84aa024414eeb9b5edb2b254bbe3b` | Conversation memory |
+| `RATE_LIMIT_KV` | `b7addbaac289495ba3cac09e573fe279` | API rate limiting |
+| `COST_MONITOR_KV` | `6173089a0e644193b07e7419055f4c7a` | Cost tracking |
+| `RESPONSE_CACHE_KV` | `cbef44c800ca49eb81e2b08b95f05d11` | Response caching |
 
 ---
 
