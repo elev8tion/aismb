@@ -1,6 +1,6 @@
 'use client';
 
-import { TimeSlot } from '@/lib/booking/types';
+import { TimeSlot } from '@kre8tion/shared-types';
 
 interface TimeSlotPickerProps {
   slots: TimeSlot[];

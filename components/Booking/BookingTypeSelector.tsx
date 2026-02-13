@@ -1,6 +1,6 @@
 'use client';
 
-import { BookingType } from '@/lib/booking/types';
+import { BookingType } from '@kre8tion/shared-types';
 
 interface BookingTypeSelectorProps {
   onSelectType: (type: BookingType) => void;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookingFormData, BookingType } from '@/lib/booking/types';
+import { BookingFormData, BookingType } from '@kre8tion/shared-types';
 import { formatDateDisplay, formatTimeLabel } from '@/lib/shared/formatters';
 
 interface BookingFormProps {

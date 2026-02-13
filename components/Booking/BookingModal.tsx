@@ -6,7 +6,7 @@ import TimeSlotPicker from './TimeSlotPicker';
 import BookingForm from './BookingForm';
 import BookingConfirmation from './BookingConfirmation';
 import BookingTypeSelector from './BookingTypeSelector';
-import { TimeSlot, Booking, BookingFormData, BookingType } from '@/lib/booking/types';
+import { TimeSlot, LandingPageBooking as Booking, BookingFormData, BookingType } from '@kre8tion/shared-types';
 import { useTranslations } from '@/contexts/LanguageContext';
 
 interface BookingModalProps {

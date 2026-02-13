@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { BookingType, BookingStatus, CalendarProvider } from '@/lib/booking/types';
+import { BookingType, BookingStatus, CalendarProvider } from '@kre8tion/shared-types';
 
 interface AdminBookingFormProps {
   onSuccess?: () => void;

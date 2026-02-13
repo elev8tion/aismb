@@ -1,6 +1,6 @@
 'use client';
 
-import { Booking } from '@/lib/booking/types';
+import { LandingPageBooking as Booking } from '@kre8tion/shared-types';
 import { formatDateDisplay, formatTimeLabel } from '@/lib/booking/availability';
 import {
   generateGoogleCalendarLink,
