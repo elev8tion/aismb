@@ -9,11 +9,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import {
   CreateBookingRequest,
-  Booking,
+  LandingPageBooking as Booking,
   BookingType,
   MEETING_DURATION,
   ASSESSMENT_DURATION,
-} from '@/lib/booking/types';
+} from '@kre8tion/shared-types';
 import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
 import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
 import { runBookingPipeline } from '@/lib/booking/createBooking';

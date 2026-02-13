@@ -29,6 +29,7 @@ export type CalendarProvider = 'google' | 'caldav';
 export const ASSESSMENT_FEE_CENTS = 25000; // $250.00
 export const ASSESSMENT_DURATION = 180; // minutes (3 hours)
 export const CONSULTATION_DURATION = 30; // minutes (30 min)
+export const MEETING_DURATION = CONSULTATION_DURATION; // Backward compatibility alias
 
 // ─── Unified Booking Interface ─────────────────────────────────────────────
 

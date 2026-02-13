@@ -10,7 +10,7 @@
  *   - lib/voiceAgent/tools.ts (voice agent create_consultation_booking)
  */
 
-import type { Booking, BookingType } from '@/lib/booking/types';
+import type { LandingPageBooking as Booking, BookingType } from '@kre8tion/shared-types';
 import { generateAllCalendarLinks } from '@/lib/booking/calendarLinks';
 import {
   sendBookingConfirmation,

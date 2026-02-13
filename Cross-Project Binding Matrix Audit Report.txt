@@ -1,0 +1,118 @@
+# Cross-Project Binding Matrix Audit Report ## 📊 Executive Summary **Audit Date:** Current **Projects Analyzed:** 2 **Total Files:** 292 **Critical Interfaces:** 18 **High-Risk Dependencies:** 42 ## 🔗 Shared Binding Points Analysis ### 1. **Authentication & Auth Providers** **Risk Level:** 🟡 Medium (Shared Patterns) - Both projects have identical `/app/api/auth-providers/route.ts` files - Both use `app/api/auth/[...path]/route.ts` patterns - **Concern:** Authentication logic duplication across projects ### 2. **Voice Agent Infrastructure** **Risk Level:** 🔴 High (Tight Coupling) - **ai-smb-partners:** `components/VoiceAgentFAB/` - **ai_smb_crm_frontend:** `components/VoiceOperator/` - **Shared Patterns:** - `useVoiceRecording.ts` (identical interfaces) - `utils/audioProcessor.ts`, `utils/mediaRecorder.ts` - `utils/iosAudioUnlock.ts`, `utils/browserCompatibility.ts` - **Critical Issue:** Voice agent tools diverge but share core interfaces ### 3. **Booking & Calendar Systems** **Risk Level:** 🟡 Medium (Interface Alignment) - **ai-smb-partners:** `lib/booking/types.ts` (Risk: 62.4/100) - **ai_smb_crm_frontend:** `app/bookings/` pages - **Shared Calendar Providers:** Google, CalDAV - **Concern:** Booking logic split across projects without clear API boundary ### 4. **ROI Calculation Engine** **Risk Level:** 🔴 High (Direct Dependencies) - **ai-smb-partners:** `lib/shared/roiEngine.ts`, `lib/shared/roiTypes.ts` - **ai_smb_crm_frontend:** `app/roi-calculations/page.tsx` - **Shared Components:** ROI calculator UI components - **Critical Issue:** Business logic duplication with different implementations ### 5. **Contract & Document Management** **Risk Level:** 🔴 High (Frontend/Backend Split) - **ai_smb_crm_frontend:** `lib/contracts/types.ts` (Risk: 56.9/100) - **ai-smb-partners:** No contract system - **Concern:** Contracts exist only in CRM, creating one-way dependency ### 6. **Email & Notification Systems** **Risk Level:** 🟡 Medium (Pattern Duplication) - Both projects have: - `lib/email/templates.ts` - `lib/email/sendEmail.ts` - `app/api/webhooks/emailit/route.ts` - **Concern:** Email templates and sending logic duplicated ### 7. **Stripe Payment Integration** **Risk Level:** 🟡 Medium (Shared Configuration) - Both projects have: - `app/api/webhooks/stripe/route.ts` - Stripe session creation endpoints - **Shared Risk:** Payment logic duplication ### 8. **Internationalization (i18n)** **Risk Level:** 🟢 Low (Independent) - **ai-smb-partners:** `lib/i18n/translations.ts` (Risk: 34.6/100) - **ai_smb_crm_frontend:** `lib/i18n/translations.ts` - **Status:** Independent implementations, no shared translations ### 9. **Security & Rate Limiting** **Risk Level:** 🟡 Medium (Pattern Duplication) - Both projects have: - `lib/security/rateLimiter.kv.ts` - `lib/security/requestValidator.ts` - **Concern:** Security logic duplication increases attack surface ### 10. **Cloudflare Environment** **Risk Level:** 🔴 High (Shared Dependencies) - Both projects have `lib/cloudflare/env.ts` - **Critical Issue:** Environment configuration divergence - **Risk:** Different KV/DB configurations for shared data ## 🚨 Critical Binding Conflicts ### **Conflict 1: Voice Agent Tools Interface Mismatch**
+
+
+Edit ai-smb-partners/lib/voiceAgent/tools.ts:
+
+```typescript
+interface VoiceTool {
+  execute(session: VoiceSession): Promise<ToolResult>;
+}
+
+// File: ai_smb_crm_frontend/lib/agent/tools/index.ts  
+interface AgentTool {
+  run(context: AgentContext): Promise<ToolOutput>;
+}
+
+```
+**Impact:** Incompatible tool systems prevent code sharing ### **Conflict 2: Booking Data Models**
+
+Edit ai-smb-partners/lib/booking/types.ts:
+
+```typescript
+interface Booking {
+  customerEmail: string;
+  serviceType: string;
+  // ... 15+ fields
+}
+
+// File: ai_smb_crm_frontend/types/api.ts
+interface CRMBooking {
+  contact_email: string;
+  service_type: string;
+  // Different field structure
+}
+
+```
+
+
+**Impact:** Data transformation needed between systems ### **Conflict 3: ROI Calculation Interfaces**
+
+Edit ai-smb-partners/lib/shared/roiTypes.ts:
+
+```typescript
+interface ROICalculation {
+  annualSavings: number;
+  monthlyCost: number;
+}
+
+// File: ai_smb_crm_frontend/types/roi.ts
+interface ROIAnalysis {
+  yearly_savings: number;
+  cost_per_month: number;
+}
+
+```
+
+
+**Impact:** Inconsistent data models for same business domain ## 📈 Dependency Graph Analysis ### **One-Way Dependencies:**
+
+```plaintext
+ai_smb_crm_frontend → ai-smb-partners
+    ↓
+[Contracts]    [Bookings]
+    ↓              ↓
+[Signing]  ←  [Calendar]
+    ↓
+[Email]    →  [Shared?]
+
+```
+
+### **Circular Dependencies:**
+
+```plaintext
+Voice Agent → Tools → Session → Voice Agent
+    ↑                             ↓
+  CRM ←─────── ROI Engine ─────→ Partners
+
+```
+
+## 🛠️ Recommended Refactoring Actions ### **Phase 1: Immediate (High Risk)** 1. **Extract Shared Voice Infrastructure
+
+```typescript
+   // Proposed: shared-voice-agent package
+   export interface VoiceCore {
+     recording: AudioRecording;
+     transcription: TranscriptionService;
+     agent: VoiceAgent;
+   }
+   
+```
+2. **Unify Booking Interfaces**
+
+```typescript
+   // File: shared-types/booking.ts
+   export interface UnifiedBooking {
+     id: string;
+     customer: CustomerInfo;
+     service: ServiceType;
+     timeSlot: TimeSlot;
+     // Common fields only
+   }
+   
+```
+
+### **Phase 2: Short-term (Medium Risk)** 3. **Create Shared Email Service**
+
+```typescript
+   // File: shared-services/email.ts
+   export class EmailService {
+     sendTemplate(template: EmailTemplate, data: any): Promise<void>;
+     handleWebhook(payload: WebhookPayload): Promise<void>;
+   }
+   
+```
+
+3. **Create Binding Matrix Dashboard** - Monitor interface changes - Alert on breaking changes - Track dependency health scores ## 📊 Health Metrics Summary | Category | ai-smb-partners |
+
+
+

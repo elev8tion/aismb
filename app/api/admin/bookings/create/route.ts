@@ -9,8 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import { calculateEndTime } from '@/lib/booking/availability';
 // import { runBookingPipeline } from '@/lib/booking/createBooking';
-import { Booking } from '@/lib/booking/types';
-import { adminBookingRequestSchema, validate, formatZodErrors } from '@kre8tion/shared-types';
+import { adminBookingRequestSchema, validate, formatZodErrors, LandingPageBooking as Booking } from '@kre8tion/shared-types';
 
 export const runtime = 'edge';
 
