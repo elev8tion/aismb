@@ -529,6 +529,49 @@ export default function VoiceAgentFAB() {
                 </div>
               )}
 
+              {/* Processing Animation */}
+              {voiceState === 'processing' && (
+                <div className="flex items-center justify-center gap-2 h-16">
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-3 h-3 bg-orange-400 rounded-full"
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.5, 1, 0.5],
+                      }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        delay: i * 0.2,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Speaking Animation */}
+              {voiceState === 'speaking' && (
+                <div className="flex items-center justify-center gap-1 h-16">
+                  {[...Array(7)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1.5 bg-blue-400 rounded-full"
+                      animate={{
+                        height: [10, 30, 15, 35, 10],
+                      }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                        delay: i * 0.15,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
               {/* Auto-Close Countdown Prompt */}
               {showAutoClosePrompt && countdown !== null && (
                 <motion.div
