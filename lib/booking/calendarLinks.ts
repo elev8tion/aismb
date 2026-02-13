@@ -8,7 +8,7 @@
  * No OAuth required - users click the link to add to their own calendar.
  */
 
-import type { CalendarEventData } from './types';
+import type { CalendarEventData } from '@kre8tion/shared-types';
 
 export interface CalendarLinkData {
   title: string;
