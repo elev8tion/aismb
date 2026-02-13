@@ -166,7 +166,7 @@ export function getAvailableDates(
   const dates: string[] = [];
   const today = new Date();
 
-  for (let i = 1; i <= daysAhead; i++) {
+  for (let i = 0; i <= daysAhead; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() + i);
     const dateStr = date.toISOString().split('T')[0];

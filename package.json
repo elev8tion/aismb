@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:admin-booking": "node scripts/test-admin-booking.js"
   },
   "dependencies": {
     "@cloudflare/next-on-pages": "^1.13.16",
