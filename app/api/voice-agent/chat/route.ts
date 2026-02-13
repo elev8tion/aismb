@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
-import { createOpenAI, MODELS } from '@/lib/openai/config';
+import { createOpenAI } from '@/lib/openai/config';
 import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
 import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
@@ -9,6 +9,10 @@ import { getFeatureFlags, logFeatureFlags } from '@/lib/featureFlags';
 import { extractLeadInfo, syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
 import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
 import { sendViaEmailIt } from '@/lib/email/sendEmail';
+import { classifyIntent } from '@/lib/voiceAgent/intentRouter';
+import { runBookingAgent } from '@/lib/voiceAgent/agents/bookingAgent';
+import { runROIAgent } from '@/lib/voiceAgent/agents/roiAgent';
+import { runInfoAgent } from '@/lib/voiceAgent/agents/infoAgent';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -89,21 +93,46 @@ export async function POST(request: NextRequest) {
     // Current user question
     messages.push({ role: 'user', content: sanitizedQuestion });
 
-    // Call OpenAI Chat Completions API
-    const completion = await openai.chat.completions.create({
-      model: MODELS.chat,
-      messages,
-      temperature: 0.7,
-      max_tokens: classification.maxTokens,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-    });
+    // Classify intent (deterministic, no LLM call)
+    const intentResult = classifyIntent(sanitizedQuestion, conversationHistory);
+    console.log(`🎯 Intent: ${intentResult.intent} (confidence: ${intentResult.confidence}, continuation: ${intentResult.isContinuation})`);
 
-    const fallbackMessage = language === 'es'
-      ? 'Lo siento, no pude generar una respuesta. Por favor, intenta de nuevo.'
-      : 'I apologize, but I couldn\'t generate a response. Please try asking again.';
-    const response = completion.choices[0]?.message?.content || fallbackMessage;
+    // Tool context for agents
+    const toolContext = { env: env as Record<string, string> };
+
+    // Route to appropriate agent
+    let response: string;
+    switch (intentResult.intent) {
+      case 'booking':
+        response = await runBookingAgent(
+          openai,
+          sanitizedQuestion,
+          conversationHistory,
+          toolContext,
+          { language, isContinuation: intentResult.isContinuation }
+        );
+        break;
+
+      case 'roi':
+        response = await runROIAgent(
+          openai,
+          sanitizedQuestion,
+          conversationHistory,
+          toolContext,
+          { language }
+        );
+        break;
+
+      case 'info':
+      default:
+        response = await runInfoAgent(
+          openai,
+          sanitizedQuestion,
+          conversationHistory,
+          { language }
+        );
+        break;
+    }
 
     // Save the conversation to session storage
     await sessionStorage.addMessage(sessionId, 'user', sanitizedQuestion);

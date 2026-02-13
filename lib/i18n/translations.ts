@@ -315,6 +315,13 @@ export interface Translations {
     errors: {
       notSupported: string;
     };
+    textInput: {
+      email: string;
+      name: string;
+      phone: string;
+      company: string;
+      industry: string;
+    };
   };
 
   languageSwitcher: {
@@ -1067,6 +1074,13 @@ export const translations: Record<Language, Translations> = {
       hint: 'Voice Chat With Me!',
       errors: {
         notSupported: 'Voice recording is not supported in this browser.',
+      },
+      textInput: {
+        email: 'Email Address',
+        name: 'Full Name',
+        phone: 'Phone Number',
+        company: 'Company Name',
+        industry: 'Industry',
       },
     },
 
@@ -1831,6 +1845,13 @@ export const translations: Record<Language, Translations> = {
       hint: '¡Chatea Por Voz Conmigo!',
       errors: {
         notSupported: 'La grabacion de voz no es compatible con este navegador.',
+      },
+      textInput: {
+        email: 'Correo Electrónico',
+        name: 'Nombre Completo',
+        phone: 'Número de Teléfono',
+        company: 'Nombre de la Empresa',
+        industry: 'Industria',
       },
     },
 

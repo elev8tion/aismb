@@ -29,6 +29,10 @@ export default function VoiceAgentFAB() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textInputType, setTextInputType] = useState<'email' | 'name' | 'phone' | 'company' | 'industry' | null>(null);
+  const [textInputValue, setTextInputValue] = useState('');
+  const [textInputError, setTextInputError] = useState<string | null>(null);
 
   const audioURLManagerRef = useRef<AudioURLManager>(new AudioURLManager());
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -137,6 +141,17 @@ export default function VoiceAgentFAB() {
     setShowAutoClosePrompt(false);
   }, []);
 
+  // Detect if AI is asking for specific info
+  const detectInfoRequest = (text: string): 'email' | 'name' | 'phone' | 'company' | 'industry' | null => {
+    const lower = text.toLowerCase();
+    if (/(what'?s |what is |can i get |could i have |provide ).*email/i.test(lower)) return 'email';
+    if (/(what'?s |what is |can i get |could i have ).*name/i.test(lower)) return 'name';
+    if (/(what'?s |what is |can i get |could i have ).*phone/i.test(lower)) return 'phone';
+    if (/(what'?s |what is |can i get |could i have ).*company/i.test(lower)) return 'company';
+    if (/(what'?s |what is |can i get |could i have ).*industry/i.test(lower)) return 'industry';
+    return null;
+  };
+
   // Process full voice interaction flow
   const processVoiceInteraction = useCallback(async (transcribedText: string) => {
     const currentLanguage = languageRef.current;
@@ -211,6 +226,15 @@ export default function VoiceAgentFAB() {
 
       // Store cleaned response text for display
       setAiResponse(responseText);
+
+      // Show text input if AI asks for specific info
+      const infoRequest = detectInfoRequest(responseText);
+      if (infoRequest) {
+        setTextInputType(infoRequest);
+        setShowTextInput(true);
+        setTextInputValue('');
+        setTextInputError(null);
+      }
 
       // Step 2: Convert response to speech
       setVoiceState('speaking');
@@ -541,6 +565,72 @@ export default function VoiceAgentFAB() {
                     )}
                   </AnimatePresence>
                 </div>
+              )}
+
+              {/* Hybrid Text Input */}
+              {showTextInput && textInputType && voiceState === 'speaking' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-4"
+                >
+                  <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <label className="block text-sm font-medium mb-2">
+                      {textInputType === 'email' && t.voiceAgent.textInput.email}
+                      {textInputType === 'name' && t.voiceAgent.textInput.name}
+                      {textInputType === 'phone' && t.voiceAgent.textInput.phone}
+                      {textInputType === 'company' && t.voiceAgent.textInput.company}
+                      {textInputType === 'industry' && t.voiceAgent.textInput.industry}
+                    </label>
+                    <input
+                      type={textInputType === 'email' ? 'email' : 'text'}
+                      value={textInputValue}
+                      onChange={(e) => setTextInputValue(e.target.value)}
+                      placeholder={
+                        textInputType === 'email' ? 'your.email@example.com' :
+                        textInputType === 'name' ? 'Your full name' :
+                        textInputType === 'phone' ? '(555) 123-4567' :
+                        textInputType === 'company' ? 'Your company name' :
+                        'Your industry'
+                      }
+                      className={`w-full input-glass ${textInputError ? 'border-[#EF4444]' : ''}`}
+                    />
+                    {textInputError && (
+                      <p className="mt-1 text-sm text-[#EF4444]">{textInputError}</p>
+                    )}
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={async () => {
+                          if (!textInputValue.trim()) {
+                            setTextInputError('This field is required');
+                            return;
+                          }
+                          if (textInputType === 'email' && !textInputValue.includes('@')) {
+                            setTextInputError('Please enter a valid email');
+                            return;
+                          }
+                          setShowTextInput(false);
+                          await processVoiceInteraction(textInputValue.trim());
+                        }}
+                        className="flex-1 btn-primary py-2 rounded-lg text-sm"
+                      >
+                        Submit
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowTextInput(false);
+                          setTextInputType(null);
+                          setTextInputValue('');
+                          setTextInputError(null);
+                        }}
+                        className="px-4 btn-glass py-2 rounded-lg text-sm"
+                      >
+                        Skip
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
               )}
 
               {/* Error */}
