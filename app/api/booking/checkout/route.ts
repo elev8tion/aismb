@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
+import { getEnv } from '@/lib/cloudflare/env';
 
 export const runtime = 'edge';
 
@@ -23,7 +23,7 @@ function getBaseUrl(req: NextRequest): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
+    const env = getEnv();
     const stripeKey = env.STRIPE_SECRET_KEY;
     const assessmentPriceId = env.STRIPE_ASSESSMENT_PRICE_ID;
 

@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
+import { getEnv } from '@/lib/cloudflare/env';
 import {
   CreateBookingRequest,
   Booking,
@@ -78,7 +78,7 @@ async function isSlotAvailable(env: Record<string, string>, date: string, time: 
 
 export async function POST(req: NextRequest) {
   try {
-    const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
+    const env = getEnv();
     const cfEnv = env as unknown as Record<string, string>;
 
     // Rate limiting (booking creates get their own prefix for stricter tracking)

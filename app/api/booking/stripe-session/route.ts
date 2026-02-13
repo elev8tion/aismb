@@ -7,13 +7,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
+import { getEnv } from '@/lib/cloudflare/env';
 
 export const runtime = 'edge';
 
 export async function GET(req: NextRequest) {
   try {
-    const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
+    const env = getEnv();
     const stripeKey = env.STRIPE_SECRET_KEY;
 
     if (!stripeKey) {

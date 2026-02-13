@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
+import { getEnv } from '@/lib/cloudflare/env';
 import { sendViaEmailIt } from '@/lib/email/sendEmail';
 
 export const runtime = 'edge';
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       case 'email.bounced': {
         console.warn(`[EmailIt Webhook] Bounce for ${payload.email}: ${payload.reason}`);
         // Alert admin about bounces
-        const ctx = getOptionalRequestContext(); const env = (ctx?.env || process.env) as any;
+        const env = getEnv();
         const apiKey = env.EMAILIT_API_KEY;
         if (apiKey) {
           try {
@@ -70,8 +70,7 @@ export async function POST(req: NextRequest) {
 
       case 'email.inbound': {
         // Forward inbound reply to admin
-        const ctx = getOptionalRequestContext();
-        const inboundEnv = (ctx?.env || process.env) as any;
+        const inboundEnv = getEnv();
         const inboundApiKey = inboundEnv.EMAILIT_API_KEY;
         if (inboundApiKey) {
           try {

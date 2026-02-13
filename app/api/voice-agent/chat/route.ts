@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
+import { getEnv } from '@/lib/cloudflare/env';
 import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
 import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
@@ -14,9 +14,8 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   // Get env from Cloudflare context OR fallback to process.env for local dev
-  const ctx = getOptionalRequestContext();
-  const env = (ctx?.env || process.env) as any;
-  const openai = createOpenAI(env.OPENAI_API_KEY);
+  const env = getEnv();
+  const openai = createOpenAI(env.OPENAI_API_KEY!);
 
   try {
     const body = await request.json();
@@ -114,7 +113,7 @@ export async function POST(request: NextRequest) {
     // ═══════════════════════════════════════════════════════════════════════════
     // FEATURE FLAGS: Lead Intelligence Pipeline
     // ═══════════════════════════════════════════════════════════════════════════
-    const flags = getFeatureFlags(env);
+    const flags = getFeatureFlags(env as Record<string, string | undefined>);
     logFeatureFlags(flags);
 
     if (flags.VOICE_LEAD_EXTRACTION) {
@@ -141,7 +140,7 @@ export async function POST(request: NextRequest) {
             };
 
             try {
-              const crmLead = await syncLeadToCRM(enrichedLead, env);
+              const crmLead = await syncLeadToCRM(enrichedLead, env as Record<string, string>);
               if (crmLead) {
                 console.log(`✅ Lead synced to CRM: ID ${crmLead.id}`);
 
