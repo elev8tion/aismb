@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
           if (flags.VOICE_CRM_SYNC) {
             const enrichedLead = {
               ...leadInfo,
+              email: leadInfo.email!, // TypeScript: we know email exists from line 124 check
               qualified_score: scoreResult.score,
               notes: `Voice Agent | Score: ${scoreResult.tier} (${scoreResult.factors.join(', ')})`,
               source: 'Voice Agent',
