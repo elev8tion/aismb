@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function AdminLoginPage() {
+// Force dynamic rendering to avoid prerendering with useSearchParams
+export const dynamic = 'force-dynamic';
+
+function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/admin/bookings';
 
@@ -108,5 +111,17 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
