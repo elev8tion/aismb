@@ -1,11 +1,11 @@
 import {
   AvailabilitySetting,
   BlockedDate,
-  Booking,
+  LandingPageBooking as Booking,
   TimeSlot,
   MEETING_DURATION,
   DEFAULT_AVAILABILITY,
-} from './types';
+} from '@kre8tion/shared-types';
 import {
   formatTimeLabel as _formatTimeLabel,
   formatDateDisplay as _formatDateDisplay,

@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
-import { Booking } from '@/lib/booking/types';
+import { LandingPageBooking as Booking } from '@kre8tion/shared-types';
 
 export const runtime = 'edge';
 

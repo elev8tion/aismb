@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getEnv } from '@/lib/cloudflare/env';
-import { ASSESSMENT_FEE_CENTS, ASSESSMENT_DURATION } from '@/lib/booking/types';
+import { ASSESSMENT_FEE_CENTS, ASSESSMENT_DURATION } from '@kre8tion/shared-types';
 import { calculateEndTime } from '@/lib/booking/availability';
 
 export const runtime = 'edge';

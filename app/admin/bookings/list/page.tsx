@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Booking } from '@/lib/booking/types';
+import { LandingPageBooking as Booking } from '@kre8tion/shared-types';
 
 export default function AdminBookingsListPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);

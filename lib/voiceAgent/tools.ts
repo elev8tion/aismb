@@ -9,10 +9,10 @@ import type OpenAI from 'openai';
 import {
   AvailabilitySetting,
   BlockedDate,
-  Booking,
+  LandingPageBooking as Booking,
   DEFAULT_AVAILABILITY,
   MEETING_DURATION,
-} from '@/lib/booking/types';
+} from '@kre8tion/shared-types';
 import {
   getAvailableDates,
   getAvailableSlots,

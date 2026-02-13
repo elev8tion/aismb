@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ClientLayout from '@/components/ClientLayout';
 import { useTranslations } from '@/contexts/LanguageContext';
-import { ASSESSMENT_FEE_CENTS } from '@/lib/booking/types';
+import { ASSESSMENT_FEE_CENTS } from '@kre8tion/shared-types';
 
 interface SessionData {
   id: string;

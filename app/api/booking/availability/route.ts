@@ -14,9 +14,9 @@ import {
 import {
   AvailabilitySetting,
   BlockedDate,
-  Booking,
+  LandingPageBooking as Booking,
   DEFAULT_AVAILABILITY,
-} from '@/lib/booking/types';
+} from '@kre8tion/shared-types';
 import { fetchFromNCB } from '@/lib/ncb/client';
 import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 
