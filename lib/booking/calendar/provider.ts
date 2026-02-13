@@ -1,4 +1,4 @@
-import { CalendarEventData, CalendarEventResult } from '../types';
+import { CalendarEventData, CalendarEventResult } from '@kre8tion/shared-types';
 
 /**
  * Abstract calendar provider interface

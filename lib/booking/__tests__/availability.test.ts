@@ -10,7 +10,7 @@ import {
   getWeekdaySettings,
   isSlotBooked,
 } from '../availability';
-import type { AvailabilitySetting, BlockedDate, Booking } from '../types';
+import type { AvailabilitySetting, BlockedDate, LandingPageBooking as Booking } from '@kre8tion/shared-types';
 
 describe('minutesToTime', () => {
   it('converts 0 to 00:00', () => {

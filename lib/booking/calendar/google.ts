@@ -1,5 +1,5 @@
 import { ICalendarProvider } from './provider';
-import { CalendarEventData, CalendarEventResult, CalendarIntegration } from '../types';
+import { CalendarEventData, CalendarEventResult, CalendarIntegration } from '@kre8tion/shared-types';
 
 /**
  * Google Calendar Provider

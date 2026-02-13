@@ -1,6 +1,6 @@
 import { ICalendarProvider } from './provider';
 import { generateICSContent } from '../calendarLinks';
-import { CalendarEventData, CalendarEventResult, CalendarIntegration } from '../types';
+import { CalendarEventData, CalendarEventResult, CalendarIntegration } from '@kre8tion/shared-types';
 
 /**
  * CalDAV Provider for Apple Calendar and other CalDAV-compatible services
