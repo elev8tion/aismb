@@ -28,6 +28,8 @@ jobs:
 
       - name: Build for Cloudflare Pages
         run: npm run pages:build
+        env:
+          NPM_CONFIG_LEGACY_PEER_DEPS: true
 
       - name: Set Cloudflare Pages Secrets
         run: |
