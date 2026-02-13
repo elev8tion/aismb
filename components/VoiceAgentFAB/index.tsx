@@ -586,6 +586,18 @@ export default function VoiceAgentFAB() {
                     {t.voiceAgent.buttons.stop}
                   </button>
                 )}
+                {voiceState === 'idle' && !showAutoClosePrompt && (
+                  <button
+                    onClick={() => {
+                      // CRITICAL: Unlock iOS audio during user tap
+                      iosAudioPlayerRef.current.unlock();
+                      startRecording();
+                    }}
+                    className="flex-1 btn-primary py-2 rounded-lg text-sm"
+                  >
+                    {t.voiceAgent.autoClose.askAnother}
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     if (abortControllerRef.current) {
