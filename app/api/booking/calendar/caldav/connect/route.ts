@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
+import { caldavConnectRequestSchema, validate, formatZodErrors } from '@kre8tion/shared-types';
 
 export const runtime = 'edge';
 
@@ -22,46 +23,21 @@ function getConfig() {
   return { instance, dataApiUrl };
 }
 
-interface ConnectRequest {
-  caldav_url: string;
-  caldav_username: string;
-  caldav_password: string;
-}
-
-function validateRequest(data: unknown): ConnectRequest | null {
-  if (!data || typeof data !== 'object') return null;
-
-  const req = data as Record<string, unknown>;
-
-  if (typeof req.caldav_url !== 'string' || !req.caldav_url.startsWith('https://')) {
-    return null;
-  }
-  if (typeof req.caldav_username !== 'string' || !req.caldav_username) {
-    return null;
-  }
-  if (typeof req.caldav_password !== 'string' || !req.caldav_password) {
-    return null;
-  }
-
-  return {
-    caldav_url: req.caldav_url,
-    caldav_username: req.caldav_username,
-    caldav_password: req.caldav_password,
-  };
-}
 
 export async function POST(req: NextRequest) {
   try {
     const config = getConfig();
     const body = await req.json();
-    const validatedData = validateRequest(body);
 
-    if (!validatedData) {
+    // Validate with Zod schema
+    const validation = validate(caldavConnectRequestSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: 'Invalid request. Provide caldav_url, caldav_username, and caldav_password.' },
+        { success: false, error: 'Invalid CalDAV configuration', details: formatZodErrors(validation.errors) },
         { status: 400 }
       );
     }
+    const validatedData = validation.data;
 
     // Test the CalDAV connection
     const encoder = new TextEncoder();

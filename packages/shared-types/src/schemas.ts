@@ -77,6 +77,16 @@ export const availabilityRequestSchema = z.object({
   timezone: timezoneSchema,
 });
 
+export const caldavConnectRequestSchema = z.object({
+  caldav_url: z.string()
+    .url()
+    .refine(url => url.startsWith('https://'), {
+      message: 'CalDAV URL must use HTTPS protocol'
+    }),
+  caldav_username: z.string().min(1, 'Username is required'),
+  caldav_password: z.string().min(1, 'Password is required'),
+});
+
 // ─── Voice Agent Schemas ────────────────────────────────────────────────────
 
 export const languageSchema = z.enum(['en', 'es']);

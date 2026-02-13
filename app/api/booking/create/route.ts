@@ -13,6 +13,9 @@ import {
   BookingType,
   MEETING_DURATION,
   ASSESSMENT_DURATION,
+  createBookingRequestSchema,
+  validate,
+  formatZodErrors,
 } from '@kre8tion/shared-types';
 import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
 import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
@@ -21,42 +24,6 @@ import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 
 export const runtime = 'edge';
 
-function validateBookingRequest(data: unknown): CreateBookingRequest | null {
-  if (!data || typeof data !== 'object') return null;
-
-  const req = data as Record<string, unknown>;
-
-  if (typeof req.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(req.date)) return null;
-  if (typeof req.time !== 'string' || !/^\d{2}:\d{2}$/.test(req.time)) return null;
-  if (typeof req.name !== 'string' || req.name.trim().length < 2) return null;
-  if (typeof req.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(req.email)) return null;
-  if (typeof req.timezone !== 'string') return null;
-
-  const bookingType = req.bookingType === 'assessment' ? 'assessment' : 'consultation';
-
-  // Validate required business fields
-  if (typeof req.companyName !== 'string' || req.companyName.trim().length < 2) return null;
-  if (typeof req.industry !== 'string' || req.industry.trim().length < 2) return null;
-  if (typeof req.employeeCount !== 'string' || !req.employeeCount.trim()) return null;
-
-  return {
-    date: req.date,
-    time: req.time,
-    name: req.name.trim(),
-    email: req.email.trim().toLowerCase(),
-    phone: typeof req.phone === 'string' ? req.phone.trim() : undefined,
-    companyName: req.companyName.trim(),
-    industry: req.industry.trim(),
-    employeeCount: req.employeeCount.trim(),
-    challenge: typeof req.challenge === 'string' ? req.challenge.trim() : undefined,
-    referralSource: typeof req.referralSource === 'string' ? req.referralSource.trim() : undefined,
-    websiteUrl: typeof req.websiteUrl === 'string' ? req.websiteUrl.trim() : undefined,
-    timezone: req.timezone,
-    bookingType: bookingType as BookingType,
-    stripe_session_id: typeof req.stripe_session_id === 'string' ? req.stripe_session_id : undefined,
-    payment_amount_cents: typeof req.payment_amount_cents === 'number' ? req.payment_amount_cents : undefined,
-  };
-}
 
 async function isSlotAvailable(env: Record<string, string>, date: string, time: string, duration: number = MEETING_DURATION): Promise<boolean> {
   // Filter client-side — NCB datetime filter doesn't match date strings
@@ -95,14 +62,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validatedData = validateBookingRequest(body);
 
-    if (!validatedData) {
+    // Validate with Zod schema
+    const validation = validate(createBookingRequestSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: 'Invalid booking data. Please check all fields.' },
+        { success: false, error: 'Validation failed', details: formatZodErrors(validation.errors) },
         { status: 400 }
       );
     }
+    const validatedData = validation.data;
 
     const isAssessment = validatedData.bookingType === 'assessment';
     const duration = isAssessment ? ASSESSMENT_DURATION : MEETING_DURATION;

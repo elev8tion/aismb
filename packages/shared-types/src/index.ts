@@ -41,6 +41,7 @@ export {
   createBookingRequestSchema,
   adminBookingRequestSchema,
   availabilityRequestSchema,
+  caldavConnectRequestSchema,
 
   // Voice agent schemas
   conversationMessageSchema,

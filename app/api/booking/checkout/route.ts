@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getEnv } from '@/lib/cloudflare/env';
+import { createBookingRequestSchema, validate, formatZodErrors } from '@kre8tion/shared-types';
 
 export const runtime = 'edge';
 
@@ -42,69 +43,24 @@ export async function POST(req: NextRequest) {
 
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
 
-    const body = await req.json() as Record<string, unknown>;
-    const date = body.date as string | undefined;
-    const time = body.time as string | undefined;
-    const name = body.name as string | undefined;
-    const email = body.email as string | undefined;
-    const phone = body.phone as string | undefined;
-    const timezone = body.timezone as string | undefined;
-    const companyName = body.companyName as string | undefined;
-    const industry = body.industry as string | undefined;
-    const employeeCount = body.employeeCount as string | undefined;
-    const challenge = body.challenge as string | undefined;
-    const referralSource = body.referralSource as string | undefined;
-    const websiteUrl = body.websiteUrl as string | undefined;
+    const body = await req.json();
 
-    // Basic validation
-    if (!date || !time || !name || !email || !timezone) {
+    // Validate with Zod schema
+    const validation = validate(createBookingRequestSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: 'Missing required booking fields.' },
+        { success: false, error: 'Invalid booking data', details: formatZodErrors(validation.errors) },
         { status: 400 }
       );
     }
-
-    if (!name || name.trim().length < 2) {
-      return NextResponse.json(
-        { success: false, error: 'Please enter a valid name.' },
-        { status: 400 }
-      );
-    }
-
-    if (!email || !email.includes('@')) {
-      return NextResponse.json(
-        { success: false, error: 'Please enter a valid email.' },
-        { status: 400 }
-      );
-    }
-
-    if (!companyName || companyName.trim().length < 2) {
-      return NextResponse.json(
-        { success: false, error: 'Please enter your company name.' },
-        { status: 400 }
-      );
-    }
-
-    if (!industry || industry.trim().length < 2) {
-      return NextResponse.json(
-        { success: false, error: 'Please enter your industry.' },
-        { status: 400 }
-      );
-    }
-
-    if (!employeeCount || !employeeCount.trim()) {
-      return NextResponse.json(
-        { success: false, error: 'Please enter your number of employees.' },
-        { status: 400 }
-      );
-    }
+    const { date, time, name, email, phone, timezone, companyName, industry, employeeCount, challenge, referralSource, websiteUrl } = validation.data;
 
     const baseUrl = getBaseUrl(req);
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      customer_email: email.trim().toLowerCase(),
+      customer_email: email,
       line_items: [
         {
           price: assessmentPriceId,
@@ -113,18 +69,18 @@ export async function POST(req: NextRequest) {
       ],
       metadata: {
         booking_type: 'assessment',
-        date: date as string,
-        time: time as string,
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        phone: (phone || '').trim(),
-        timezone: timezone as string,
-        company_name: truncate(companyName.trim()),
-        industry: truncate(industry.trim()),
-        employee_count: truncate(employeeCount.trim()),
-        challenge: truncate((challenge || '').trim()),
-        referral_source: truncate((referralSource || '').trim()),
-        website_url: truncate((websiteUrl || '').trim()),
+        date,
+        time,
+        name,
+        email,
+        phone: phone || '',
+        timezone,
+        company_name: truncate(companyName || ''),
+        industry: truncate(industry || ''),
+        employee_count: truncate(employeeCount || ''),
+        challenge: truncate(challenge || ''),
+        referral_source: truncate(referralSource || ''),
+        website_url: truncate(websiteUrl || ''),
       },
       success_url: `${baseUrl}/booking/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/#pricing`,
