@@ -7,6 +7,7 @@
  */
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'dev_admin_key_change_in_production';
 
 // ANSI color codes for better output
 const colors = {
@@ -158,7 +159,10 @@ async function testCreateFullBooking() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/bookings/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
       body: JSON.stringify(TEST_DATA.fullBooking),
     });
 
@@ -192,7 +196,10 @@ async function testCreateMinimalBooking() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/bookings/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
       body: JSON.stringify(TEST_DATA.minimalBooking),
     });
 
@@ -223,14 +230,19 @@ async function testInvalidEmail() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/bookings/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
       body: JSON.stringify(TEST_DATA.invalidEmail),
     });
 
     const data = await response.json();
 
-    const shouldFail = !response.ok && data.error && data.error.toLowerCase().includes('email');
+    const hasEmailError = data.details && data.details.guest_email;
+    const shouldFail = !response.ok && (data.error.toLowerCase().includes('email') || hasEmailError);
     logInfo(`Response: ${response.status} - ${data.error || 'OK'}`);
+    if (hasEmailError) logInfo(`Zod error: ${data.details.guest_email.join(', ')}`);
 
     recordTest('Reject invalid email format', shouldFail,
       shouldFail ? 'Validation working correctly' : 'Validation may not be working');
@@ -246,14 +258,19 @@ async function testInvalidDate() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/bookings/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
       body: JSON.stringify(TEST_DATA.invalidDate),
     });
 
     const data = await response.json();
 
-    const shouldFail = !response.ok && data.error && data.error.toLowerCase().includes('date');
+    const hasDateError = data.details && data.details.booking_date;
+    const shouldFail = !response.ok && (data.error.toLowerCase().includes('date') || hasDateError);
     logInfo(`Response: ${response.status} - ${data.error || 'OK'}`);
+    if (hasDateError) logInfo(`Zod error: ${data.details.booking_date.join(', ')}`);
 
     recordTest('Reject invalid date format', shouldFail,
       shouldFail ? 'Validation working correctly' : 'Validation may not be working');
@@ -269,14 +286,19 @@ async function testMissingRequired() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/bookings/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
       body: JSON.stringify(TEST_DATA.missingRequired),
     });
 
     const data = await response.json();
 
-    const shouldFail = !response.ok && data.error && data.error.toLowerCase().includes('required');
+    const hasRequiredError = data.details && Object.keys(data.details).length > 0;
+    const shouldFail = !response.ok && (data.error.toLowerCase().includes('required') || hasRequiredError);
     logInfo(`Response: ${response.status} - ${data.error || 'OK'}`);
+    if (hasRequiredError) logInfo(`Zod errors: ${Object.keys(data.details).join(', ')}`);
 
     recordTest('Reject missing required fields', shouldFail,
       shouldFail ? 'Validation working correctly' : 'Validation may not be working');
@@ -290,7 +312,11 @@ async function testFetchBookingsList() {
   log('\n📋 Test 7: Fetch Bookings List', 'bright');
 
   try {
-    const response = await fetch(`${BASE_URL}/api/admin/bookings/list`);
+    const response = await fetch(`${BASE_URL}/api/admin/bookings/list`, {
+      headers: {
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
+    });
     const data = await response.json();
 
     if (data.success) {
@@ -317,7 +343,11 @@ async function testFilterByStatus() {
   log('\n🔍 Test 8: Filter Bookings by Status', 'bright');
 
   try {
-    const response = await fetch(`${BASE_URL}/api/admin/bookings/list?status=confirmed`);
+    const response = await fetch(`${BASE_URL}/api/admin/bookings/list?status=confirmed`, {
+      headers: {
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
+    });
     const data = await response.json();
 
     if (data.success) {
@@ -341,7 +371,10 @@ async function testCustomDuration() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/bookings/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ADMIN_API_KEY}`,
+      },
       body: JSON.stringify(TEST_DATA.customDuration),
     });
 

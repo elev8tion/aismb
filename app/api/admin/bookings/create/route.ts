@@ -9,37 +9,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import { calculateEndTime } from '@/lib/booking/availability';
 // import { runBookingPipeline } from '@/lib/booking/createBooking';
-import { Booking, BookingType, BookingStatus, CalendarProvider } from '@/lib/booking/types';
+import { Booking } from '@/lib/booking/types';
+import { adminBookingRequestSchema, validate, formatZodErrors } from '@kre8tion/shared-types';
 
 export const runtime = 'edge';
-
-interface AdminBookingRequest {
-  // Required fields
-  guest_name: string;
-  guest_email: string;
-  booking_date: string; // YYYY-MM-DD
-  start_time: string; // HH:mm
-
-  // Optional fields
-  guest_phone?: string;
-  timezone?: string;
-  notes?: string;
-  status?: BookingStatus;
-  company_name?: string;
-  industry?: string;
-  employee_count?: string;
-  challenge?: string;
-  referral_source?: string;
-  website_url?: string;
-  booking_type?: BookingType;
-  stripe_session_id?: string;
-  payment_status?: string;
-  payment_amount_cents?: number;
-  calendar_provider?: CalendarProvider;
-  calendar_event_id?: string;
-  meeting_link?: string;
-  duration_minutes?: number; // Custom duration (defaults to 30)
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,39 +25,22 @@ export async function POST(req: NextRequest) {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     // }
 
-    const body = (await req.json()) as AdminBookingRequest;
+    const rawBody = await req.json();
 
-    // Validate required fields
-    if (!body.guest_name || !body.guest_email || !body.booking_date || !body.start_time) {
+    // Validate with Zod schema
+    const validation = validate(adminBookingRequestSchema, rawBody);
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Missing required fields: guest_name, guest_email, booking_date, start_time' },
+        {
+          error: 'Validation failed',
+          details: formatZodErrors(validation.errors),
+        },
         { status: 400 }
       );
     }
 
-    // Validate date format
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(body.booking_date)) {
-      return NextResponse.json(
-        { error: 'Invalid booking_date format. Use YYYY-MM-DD' },
-        { status: 400 }
-      );
-    }
-
-    // Validate time format
-    if (!/^\d{2}:\d{2}$/.test(body.start_time)) {
-      return NextResponse.json(
-        { error: 'Invalid start_time format. Use HH:mm' },
-        { status: 400 }
-      );
-    }
-
-    // Validate email format
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.guest_email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
+    const body = validation.data;
 
     // Calculate end time
     const duration = body.duration_minutes || 30;
