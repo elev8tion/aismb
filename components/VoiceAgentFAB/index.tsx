@@ -21,6 +21,7 @@ export default function VoiceAgentFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
   const [displayError, setDisplayError] = useState<string | null>(null);
   const [browserSupported, setBrowserSupported] = useState(true);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -113,6 +114,7 @@ export default function VoiceAgentFAB() {
           setIsOpen(false);
           setVoiceState('idle');
           setTranscript('');
+          setAiResponse('');
           setDisplayError(null);
           setShowAutoClosePrompt(false);
           setCountdown(null);
@@ -206,6 +208,9 @@ export default function VoiceAgentFAB() {
           }, 500); // Small delay to allow voice to start
         }
       }
+
+      // Store cleaned response text for display
+      setAiResponse(responseText);
 
       // Step 2: Convert response to speech
       setVoiceState('speaking');
@@ -320,6 +325,7 @@ export default function VoiceAgentFAB() {
       setIsOpen(true);
       setDisplayError(null);
       setTranscript('');
+      setAiResponse('');
       // Unlock iOS audio on initial open (user gesture)
       iosAudioPlayerRef.current.unlock();
       setTimeout(() => {
@@ -340,6 +346,7 @@ export default function VoiceAgentFAB() {
         setIsOpen(false);
         setVoiceState('idle');
         setTranscript('');
+        setAiResponse('');
         setDisplayError(null);
         clearSessionId(); // Clear session on manual close
         setSessionId(null);
@@ -462,6 +469,12 @@ export default function VoiceAgentFAB() {
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
               )}
+              {voiceState === 'idle' && (
+                <svg className="w-full h-full text-[#F97316]" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" opacity="0.3"/>
+                  <path d="M12 6v6l4 2.4 1-1.6-3-1.8V6z"/>
+                </svg>
+              )}
             </motion.div>
           )}
         </div>
@@ -493,11 +506,40 @@ export default function VoiceAgentFAB() {
                 </p>
               </div>
 
-              {/* Transcript */}
-              {transcript && (
-                <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
-                  <p className="text-xs text-white/50 mb-1">{t.voiceAgent.transcript}</p>
-                  <p className="text-sm text-white">{transcript}</p>
+              {/* Conversation Display */}
+              {(transcript || aiResponse) && (
+                <div className="mb-4 space-y-3 max-h-48 overflow-y-auto">
+                  {/* User Question */}
+                  {transcript && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 rounded-lg bg-white/5 border border-white/10"
+                    >
+                      <p className="text-xs text-white/50 mb-1">
+                        {t.voiceAgent.yourQuestion}
+                      </p>
+                      <p className="text-sm text-white leading-relaxed">{transcript}</p>
+                    </motion.div>
+                  )}
+
+                  {/* AI Response */}
+                  <AnimatePresence>
+                    {aiResponse && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ delay: 0.2, duration: 0.3 }}
+                        className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30"
+                      >
+                        <p className="text-xs text-blue-400/80 mb-1">
+                          {t.voiceAgent.aiResponse}
+                        </p>
+                        <p className="text-sm text-white leading-relaxed">{aiResponse}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
 
@@ -531,23 +573,36 @@ export default function VoiceAgentFAB() {
 
               {/* Processing Animation */}
               {voiceState === 'processing' && (
-                <div className="flex items-center justify-center gap-2 h-16">
-                  {[...Array(3)].map((_, i) => (
+                <div className="h-16 flex flex-col justify-center">
+                  {/* Progress Bar */}
+                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-4">
                     <motion.div
-                      key={i}
-                      className="w-3 h-3 bg-orange-400 rounded-full"
-                      animate={{
-                        scale: [1, 1.5, 1],
-                        opacity: [0.5, 1, 0.5],
-                      }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        delay: i * 0.2,
-                        ease: 'easeInOut',
-                      }}
+                      className="h-full bg-gradient-to-r from-orange-400 to-orange-600"
+                      initial={{ width: '0%' }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 2.5, ease: 'easeOut' }}
                     />
-                  ))}
+                  </div>
+
+                  {/* Pulsing Dots */}
+                  <div className="flex items-center justify-center gap-2">
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="w-3 h-3 bg-orange-400 rounded-full"
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 1, 0.5],
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: 'easeInOut',
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -651,6 +706,7 @@ export default function VoiceAgentFAB() {
                     setIsOpen(false);
                     setVoiceState('idle');
                     setTranscript('');
+                    setAiResponse('');
                     setDisplayError(null);
                     clearSessionId(); // Clear session on close
                     setSessionId(null);

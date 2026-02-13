@@ -299,6 +299,8 @@ export interface Translations {
       speaking: { title: string; description: string };
     };
     transcript: string;
+    aiResponse: string;
+    yourQuestion: string;
     autoClose: {
       prompt: string;
       seconds: string;
@@ -1040,10 +1042,18 @@ export const translations: Record<Language, Translations> = {
       states: {
         idle: { title: 'Ready to Help', description: 'Click to ask a question' },
         listening: { title: 'Listening...', description: 'Speak your question' },
-        processing: { title: 'Processing...', description: 'Thinking...' },
-        speaking: { title: 'Speaking...', description: 'Playing response' },
+        processing: {
+          title: 'Processing Your Question...',
+          description: 'Analyzing and preparing response...'
+        },
+        speaking: {
+          title: 'AI Response',
+          description: 'Listen or read below ↓'
+        },
       },
       transcript: 'You asked:',
+      aiResponse: 'AI Response:',
+      yourQuestion: 'Your Question:',
       autoClose: {
         prompt: 'Need more information or have another question?',
         seconds: 'seconds until auto-close',
@@ -1796,10 +1806,18 @@ export const translations: Record<Language, Translations> = {
       states: {
         idle: { title: 'Listo para Ayudar', description: 'Haz clic para hacer una pregunta' },
         listening: { title: 'Escuchando...', description: 'Di tu pregunta' },
-        processing: { title: 'Procesando...', description: 'Pensando...' },
-        speaking: { title: 'Hablando...', description: 'Reproduciendo respuesta' },
+        processing: {
+          title: 'Procesando Tu Pregunta...',
+          description: 'Analizando y preparando respuesta...'
+        },
+        speaking: {
+          title: 'Respuesta de IA',
+          description: 'Escucha o lee abajo ↓'
+        },
       },
       transcript: 'Preguntaste:',
+      aiResponse: 'Respuesta de IA:',
+      yourQuestion: 'Tu Pregunta:',
       autoClose: {
         prompt: 'Necesitas mas informacion o tienes otra pregunta?',
         seconds: 'segundos hasta cierre automatico',
