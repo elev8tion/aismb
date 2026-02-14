@@ -1,12 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslations } from '@/contexts/LanguageContext';
 import { BookingModal } from './Booking';
 
 export default function FinalCTA() {
   const { t } = useTranslations();
   const [bookingOpen, setBookingOpen] = useState(false);
+
+  // Listen for global event to open booking modal (used by voice agent)
+  useEffect(() => {
+    const handler = () => setBookingOpen(true);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('open-booking-form', handler);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('open-booking-form', handler);
+      }
+    };
+  }, []);
 
   return (
     <section id="get-started" className="bg-[#111113] py-16 lg:py-24">

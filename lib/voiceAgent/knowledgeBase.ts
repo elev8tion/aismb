@@ -553,6 +553,7 @@ You can control the website navigation. If the user asks to SEE something or GO 
 - If they ask about case studies, examples, or results: [ACTION:SCROLL_TO_CASES]
 - If they ask how it works or the process: [ACTION:SCROLL_TO_PROCESS]
 - If they ask to book, contact, or start: [ACTION:SCROLL_TO_BOOKING]
+ - To open the booking form directly so they can type details: [ACTION:OPEN_BOOKING_FORM]
 
 Example: "Our pricing starts at $4,000. Let me take you to the pricing section. [ACTION:SCROLL_TO_PRICING]"
 

@@ -194,7 +194,7 @@ export default function VoiceAgentFAB() {
         const action = actionMatch[1];
         responseText = responseText.replace(actionMatch[0], '').trim();
 
-        // Execute action (scroll to section)
+        // Execute action (scroll to section or open booking form)
         let targetId = '';
         switch (action) {
           case 'SCROLL_TO_PRICING':
@@ -211,6 +211,14 @@ export default function VoiceAgentFAB() {
             break;
           case 'SCROLL_TO_BOOKING':
             targetId = 'get-started'; // Updated to match FinalCTA section ID
+            break;
+          case 'OPEN_BOOKING_FORM':
+            // Dispatch global event so sections can open their BookingModal
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('open-booking-form'));
+            }
+            // Also scroll to the booking section for context
+            targetId = 'get-started';
             break;
         }
 
