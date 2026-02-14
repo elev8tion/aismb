@@ -568,7 +568,7 @@ export default function VoiceAgentFAB() {
               )}
 
               {/* Hybrid Text Input */}
-              {showTextInput && textInputType && voiceState === 'speaking' && (
+              {showTextInput && textInputType && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
