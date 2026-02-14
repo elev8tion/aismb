@@ -100,8 +100,9 @@ export const VOICE_AGENT_TOOLS: OpenAI.ChatCompletionTool[] = [
           employeeCount: { type: 'string', description: 'Number of employees' },
           phone: { type: 'string', description: 'Phone number (optional)' },
           timezone: { type: 'string', description: 'IANA timezone (default: America/Los_Angeles)' },
+          termsAgreed: { type: 'boolean', description: 'User verbally agreed to Terms & Refund Policy (true/false)' },
         },
-        required: ['date', 'time', 'name', 'email', 'companyName', 'industry'],
+        required: ['date', 'time', 'name', 'email', 'companyName', 'industry', 'employeeCount'],
       },
     },
   },
@@ -122,8 +123,9 @@ export const VOICE_AGENT_TOOLS: OpenAI.ChatCompletionTool[] = [
           employeeCount: { type: 'string', description: 'Number of employees' },
           phone: { type: 'string', description: 'Phone number (optional)' },
           timezone: { type: 'string', description: 'IANA timezone (default: America/Los_Angeles)' },
+          termsAgreed: { type: 'boolean', description: 'User verbally agreed to Terms & Refund Policy (true/false)' },
         },
-        required: ['date', 'time', 'name', 'email', 'companyName', 'industry'],
+        required: ['date', 'time', 'name', 'email', 'companyName', 'industry', 'employeeCount'],
       },
     },
   },
@@ -163,14 +165,14 @@ const RESPOND_TO_USER_TOOL: OpenAI.ChatCompletionTool = {
   type: 'function',
   function: {
     name: 'respond_to_user',
-    description: 'Ask the user for their personal details (name, email, company, industry) during the booking flow. ONLY use this to collect user info. NEVER use this to discuss availability or dates — use get_available_dates or get_available_slots for that.',
-    parameters: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', description: 'A question asking for the user\'s name, email, company, or industry' },
+    description: 'Ask the user for personal details (name, spelled-and-confirmed email, company, industry, employee count) and to confirm terms consent during the booking flow. ONLY use this to collect user info. NEVER use this to discuss availability or dates — use get_available_dates or get_available_slots for that.',
+      parameters: {
+        type: 'object',
+        properties: {
+        message: { type: 'string', description: 'A question asking for the user\'s name, spelled email, company, industry, employee count, or terms consent' },
+        },
+        required: ['message'],
       },
-      required: ['message'],
-    },
   },
 };
 
@@ -270,6 +272,7 @@ async function handleCreateConsultation(
   const employeeCount = (args.employeeCount as string) || 'Unknown';
   const phone = (args.phone as string) || '';
   const timezone = (args.timezone as string) || 'America/Los_Angeles';
+  const termsAgreed = Boolean(args.termsAgreed);
 
   if (!date || !time || !name || !email) {
     return JSON.stringify({ error: 'Missing required fields: date, time, name, email' });
@@ -304,6 +307,7 @@ async function handleCreateConsultation(
     company_name: companyName || null,
     industry: industry || null,
     employee_count: employeeCount || null,
+    notes: termsAgreed ? 'Terms agreed via voice consent' : null,
     status: 'confirmed',
     booking_type: 'consultation',
   };
@@ -350,6 +354,7 @@ async function handleCreateAssessmentCheckout(
   const employeeCount = (args.employeeCount as string) || 'Unknown';
   const phone = (args.phone as string) || '';
   const timezone = (args.timezone as string) || 'America/Los_Angeles';
+  const termsAgreed = Boolean(args.termsAgreed);
 
   if (!date || !time || !name || !email) {
     return JSON.stringify({ error: 'Missing required fields: date, time, name, email' });
@@ -384,6 +389,7 @@ async function handleCreateAssessmentCheckout(
       company_name: companyName.trim(),
       industry: industry.trim(),
       employee_count: employeeCount.trim(),
+      terms_agreed: String(termsAgreed),
     },
     success_url: `${baseUrl}/booking/payment-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/#pricing`,

@@ -144,7 +144,8 @@ export default function VoiceAgentFAB() {
   // Detect if AI is asking for specific info
   const detectInfoRequest = (text: string): 'email' | 'name' | 'phone' | 'company' | 'industry' | null => {
     const lower = text.toLowerCase();
-    if (/(what'?s |what is |can i get |could i have |provide ).*email/i.test(lower)) return 'email';
+    // Do NOT trigger text input for email in voice mode — handle via voice spelling + confirmation
+    // if (/(what'?s |what is |can i get |could i have |provide ).*email/i.test(lower)) return 'email';
     if (/(what'?s |what is |can i get |could i have ).*name/i.test(lower)) return 'name';
     if (/(what'?s |what is |can i get |could i have ).*phone/i.test(lower)) return 'phone';
     if (/(what'?s |what is |can i get |could i have ).*company/i.test(lower)) return 'company';
