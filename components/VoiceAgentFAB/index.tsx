@@ -8,6 +8,8 @@ import {
   checkBrowserCompatibility,
   getErrorMessage,
   BrowserNotSupportedError,
+  NetworkError,
+  AudioError,
 } from './utils/browserCompatibility';
 import { AudioURLManager } from './utils/audioProcessor';
 import { getIOSAudioPlayer } from './utils/iosAudioUnlock';
@@ -182,7 +184,7 @@ export default function VoiceAgentFAB() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({})) as { error?: string };
-        throw new Error(`Failed to get response: ${errorData.error || 'Unknown error'}`);
+        throw new NetworkError(`Failed to get response: ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json() as { response: string };
@@ -255,7 +257,7 @@ export default function VoiceAgentFAB() {
       });
 
       if (!speechResponse.ok) {
-        throw new Error('Failed to generate speech');
+        throw new NetworkError('Failed to generate speech');
       }
 
       const audioBlob = await speechResponse.blob();
@@ -271,11 +273,10 @@ export default function VoiceAgentFAB() {
           startAutoCloseCountdown();
         },
         (error) => {
-          // onError
+          // onError - convert to AudioError and re-throw to be caught by outer try/catch
           console.error('Audio playback error:', error);
-          setDisplayError(`Audio error: ${error.message}`);
-          setVoiceState('idle');
           audioURLManagerRef.current.revokeURL(audioUrl);
+          throw new AudioError(error.message || 'Audio playback failed');
         }
       );
     } catch (error) {
@@ -286,9 +287,13 @@ export default function VoiceAgentFAB() {
       }
 
       console.error('Voice interaction error:', error);
-      // Show detailed error for debugging
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      setDisplayError(`Error: ${errorMessage}`);
+
+      // Use getErrorMessage() for categorized, user-friendly error messages
+      const errorMessage = error instanceof Error
+        ? getErrorMessage(error)
+        : 'An unexpected error occurred. Please try again.';
+
+      setDisplayError(errorMessage);
       setVoiceState('idle');
     } finally {
       abortControllerRef.current = null;

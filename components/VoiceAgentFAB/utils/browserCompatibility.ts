@@ -35,6 +35,13 @@ export class UserCancelledError extends Error {
   }
 }
 
+export class AudioError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AudioError';
+  }
+}
+
 export interface AudioFormat {
   mimeType: string;
   fileExtension: string;
@@ -128,6 +135,10 @@ export function getErrorMessage(error: Error): string {
 
   if (error instanceof UserCancelledError) {
     return ''; // Silent - user intentionally cancelled
+  }
+
+  if (error instanceof AudioError) {
+    return 'Audio playback failed. Please try closing the chat and asking your question again.';
   }
 
   // Generic fallback
