@@ -35,6 +35,7 @@ export default function VoiceAgentFAB() {
   const [textInputType, setTextInputType] = useState<'email' | 'name' | 'phone' | 'company' | 'industry' | null>(null);
   const [textInputValue, setTextInputValue] = useState('');
   const [textInputError, setTextInputError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const audioURLManagerRef = useRef<AudioURLManager>(new AudioURLManager());
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -103,6 +104,28 @@ export default function VoiceAgentFAB() {
         clearInterval(countdownTimerRef.current);
       }
       iosAudioPlayerRef.current.stop();
+    };
+  }, []);
+
+  // Listen for toast notification events
+  useEffect(() => {
+    const handleToast = (event: Event) => {
+      const customEvent = event as CustomEvent<{ message: string }>;
+      if (customEvent.detail?.message) {
+        setToastMessage(customEvent.detail.message);
+        // Auto-hide after 3 seconds
+        setTimeout(() => setToastMessage(null), 3000);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('show-toast', handleToast);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('show-toast', handleToast);
+      }
     };
   }, []);
 
@@ -190,13 +213,14 @@ export default function VoiceAgentFAB() {
       const data = await response.json() as { response: string };
       let responseText = data.response;
 
-      // Check for action tags
-      const actionMatch = responseText.match(/\[ACTION:([A-Z_]+)\]/);
+      // Check for action tags (supports both [ACTION:TYPE] and [ACTION:TYPE:data])
+      const actionMatch = responseText.match(/\[ACTION:([A-Z_]+)(?::(.+?))?\]/);
       if (actionMatch) {
         const action = actionMatch[1];
+        const actionData = actionMatch[2] || null;
         responseText = responseText.replace(actionMatch[0], '').trim();
 
-        // Execute action (scroll to section or open booking form)
+        // Execute action (scroll to section, open booking form, fill forms, etc.)
         let targetId = '';
         switch (action) {
           case 'SCROLL_TO_PRICING':
@@ -212,7 +236,7 @@ export default function VoiceAgentFAB() {
             targetId = 'how-it-works';
             break;
           case 'SCROLL_TO_BOOKING':
-            targetId = 'get-started'; // Updated to match FinalCTA section ID
+            targetId = 'get-started';
             break;
           case 'OPEN_BOOKING_FORM':
             // Dispatch global event so sections can open their BookingModal
@@ -221,6 +245,60 @@ export default function VoiceAgentFAB() {
             }
             // Also scroll to the booking section for context
             targetId = 'get-started';
+            break;
+          case 'CLOSE_BOOKING_FORM':
+            // Dispatch event to close booking modal
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('close-booking-form'));
+            }
+            break;
+          case 'FILL_FORM_EMAIL':
+            // Dispatch event with email data
+            if (typeof window !== 'undefined' && actionData) {
+              window.dispatchEvent(new CustomEvent('fill-booking-email', {
+                detail: { value: actionData }
+              }));
+            }
+            break;
+          case 'FILL_FORM_NAME':
+            // Dispatch event with name data
+            if (typeof window !== 'undefined' && actionData) {
+              window.dispatchEvent(new CustomEvent('fill-booking-name', {
+                detail: { value: actionData }
+              }));
+            }
+            break;
+          case 'FILL_FORM_COMPANY':
+            // Dispatch event with company data
+            if (typeof window !== 'undefined' && actionData) {
+              window.dispatchEvent(new CustomEvent('fill-booking-company', {
+                detail: { value: actionData }
+              }));
+            }
+            break;
+          case 'FILL_FORM_PHONE':
+            // Dispatch event with phone data
+            if (typeof window !== 'undefined' && actionData) {
+              window.dispatchEvent(new CustomEvent('fill-booking-phone', {
+                detail: { value: actionData }
+              }));
+            }
+            break;
+          case 'FILL_FORM_INDUSTRY':
+            // Dispatch event with industry data
+            if (typeof window !== 'undefined' && actionData) {
+              window.dispatchEvent(new CustomEvent('fill-booking-industry', {
+                detail: { value: actionData }
+              }));
+            }
+            break;
+          case 'SHOW_TOAST':
+            // Dispatch toast notification event
+            if (typeof window !== 'undefined' && actionData) {
+              window.dispatchEvent(new CustomEvent('show-toast', {
+                detail: { message: actionData }
+              }));
+            }
             break;
         }
 
@@ -819,6 +897,30 @@ export default function VoiceAgentFAB() {
                   {t.voiceAgent.buttons.close}
                 </button>
               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed bottom-32 right-6 z-50 max-w-sm"
+          >
+            <div
+              className="glass rounded-lg p-4 shadow-2xl"
+              style={{
+                background: 'rgba(14, 165, 233, 0.15)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+              }}
+            >
+              <p className="text-sm text-white font-medium">{toastMessage}</p>
             </div>
           </motion.div>
         )}

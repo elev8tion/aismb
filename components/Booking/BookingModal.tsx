@@ -31,6 +31,19 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
   const [calendarLinks, setCalendarLinks] = useState<{ google: string; outlook: string; ics: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Listen for voice agent close event
+  useEffect(() => {
+    const handler = () => onClose();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('close-booking-form', handler);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('close-booking-form', handler);
+      }
+    };
+  }, [onClose]);
+
   // Fetch available dates
   const fetchAvailableDates = useCallback(async () => {
     setLoadingDates(true);

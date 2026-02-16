@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookingFormData, BookingType } from '@kre8tion/shared-types';
 import { formatDateDisplay, formatTimeLabel } from '@/lib/shared/formatters';
 
@@ -62,6 +62,78 @@ export default function BookingForm({
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Listen for voice agent form filling events
+  useEffect(() => {
+    const handleFillEmail = (event: Event) => {
+      const customEvent = event as CustomEvent<{ value: string }>;
+      if (customEvent.detail?.value) {
+        setEmail(customEvent.detail.value);
+        // Clear error if exists
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.email;
+          return newErrors;
+        });
+      }
+    };
+
+    const handleFillName = (event: Event) => {
+      const customEvent = event as CustomEvent<{ value: string }>;
+      if (customEvent.detail?.value) {
+        setName(customEvent.detail.value);
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.name;
+          return newErrors;
+        });
+      }
+    };
+
+    const handleFillCompany = (event: Event) => {
+      const customEvent = event as CustomEvent<{ value: string }>;
+      if (customEvent.detail?.value) {
+        setCompanyName(customEvent.detail.value);
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.companyName;
+          return newErrors;
+        });
+      }
+    };
+
+    const handleFillPhone = (event: Event) => {
+      const customEvent = event as CustomEvent<{ value: string }>;
+      if (customEvent.detail?.value) {
+        setPhone(customEvent.detail.value);
+      }
+    };
+
+    const handleFillIndustry = (event: Event) => {
+      const customEvent = event as CustomEvent<{ value: string }>;
+      if (customEvent.detail?.value) {
+        setIndustry(customEvent.detail.value);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('fill-booking-email', handleFillEmail);
+      window.addEventListener('fill-booking-name', handleFillName);
+      window.addEventListener('fill-booking-company', handleFillCompany);
+      window.addEventListener('fill-booking-phone', handleFillPhone);
+      window.addEventListener('fill-booking-industry', handleFillIndustry);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('fill-booking-email', handleFillEmail);
+        window.removeEventListener('fill-booking-name', handleFillName);
+        window.removeEventListener('fill-booking-company', handleFillCompany);
+        window.removeEventListener('fill-booking-phone', handleFillPhone);
+        window.removeEventListener('fill-booking-industry', handleFillIndustry);
+      }
+    };
+  }, []);
 
   const formattedDate = formatDateDisplay(date);
   const formattedTime = formatTimeLabel(time);
