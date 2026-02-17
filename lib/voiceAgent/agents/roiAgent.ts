@@ -7,7 +7,7 @@
 
 import type OpenAI from 'openai';
 import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
-import { ROI_AGENT_PROMPT, SPANISH_INSTRUCTION } from './prompts';
+import { ROI_AGENT_PROMPT, SPANISH_ROI_INSTRUCTION } from './prompts';
 import { ROI_TOOLS, executeTool, type ToolContext } from '../tools';
 import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
 import { historyToMessages } from './utils';
@@ -28,7 +28,7 @@ export async function runROIAgent(
 
   // Language instruction
   if (options.language === 'es') {
-    messages.push({ role: 'system', content: SPANISH_INSTRUCTION });
+    messages.push({ role: 'system', content: SPANISH_ROI_INSTRUCTION });
   }
 
   // Agent system prompt (no knowledge base)
@@ -79,5 +79,5 @@ export async function runROIAgent(
     responseMessage = followUp.choices[0]?.message;
   }
 
-  return responseMessage?.content || 'I apologize, I could not calculate the ROI.';
+  return responseMessage?.content || (options.language === 'es' ? 'Lo siento, no pude calcular el ROI. Por favor intente de nuevo.' : 'I apologize, I could not calculate the ROI.');
 }
