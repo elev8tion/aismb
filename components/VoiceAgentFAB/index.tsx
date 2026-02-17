@@ -31,10 +31,6 @@ export default function VoiceAgentFAB() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
-  const [showTextInput, setShowTextInput] = useState(false);
-  const [textInputType, setTextInputType] = useState<'email' | 'name' | 'phone' | 'company' | 'industry' | null>(null);
-  const [textInputValue, setTextInputValue] = useState('');
-  const [textInputError, setTextInputError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isPausedForManualEntry, setIsPausedForManualEntry] = useState(false);
   const [pausedFieldName, setPausedFieldName] = useState<string | null>(null);
@@ -152,6 +148,45 @@ export default function VoiceAgentFAB() {
     };
   }, [pausedFieldName]);
 
+  // Start auto-close countdown (30 seconds to give customer time to absorb)
+  const startAutoCloseCountdown = useCallback(() => {
+    setCountdown(30); // Increased from 15 to 30 seconds
+    setShowAutoClosePrompt(true);
+
+    countdownTimerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          // Countdown finished, close the modal
+          clearInterval(countdownTimerRef.current!);
+          countdownTimerRef.current = null;
+          setIsOpen(false);
+          setVoiceState('idle');
+          setTranscript('');
+          setAiResponse('');
+          setDisplayError(null);
+          setShowAutoClosePrompt(false);
+          setCountdown(null);
+          setIsPausedForManualEntry(false);
+          setPausedFieldName(null);
+          clearSessionId(); // Clear session when auto-closing
+          setSessionId(null);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // Clear auto-close countdown
+  const clearAutoCloseCountdown = useCallback(() => {
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+    setCountdown(null);
+    setShowAutoClosePrompt(false);
+  }, []);
+
   // Listen for successful booking confirmation from BookingModal
   useEffect(() => {
     const handleBookingConfirmed = async (event: Event) => {
@@ -212,56 +247,6 @@ export default function VoiceAgentFAB() {
       }
     };
   }, [isOpen, clearAutoCloseCountdown, startAutoCloseCountdown]);
-
-  // Start auto-close countdown (30 seconds to give customer time to absorb)
-  const startAutoCloseCountdown = useCallback(() => {
-    setCountdown(30); // Increased from 15 to 30 seconds
-    setShowAutoClosePrompt(true);
-
-    countdownTimerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev === null || prev <= 1) {
-          // Countdown finished, close the modal
-          clearInterval(countdownTimerRef.current!);
-          countdownTimerRef.current = null;
-          setIsOpen(false);
-          setVoiceState('idle');
-          setTranscript('');
-          setAiResponse('');
-          setDisplayError(null);
-          setShowAutoClosePrompt(false);
-          setCountdown(null);
-          setIsPausedForManualEntry(false);
-          setPausedFieldName(null);
-          clearSessionId(); // Clear session when auto-closing
-          setSessionId(null);
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
-
-  // Clear auto-close countdown
-  const clearAutoCloseCountdown = useCallback(() => {
-    if (countdownTimerRef.current) {
-      clearInterval(countdownTimerRef.current);
-      countdownTimerRef.current = null;
-    }
-    setCountdown(null);
-    setShowAutoClosePrompt(false);
-  }, []);
-
-  // Detect if AI is asking for specific info
-  const detectInfoRequest = (text: string): 'email' | 'name' | 'phone' | 'company' | 'industry' | null => {
-    const lower = text.toLowerCase();
-    if (/(what'?s |what is |can i get |could i have |provide ).*email/i.test(lower)) return 'email';
-    if (/(what'?s |what is |can i get |could i have ).*name/i.test(lower)) return 'name';
-    if (/(what'?s |what is |can i get |could i have ).*phone/i.test(lower)) return 'phone';
-    if (/(what'?s |what is |can i get |could i have ).*company/i.test(lower)) return 'company';
-    if (/(what'?s |what is |can i get |could i have ).*industry/i.test(lower)) return 'industry';
-    return null;
-  };
 
   // Process full voice interaction flow
   const processVoiceInteraction = useCallback(async (transcribedText: string) => {
@@ -422,15 +407,6 @@ export default function VoiceAgentFAB() {
 
       // Store cleaned response text for display
       setAiResponse(responseText);
-
-      // Show text input if AI asks for specific info
-      const infoRequest = detectInfoRequest(responseText);
-      if (infoRequest) {
-        setTextInputType(infoRequest);
-        setShowTextInput(true);
-        setTextInputValue('');
-        setTextInputError(null);
-      }
 
       // Step 2: Convert response to speech
       setVoiceState('speaking');
@@ -766,71 +742,6 @@ export default function VoiceAgentFAB() {
                 </div>
               )}
 
-              {/* Hybrid Text Input */}
-              {showTextInput && textInputType && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-4"
-                >
-                  <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-                    <label className="block text-sm font-medium mb-2">
-                      {textInputType === 'email' && t.voiceAgent.textInput.email}
-                      {textInputType === 'name' && t.voiceAgent.textInput.name}
-                      {textInputType === 'phone' && t.voiceAgent.textInput.phone}
-                      {textInputType === 'company' && t.voiceAgent.textInput.company}
-                      {textInputType === 'industry' && t.voiceAgent.textInput.industry}
-                    </label>
-                    <input
-                      type={textInputType === 'email' ? 'email' : 'text'}
-                      value={textInputValue}
-                      onChange={(e) => setTextInputValue(e.target.value)}
-                      placeholder={
-                        textInputType === 'email' ? 'your.email@example.com' :
-                        textInputType === 'name' ? 'Your full name' :
-                        textInputType === 'phone' ? '(555) 123-4567' :
-                        textInputType === 'company' ? 'Your company name' :
-                        'Your industry'
-                      }
-                      className={`w-full input-glass ${textInputError ? 'border-[#EF4444]' : ''}`}
-                    />
-                    {textInputError && (
-                      <p className="mt-1 text-sm text-[#EF4444]">{textInputError}</p>
-                    )}
-                    <div className="flex gap-2 mt-3">
-                      <button
-                        onClick={async () => {
-                          if (!textInputValue.trim()) {
-                            setTextInputError('This field is required');
-                            return;
-                          }
-                          if (textInputType === 'email' && !textInputValue.includes('@')) {
-                            setTextInputError('Please enter a valid email');
-                            return;
-                          }
-                          setShowTextInput(false);
-                          await processVoiceInteraction(textInputValue.trim());
-                        }}
-                        className="flex-1 btn-primary py-2 rounded-lg text-sm"
-                      >
-                        Submit
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowTextInput(false);
-                          setTextInputType(null);
-                          setTextInputValue('');
-                          setTextInputError(null);
-                        }}
-                        className="px-4 btn-glass py-2 rounded-lg text-sm"
-                      >
-                        Skip
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
 
               {/* Error */}
               {displayError && (
