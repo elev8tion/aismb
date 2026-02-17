@@ -8,9 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import {
-  CreateBookingRequest,
   LandingPageBooking as Booking,
-  BookingType,
   MEETING_DURATION,
   ASSESSMENT_DURATION,
   createBookingRequestSchema,
