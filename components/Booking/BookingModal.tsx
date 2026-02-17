@@ -155,6 +155,17 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
             setCalendarLinks(result.calendarLinks);
           }
           setStep('confirmation');
+          // Notify voice agent so it can acknowledge the confirmation and unblock
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('booking-confirmed', {
+              detail: {
+                name: data.name,
+                email: data.email,
+                date: data.date,
+                time: data.time,
+              },
+            }));
+          }
         } else {
           setError(result.error || 'Failed to create booking. Please try again.');
         }

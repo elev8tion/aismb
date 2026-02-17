@@ -152,6 +152,67 @@ export default function VoiceAgentFAB() {
     };
   }, [pausedFieldName]);
 
+  // Listen for successful booking confirmation from BookingModal
+  useEffect(() => {
+    const handleBookingConfirmed = async (event: Event) => {
+      const e = event as CustomEvent<{ name: string; email: string; date: string; time: string }>;
+      const { name, email } = e.detail || {};
+
+      // Unblock the voice agent from any stuck state
+      setIsPausedForManualEntry(false);
+      setPausedFieldName(null);
+      clearAutoCloseCountdown();
+
+      if (!isOpen) return; // Only speak if the FAB panel is open
+
+      const message = `Your booking is confirmed${name ? `, ${name.split(' ')[0]}` : ''}! A confirmation email is on its way to ${email || 'your inbox'}. Is there anything else I can help you with?`;
+      setAiResponse(message);
+      setVoiceState('speaking');
+
+      try {
+        const speechResponse = await fetch('/api/voice-agent/speak', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: message, language: languageRef.current }),
+        });
+
+        if (speechResponse.ok) {
+          const audioBlob = await speechResponse.blob();
+          const audioUrl = audioURLManagerRef.current.createURL(audioBlob);
+          await iosAudioPlayerRef.current.play(
+            audioUrl,
+            () => {
+              setVoiceState('idle');
+              audioURLManagerRef.current.revokeURL(audioUrl);
+              startAutoCloseCountdown();
+            },
+            () => {
+              setVoiceState('idle');
+              audioURLManagerRef.current.revokeURL(audioUrl);
+              startAutoCloseCountdown();
+            }
+          );
+        } else {
+          setVoiceState('idle');
+          startAutoCloseCountdown();
+        }
+      } catch {
+        setVoiceState('idle');
+        startAutoCloseCountdown();
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('booking-confirmed', handleBookingConfirmed);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('booking-confirmed', handleBookingConfirmed);
+      }
+    };
+  }, [isOpen, clearAutoCloseCountdown, startAutoCloseCountdown]);
+
   // Start auto-close countdown (30 seconds to give customer time to absorb)
   const startAutoCloseCountdown = useCallback(() => {
     setCountdown(30); // Increased from 15 to 30 seconds
