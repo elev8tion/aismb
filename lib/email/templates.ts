@@ -437,126 +437,82 @@ export function leadDossierTemplate(data: LeadDossierData): string {
 // ─── ROI Report Email (sent to the user) ──────────────────────────────────
 
 export interface ROIReportData {
-  industry: string;
-  employees: string;
-  hourlyLaborCost: number;
   tier: string;
-  taskBreakdown: Array<{ name: string; hoursPerWeek: number; automationRate: number; weeklySavings: number; automated: boolean }>;
-  totalWeeklyHoursSaved: number;
-  weeklyLaborSavings: number;
-  recoveredLeads: number;
-  monthlyRevenueRecovery: number;
-  annualBenefit: number;
+  payroll: number;
+  software: number;
+  missedCalls: number;
+  avgJobValue: number;
+  fixedMonthlySavings: number;
+  recoveredMonthlyRevenue: number;
+  annualFixed: number;
+  annualRevenue: number;
+  totalAnnual: number;
   investment: number;
   roi: number;
   paybackWeeks: number;
-  consultantCost: number;
-  agencyCost: number;
+  monthlyFee: number;
   locale?: string;
 }
 
 interface RoiEmailStrings {
-  [key: string]: string | ((pct: number) => string);
-  saveVsAlt: (pct: number) => string;
+  [key: string]: string;
 }
 
 const roiEmailStrings: Record<string, RoiEmailStrings> = {
   en: {
-    headerBadge: 'Your ROI Report',
-    title: 'Your Personalized ROI Analysis',
-    subtitle: "Based on the hours and costs you entered, here's what automation could do for your business.",
-    businessProfile: 'BUSINESS PROFILE',
-    industry: 'Industry:',
-    size: 'Size:',
-    laborCost: 'Labor Cost:',
-    tier: 'Tier:',
-    timeSaved: 'Time Saved',
-    weeklySavings: 'Weekly Savings',
-    yourRoi: 'Your ROI',
+    headerBadge: 'Your Overhead Savings Report',
+    title: 'Your Capital Recapture Analysis',
+    subtitle: "Based on your overhead inputs, here\u2019s how much we recover for you annually.",
+    tierLabel: 'Infrastructure Tier:',
+    monthlyFeeLabel: 'Monthly Fee:',
+    fixedSavings: 'Fixed Monthly Savings',
+    fixedSavingsNote: 'Admin payroll + software eliminated, minus your monthly fee',
+    recoveredRevenue: 'Recovered Revenue',
+    recoveredRevenueNote: 'From captured missed calls, closed at 35%',
+    totalAnnual: 'Total Annual Capital Recaptured',
+    annualROI: 'Annual ROI',
     paybackPeriod: 'Payback Period',
     wks: 'wks',
-    annualBenefit: 'Annual Benefit',
-    investment: 'Investment',
-    revenueRecovery: 'Revenue Recovery',
-    leadsRecovered: 'leads recovered/mo',
-    taskBreakdown: 'Task Breakdown',
-    colTask: 'Task',
-    colHrsWk: 'Hrs/Wk',
-    colAutoRate: 'Auto Rate',
-    colSavings: 'Savings',
-    colStatus: 'Status',
-    automated: 'Automated',
-    notInTier: 'Not in tier',
-    compareAlternatives: 'Compare Alternatives (Annual)',
-    consultant: 'Traditional Consultant',
-    agency: 'Done-for-you Agency',
-    saveVsAlt: (pct: number) => `Save ${pct}% vs alternatives + you own the capability forever`,
-    ctaButton: 'Start Building Your Systems',
+    yourInvestment: 'Your Investment',
+    ctaButton: 'Deploy My Infrastructure',
     ctaNote: 'Questions? Reply to this email or book a free strategy call.',
-    tagline: 'Agentic Systems for Small &amp; Medium Businesses',
-    disclaimer: 'Calculations use your inputs with documented automation rates. Revenue recovery assumes 60% lead recapture. Actual results vary.',
+    tagline: 'Sovereign AI Infrastructure for SMBs',
+    disclaimer: 'Calculation assumes 60% call capture rate and 35% close rate. Actual results vary.',
     rights: 'All rights reserved.',
   },
   es: {
-    headerBadge: 'Tu Informe de ROI',
-    title: 'Tu An\u00e1lisis de ROI Personalizado',
-    subtitle: 'Basado en las horas y costos que ingresaste, esto es lo que la automatizaci\u00f3n podr\u00eda hacer por tu negocio.',
-    businessProfile: 'PERFIL DEL NEGOCIO',
-    industry: 'Industria:',
-    size: 'Tama\u00f1o:',
-    laborCost: 'Costo Laboral:',
-    tier: 'Nivel:',
-    timeSaved: 'Tiempo Ahorrado',
-    weeklySavings: 'Ahorro Semanal',
-    yourRoi: 'Tu ROI',
-    paybackPeriod: 'Periodo de Recuperaci\u00f3n',
+    headerBadge: 'Tu Informe de Ahorros Operativos',
+    title: 'Tu An\u00e1lisis de Recaptura de Capital',
+    subtitle: 'Con base en tus gastos operativos, as\u00ed es como recuperamos capital para ti anualmente.',
+    tierLabel: 'Nivel de Infraestructura:',
+    monthlyFeeLabel: 'Cuota Mensual:',
+    fixedSavings: 'Ahorro Fijo Mensual',
+    fixedSavingsNote: 'N\u00f3mina admin + software eliminados, menos tu cuota mensual',
+    recoveredRevenue: 'Ingresos Recuperados',
+    recoveredRevenueNote: 'De llamadas perdidas capturadas, cerradas al 35%',
+    totalAnnual: 'Capital Total Recapturado Anualmente',
+    annualROI: 'ROI Anual',
+    paybackPeriod: 'Per\u00edodo de Recuperaci\u00f3n',
     wks: 'sem',
-    annualBenefit: 'Beneficio Anual',
-    investment: 'Inversi\u00f3n',
-    revenueRecovery: 'Recuperaci\u00f3n de Ingresos',
-    leadsRecovered: 'clientes potenciales recuperados/mes',
-    taskBreakdown: 'Desglose de Tareas',
-    colTask: 'Tarea',
-    colHrsWk: 'Hrs/Sem',
-    colAutoRate: 'Tasa Auto.',
-    colSavings: 'Ahorro',
-    colStatus: 'Estado',
-    automated: 'Automatizado',
-    notInTier: 'No incluido',
-    compareAlternatives: 'Comparar Alternativas (Anual)',
-    consultant: 'Consultor Tradicional',
-    agency: 'Agencia Todo-Incluido',
-    saveVsAlt: (pct: number) => `Ahorra ${pct}% vs alternativas + la capacidad es tuya para siempre`,
-    ctaButton: 'Comienza a Construir tus Sistemas',
+    yourInvestment: 'Tu Inversi\u00f3n',
+    ctaButton: 'Implementar Mi Infraestructura',
     ctaNote: '\u00bfPreguntas? Responde a este correo o agenda una llamada estrat\u00e9gica gratuita.',
-    tagline: 'Sistemas Ag\u00e9nticos para Peque\u00f1as y Medianas Empresas',
-    disclaimer: 'Los c\u00e1lculos usan tus datos con tasas de automatizaci\u00f3n documentadas. La recuperaci\u00f3n de ingresos asume 60% de recaptura de clientes. Los resultados reales var\u00edan.',
+    tagline: 'Infraestructura Soberana de IA para PyMEs',
+    disclaimer: 'El c\u00e1lculo asume 60% de tasa de captura de llamadas y 35% de tasa de cierre. Los resultados reales var\u00edan.',
     rights: 'Todos los derechos reservados.',
   },
 };
+
+function fmtMoney(n: number): string {
+  return '$' + Math.round(n).toLocaleString();
+}
 
 export function roiReportTemplate(data: ROIReportData): string {
   const year = new Date().getFullYear();
   const s = roiEmailStrings[data.locale || 'en'] || roiEmailStrings.en;
   const lang = data.locale === 'es' ? 'es' : 'en';
-
-  const taskRows = data.taskBreakdown
-    .map((t) => {
-      const badge = t.automated
-        ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#DCFCE7;color:#166534;font-size:11px;font-weight:600;">${s.automated}</span>`
-        : `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#F3F4F6;color:#6B7280;font-size:11px;">${s.notInTier}</span>`;
-      return `<tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;color:#1a1a2e;">${escapeHtml(t.name)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;color:#4a4a6a;text-align:center;">${t.hoursPerWeek}h</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;color:#4a4a6a;text-align:center;">${Math.round(t.automationRate * 100)}%</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:14px;font-weight:600;color:#0066FF;text-align:right;">$${t.weeklySavings.toLocaleString()}/wk</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:center;">${badge}</td>
-      </tr>`;
-    })
-    .join('');
-
-  const cheapestAlt = Math.min(data.consultantCost, data.agencyCost);
-  const savingsPercent = cheapestAlt > 0 ? Math.round(((cheapestAlt - data.investment) / cheapestAlt) * 100) : 0;
+  const isPositive = data.fixedMonthlySavings > 0;
+  const fixedColor = isPositive ? '#166534' : '#DC2626';
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -570,7 +526,7 @@ export function roiReportTemplate(data: ROIReportData): string {
     body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
     @media only screen and (max-width: 620px) {
       .email-container { width: 100% !important; max-width: 100% !important; }
-      .metric-cell { display: block !important; width: 100% !important; }
+      .metric-cell { display: block !important; width: 100% !important; padding: 0 0 12px 0 !important; }
     }
   </style>
 </head>
@@ -584,15 +540,16 @@ export function roiReportTemplate(data: ROIReportData): string {
           <tr>
             <td style="padding:32px 40px 24px;text-align:center;background-color:#0a0a1a;border-radius:12px 12px 0 0;">
               <span style="font-size:28px;font-weight:700;color:#ffffff;">AI KRE8TION</span>
-              <span style="font-size:28px;font-weight:300;color:#0066FF;"> Partners</span>
+              <span style="font-size:28px;font-weight:300;color:#0EA5E9;"> Partners</span>
               <br>
-              <span style="display:inline-block;margin-top:16px;background-color:#0066FF;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:6px 20px;border-radius:20px;">${s.headerBadge}</span>
+              <span style="display:inline-block;margin-top:16px;background-color:#0EA5E9;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:6px 20px;border-radius:20px;">${s.headerBadge}</span>
             </td>
           </tr>
 
           <!-- Body -->
           <tr>
             <td style="background-color:#ffffff;">
+
               <!-- Intro -->
               <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                 <tr>
@@ -603,76 +560,17 @@ export function roiReportTemplate(data: ROIReportData): string {
                 </tr>
               </table>
 
-              <!-- Business Info -->
+              <!-- Tier + Fee Info -->
               <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                 <tr>
                   <td style="padding:8px 40px 20px;">
-                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background-color:#f8f9fc;border-radius:10px;border:1px solid #e8eaf0;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background-color:#f0f9ff;border-radius:10px;border:1px solid #bae6fd;">
                       <tr>
                         <td style="padding:16px 24px;">
-                          <span style="font-size:13px;color:#8a8aaa;font-weight:600;">${s.businessProfile}</span>
-                          <table role="presentation" style="width:100%;border:none;border-spacing:0;margin-top:8px;">
-                            <tr>
-                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;">${s.industry} <strong style="color:#1a1a2e;">${escapeHtml(data.industry)}</strong></td>
-                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;text-align:right;">${s.size} <strong style="color:#1a1a2e;">${escapeHtml(data.employees)}</strong></td>
-                            </tr>
-                            <tr>
-                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;">${s.laborCost} <strong style="color:#1a1a2e;">$${data.hourlyLaborCost}/hr</strong></td>
-                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;text-align:right;">${s.tier} <strong style="color:#0066FF;">${escapeHtml(data.tier)}</strong></td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Key Metrics -->
-              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
-                <tr>
-                  <td style="padding:0 40px 20px;">
-                    <table role="presentation" style="width:100%;border:none;border-spacing:0;">
-                      <tr>
-                        <td class="metric-cell" style="width:50%;padding:0 6px 12px 0;vertical-align:top;">
-                          <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#EFF6FF;border-radius:10px;border:1px solid #BFDBFE;">
-                            <tr><td style="padding:16px 20px;">
-                              <span style="font-size:11px;color:#3B82F6;font-weight:700;text-transform:uppercase;">${s.timeSaved}</span><br>
-                              <span style="font-size:28px;font-weight:700;color:#1E40AF;">${data.totalWeeklyHoursSaved} hrs/${lang === 'es' ? 'sem' : 'wk'}</span>
-                            </td></tr>
-                          </table>
-                        </td>
-                        <td class="metric-cell" style="width:50%;padding:0 0 12px 6px;vertical-align:top;">
-                          <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#EFF6FF;border-radius:10px;border:1px solid #BFDBFE;">
-                            <tr><td style="padding:16px 20px;">
-                              <span style="font-size:11px;color:#3B82F6;font-weight:700;text-transform:uppercase;">${s.weeklySavings}</span><br>
-                              <span style="font-size:28px;font-weight:700;color:#1E40AF;">$${data.weeklyLaborSavings.toLocaleString()}</span>
-                            </td></tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- ROI + Payback Highlight -->
-              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
-                <tr>
-                  <td style="padding:0 40px 20px;">
-                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#F0FDF4;border-radius:10px;border:1px solid #BBF7D0;">
-                      <tr>
-                        <td style="padding:20px 24px;">
                           <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                             <tr>
-                              <td>
-                                <span style="font-size:11px;color:#16A34A;font-weight:700;text-transform:uppercase;">${s.yourRoi}</span><br>
-                                <span style="font-size:36px;font-weight:700;color:#166534;">${data.roi}%</span>
-                              </td>
-                              <td style="text-align:right;">
-                                <span style="font-size:11px;color:#16A34A;font-weight:700;text-transform:uppercase;">${s.paybackPeriod}</span><br>
-                                <span style="font-size:36px;font-weight:700;color:#166534;">~${data.paybackWeeks} ${s.wks}</span>
-                              </td>
+                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;">${s.tierLabel} <strong style="color:#0EA5E9;">${escapeHtml(data.tier)}</strong></td>
+                              <td style="font-size:14px;color:#4a4a6a;padding:2px 0;text-align:right;">${s.monthlyFeeLabel} <strong style="color:#1a1a2e;">${fmtMoney(data.monthlyFee)}/mo</strong></td>
                             </tr>
                           </table>
                         </td>
@@ -682,25 +580,78 @@ export function roiReportTemplate(data: ROIReportData): string {
                 </tr>
               </table>
 
-              <!-- Annual Benefit + Investment -->
+              <!-- Hero Number: Total Annual Capital Recaptured -->
               <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                 <tr>
-                  <td style="padding:0 40px 24px;">
+                  <td style="padding:0 40px 20px;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#F0FDF4;border-radius:12px;border:2px solid #86EFAC;">
+                      <tr>
+                        <td style="padding:24px 28px;text-align:center;">
+                          <span style="font-size:12px;color:#16A34A;font-weight:700;text-transform:uppercase;letter-spacing:1px;">${s.totalAnnual}</span><br>
+                          <span style="font-size:44px;font-weight:800;color:#15803D;line-height:1.1;">${fmtMoney(data.totalAnnual)}</span>
+                          <p style="margin:8px 0 0;font-size:13px;color:#4A7C59;">${lang === 'es' ? 'por a\u00f1o en gastos eliminados + ingresos recuperados' : 'per year in eliminated overhead + recovered revenue'}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Savings Breakdown -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:0 40px 20px;">
+                    <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#8a8aaa;text-transform:uppercase;letter-spacing:0.5px;">${lang === 'es' ? 'Desglose de Ahorros' : 'Savings Breakdown'}</p>
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;border-radius:10px;border:1px solid #e8eaf0;">
+
+                      <!-- Fixed Savings Row -->
+                      <tr>
+                        <td style="padding:16px 20px;border-bottom:1px solid #f0f2f5;">
+                          <span style="font-size:14px;font-weight:600;color:#1a1a2e;">${s.fixedSavings}</span><br>
+                          <span style="font-size:12px;color:#8a8aaa;">${s.fixedSavingsNote}</span>
+                        </td>
+                        <td style="padding:16px 20px;border-bottom:1px solid #f0f2f5;text-align:right;vertical-align:top;white-space:nowrap;">
+                          <span style="font-size:20px;font-weight:700;color:${fixedColor};">${fmtMoney(data.fixedMonthlySavings)}/mo</span><br>
+                          <span style="font-size:12px;color:#8a8aaa;">${fmtMoney(data.annualFixed)}/yr</span>
+                        </td>
+                      </tr>
+
+                      <!-- Recovered Revenue Row -->
+                      <tr>
+                        <td style="padding:16px 20px;">
+                          <span style="font-size:14px;font-weight:600;color:#1a1a2e;">${s.recoveredRevenue}</span><br>
+                          <span style="font-size:12px;color:#8a8aaa;">${data.missedCalls} ${lang === 'es' ? 'llamadas/sem' : 'calls/wk'} \u00d7 60% ${lang === 'es' ? 'captura' : 'capture'} \u00d7 35% ${lang === 'es' ? 'cierre' : 'close'} \u00d7 ${fmtMoney(data.avgJobValue)}</span>
+                        </td>
+                        <td style="padding:16px 20px;text-align:right;vertical-align:top;white-space:nowrap;">
+                          <span style="font-size:20px;font-weight:700;color:#0EA5E9;">${fmtMoney(data.recoveredMonthlyRevenue)}/mo</span><br>
+                          <span style="font-size:12px;color:#8a8aaa;">${fmtMoney(data.annualRevenue)}/yr</span>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ROI + Payback -->
+              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                <tr>
+                  <td style="padding:0 40px 20px;">
                     <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                       <tr>
                         <td class="metric-cell" style="width:50%;padding:0 6px 0 0;vertical-align:top;">
                           <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#f8f9fc;border-radius:10px;border:1px solid #e8eaf0;">
-                            <tr><td style="padding:16px 20px;">
-                              <span style="font-size:11px;color:#8a8aaa;font-weight:700;text-transform:uppercase;">${s.annualBenefit}</span><br>
-                              <span style="font-size:24px;font-weight:700;color:#1a1a2e;">$${data.annualBenefit.toLocaleString()}</span>
+                            <tr><td style="padding:16px 20px;text-align:center;">
+                              <span style="font-size:11px;color:#8a8aaa;font-weight:700;text-transform:uppercase;">${s.annualROI}</span><br>
+                              <span style="font-size:32px;font-weight:700;color:#1a1a2e;">${data.roi}%</span>
                             </td></tr>
                           </table>
                         </td>
                         <td class="metric-cell" style="width:50%;padding:0 0 0 6px;vertical-align:top;">
                           <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#f8f9fc;border-radius:10px;border:1px solid #e8eaf0;">
-                            <tr><td style="padding:16px 20px;">
-                              <span style="font-size:11px;color:#8a8aaa;font-weight:700;text-transform:uppercase;">${s.investment}</span><br>
-                              <span style="font-size:24px;font-weight:700;color:#1a1a2e;">$${data.investment.toLocaleString()}</span>
+                            <tr><td style="padding:16px 20px;text-align:center;">
+                              <span style="font-size:11px;color:#8a8aaa;font-weight:700;text-transform:uppercase;">${s.paybackPeriod}</span><br>
+                              <span style="font-size:32px;font-weight:700;color:#1a1a2e;">${data.paybackWeeks < 999 ? `~${data.paybackWeeks} ${s.wks}` : '&mdash;'}</span>
                             </td></tr>
                           </table>
                         </td>
@@ -710,61 +661,20 @@ export function roiReportTemplate(data: ROIReportData): string {
                 </tr>
               </table>
 
-              ${data.monthlyRevenueRecovery > 0 ? `<!-- Revenue Recovery -->
+              <!-- Investment -->
               <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                 <tr>
-                  <td style="padding:0 40px 24px;">
-                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#F5F3FF;border-radius:10px;border:1px solid #DDD6FE;">
+                  <td style="padding:0 40px 28px;">
+                    <table role="presentation" style="width:100%;border:none;border-spacing:0;background:#f8f9fc;border-radius:10px;border:1px solid #e8eaf0;">
                       <tr><td style="padding:16px 24px;">
-                        <span style="font-size:11px;color:#7C3AED;font-weight:700;text-transform:uppercase;">${s.revenueRecovery}</span><br>
-                        <span style="font-size:24px;font-weight:700;color:#5B21B6;">$${data.monthlyRevenueRecovery.toLocaleString()}/${lang === 'es' ? 'mes' : 'mo'}</span>
-                        <span style="font-size:13px;color:#7C3AED;margin-left:8px;">(${data.recoveredLeads} ${s.leadsRecovered})</span>
+                        <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+                          <tr>
+                            <td style="font-size:14px;color:#4a4a6a;">${s.yourInvestment} (${lang === 'es' ? 'cuota única de configuración' : 'one-time setup fee'})</td>
+                            <td style="text-align:right;font-size:20px;font-weight:700;color:#1a1a2e;">${fmtMoney(data.investment)}</td>
+                          </tr>
+                        </table>
                       </td></tr>
                     </table>
-                  </td>
-                </tr>
-              </table>` : ''}
-
-              <!-- Task Breakdown Table -->
-              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
-                <tr>
-                  <td style="padding:0 40px 24px;">
-                    <p style="margin:0 0 12px;font-size:15px;font-weight:700;color:#1a1a2e;">${s.taskBreakdown}</p>
-                    <table role="presentation" style="width:100%;border:none;border-spacing:0;border-radius:10px;overflow:hidden;border:1px solid #e8eaf0;">
-                      <tr style="background:#f8f9fc;">
-                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;">${s.colTask}</td>
-                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:center;">${s.colHrsWk}</td>
-                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:center;">${s.colAutoRate}</td>
-                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:right;">${s.colSavings}</td>
-                        <td style="padding:10px 12px;font-size:12px;font-weight:700;color:#8a8aaa;text-transform:uppercase;text-align:center;">${s.colStatus}</td>
-                      </tr>
-                      ${taskRows}
-                    </table>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Comparison -->
-              <table role="presentation" style="width:100%;border:none;border-spacing:0;">
-                <tr><td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #e8eaf0;margin:0;"></td></tr>
-                <tr>
-                  <td style="padding:24px 40px;">
-                    <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:#1a1a2e;">${s.compareAlternatives}</p>
-                    <table role="presentation" style="width:100%;border:none;border-spacing:0;">
-                      <tr>
-                        <td style="padding:8px 0;font-size:14px;color:#4a4a6a;">${s.consultant} <span style="color:#aaa;font-size:12px;">($175/hr)</span></td>
-                        <td style="padding:8px 0;text-align:right;font-size:16px;font-weight:700;color:#F97316;">$${data.consultantCost.toLocaleString()}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding:8px 0;font-size:14px;color:#4a4a6a;border-top:1px solid #f0f2f5;">${s.agency} <span style="color:#aaa;font-size:12px;">($6,500/${lang === 'es' ? 'mes' : 'mo'})</span></td>
-                        <td style="padding:8px 0;text-align:right;font-size:16px;font-weight:700;color:#F97316;border-top:1px solid #f0f2f5;">$${data.agencyCost.toLocaleString()}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding:8px 0;font-size:14px;font-weight:600;color:#1a1a2e;border-top:1px solid #f0f2f5;">AI KRE8TION Partners</td>
-                        <td style="padding:8px 0;text-align:right;font-size:16px;font-weight:700;color:#16A34A;border-top:1px solid #f0f2f5;">$${data.investment.toLocaleString()}</td>
-                      </tr>
-                    </table>
-                    ${savingsPercent > 0 ? `<table role="presentation" style="width:100%;border:none;border-spacing:0;margin-top:12px;"><tr><td style="padding:12px 16px;background:#F0FDF4;border-radius:8px;border:1px solid #BBF7D0;font-size:14px;font-weight:600;color:#166534;">${s.saveVsAlt(savingsPercent)}</td></tr></table>` : ''}
                   </td>
                 </tr>
               </table>
@@ -773,11 +683,12 @@ export function roiReportTemplate(data: ROIReportData): string {
               <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                 <tr>
                   <td style="padding:8px 40px 36px;text-align:center;">
-                    <a href="https://kre8tion.com/#pricing" style="display:inline-block;background-color:#0066FF;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;min-width:200px;">${s.ctaButton}</a>
+                    <a href="https://kre8tion.com/#pricing" style="display:inline-block;background-color:#0EA5E9;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;min-width:200px;">${s.ctaButton}</a>
                     <p style="margin:12px 0 0;font-size:13px;color:#8a8aaa;">${s.ctaNote}</p>
                   </td>
                 </tr>
               </table>
+
             </td>
           </tr>
 
@@ -803,33 +714,21 @@ export function roiReportTemplate(data: ROIReportData): string {
 
 export interface ROILeadDossierData {
   email: string;
-  industry: string;
-  employees: string;
-  hourlyLaborCost: number;
   tier: string;
-  totalWeeklyHoursSaved: number;
-  weeklyLaborSavings: number;
-  monthlyRevenueRecovery: number;
-  annualBenefit: number;
+  payroll: number;
+  software: number;
+  missedCalls: number;
+  avgJobValue: number;
+  fixedMonthlySavings: number;
+  recoveredMonthlyRevenue: number;
+  totalAnnual: number;
   investment: number;
   roi: number;
   paybackWeeks: number;
-  taskBreakdown: Array<{ name: string; hoursPerWeek: number; weeklySavings: number }>;
 }
 
 export function roiLeadDossierTemplate(data: ROILeadDossierData): string {
   const roiColor = data.roi >= 200 ? '#16A34A' : data.roi >= 100 ? '#F59E0B' : '#EF4444';
-
-  const taskRows = data.taskBreakdown
-    .map(
-      (t) =>
-        `<tr>
-          <td style="padding:6px 0;font-size:14px;color:#1a1a2e;">${escapeHtml(t.name)}</td>
-          <td style="padding:6px 0;text-align:center;font-size:14px;color:#4a4a6a;">${t.hoursPerWeek}h/wk</td>
-          <td style="padding:6px 0;text-align:right;font-size:14px;font-weight:600;color:#0066FF;">$${t.weeklySavings.toLocaleString()}/wk</td>
-        </tr>`
-    )
-    .join('');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -844,61 +743,58 @@ export function roiLeadDossierTemplate(data: ROILeadDossierData): string {
     .stat-item { background: #f8f9fc; padding: 12px; border-radius: 8px; border: 1px solid #e8eaf0; }
     .stat-label { font-size: 11px; color: #8a8aaa; text-transform: uppercase; font-weight: bold; }
     .stat-value { font-size: 16px; font-weight: bold; }
-    .section-title { font-size: 13px; font-weight: bold; color: #0066FF; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="header">
       <span class="roi-badge" style="background-color:${roiColor};">${data.roi}% ROI</span>
-      <h1 style="margin:8px 0 0;font-size:22px;">ROI Report Request</h1>
+      <h1 style="margin:8px 0 0;font-size:22px;">Overhead Savings Report Request</h1>
       <p style="color:#6a6a8a;margin:4px 0 0;font-size:15px;">${escapeHtml(data.email)}</p>
     </div>
 
     <div class="stat-grid">
       <div class="stat-item">
-        <div class="stat-label">Industry</div>
-        <div class="stat-value">${escapeHtml(data.industry)}</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Business Size</div>
-        <div class="stat-value">${escapeHtml(data.employees)}</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Labor Cost</div>
-        <div class="stat-value">$${data.hourlyLaborCost}/hr</div>
-      </div>
-      <div class="stat-item">
         <div class="stat-label">Selected Tier</div>
-        <div class="stat-value" style="color:#0066FF;">${escapeHtml(data.tier)}</div>
+        <div class="stat-value" style="color:#0EA5E9;">${escapeHtml(data.tier)}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Time Saved</div>
-        <div class="stat-value">${data.totalWeeklyHoursSaved} hrs/wk</div>
+        <div class="stat-label">Total Annual Recaptured</div>
+        <div class="stat-value" style="color:#16A34A;">${fmtMoney(data.totalAnnual)}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Weekly Savings</div>
-        <div class="stat-value" style="color:#0066FF;">$${data.weeklyLaborSavings.toLocaleString()}</div>
+        <div class="stat-label">Admin Payroll / mo</div>
+        <div class="stat-value">${fmtMoney(data.payroll)}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Annual Benefit</div>
-        <div class="stat-value">$${data.annualBenefit.toLocaleString()}</div>
+        <div class="stat-label">Software Subs / mo</div>
+        <div class="stat-value">${fmtMoney(data.software)}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Payback</div>
-        <div class="stat-value">~${data.paybackWeeks} weeks</div>
+        <div class="stat-label">Fixed Monthly Savings</div>
+        <div class="stat-value" style="color:${data.fixedMonthlySavings >= 0 ? '#16A34A' : '#DC2626'};">${fmtMoney(data.fixedMonthlySavings)}/mo</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Recovered Revenue / mo</div>
+        <div class="stat-value" style="color:#0EA5E9;">${fmtMoney(data.recoveredMonthlyRevenue)}/mo</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Missed Calls / wk</div>
+        <div class="stat-value">${data.missedCalls}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Avg Job Value</div>
+        <div class="stat-value">${fmtMoney(data.avgJobValue)}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Setup Investment</div>
+        <div class="stat-value">${fmtMoney(data.investment)}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Payback Period</div>
+        <div class="stat-value">${data.paybackWeeks < 999 ? `~${data.paybackWeeks} wks` : '—'}</div>
       </div>
     </div>
-
-    ${data.monthlyRevenueRecovery > 0 ? `<div class="stat-item" style="margin-bottom:20px;">
-      <div class="stat-label">Revenue Recovery</div>
-      <div class="stat-value" style="color:#7C3AED;">$${data.monthlyRevenueRecovery.toLocaleString()}/mo</div>
-    </div>` : ''}
-
-    <div class="section-title">Task Breakdown (sorted by savings)</div>
-    <table style="width:100%;border-collapse:collapse;">
-      ${taskRows}
-    </table>
 
     <div style="margin-top:24px;padding-top:16px;border-top:1px solid #eee;text-align:center;font-size:12px;color:#aaa;">
       Sent automatically by AI KRE8TION Partners ROI Calculator.

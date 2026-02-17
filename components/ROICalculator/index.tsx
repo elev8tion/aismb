@@ -21,13 +21,17 @@ function fmt(n: number) {
 }
 
 export default function ROICalculator() {
-  const { t } = useTranslations();
+  const { t, language } = useTranslations();
 
   const [payroll, setPayroll] = useState(3000);
   const [software, setSoftware] = useState(500);
   const [missedCalls, setMissedCalls] = useState(20);
   const [avgJobValue, setAvgJobValue] = useState(400);
   const [tier, setTier] = useState('discovery');
+  const [email, setEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   const results = useMemo(() => {
     const monthlyFee = TIER_MONTHLY[tier] ?? 750;
@@ -62,6 +66,41 @@ export default function ROICalculator() {
   }, [payroll, software, missedCalls, avgJobValue, tier]);
 
   const isPositive = results.fixedMonthlySavings > 0;
+
+  const handleSendReport = async () => {
+    if (!email || !email.includes('@')) {
+      setEmailError(language === 'es' ? 'Ingresa un correo válido.' : 'Enter a valid email address.');
+      return;
+    }
+    setEmailError('');
+    setEmailLoading(true);
+    try {
+      const res = await fetch('/api/leads/roi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          tier,
+          locale: language,
+          metrics: {
+            payroll,
+            software,
+            missedCalls,
+            avgJobValue,
+            ...results,
+          },
+        }),
+      });
+      if (res.ok) {
+        setEmailSent(true);
+      } else {
+        setEmailError(language === 'es' ? 'Error al enviar. Inténtalo de nuevo.' : 'Failed to send. Please try again.');
+      }
+    } catch {
+      setEmailError(language === 'es' ? 'Error al enviar. Inténtalo de nuevo.' : 'Failed to send. Please try again.');
+    }
+    setEmailLoading(false);
+  };
 
   return (
     <section className="relative py-20 lg:py-32 px-4 sm:px-6" id="roi-calculator">
@@ -263,6 +302,41 @@ export default function ROICalculator() {
                 <p className="text-xs text-white/50 mt-1">Payback Period</p>
               </div>
             </div>
+
+            {/* Email Capture */}
+            {emailSent ? (
+              <div className="glass p-4 text-center" style={{ borderColor: 'rgba(34, 197, 94, 0.4)' }}>
+                <p className="text-[#22C55E] font-semibold text-sm">
+                  {language === 'es' ? '¡Informe enviado! Revisa tu correo.' : 'Report sent! Check your inbox.'}
+                </p>
+              </div>
+            ) : (
+              <div className="glass p-4 space-y-3">
+                <p className="text-xs text-white/60 font-medium">
+                  {language === 'es' ? 'Recibe este análisis en tu correo' : 'Get this analysis in your inbox'}
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendReport()}
+                    placeholder={language === 'es' ? 'tu@correo.com' : 'you@email.com'}
+                    className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#0EA5E9]/60"
+                  />
+                  <button
+                    onClick={handleSendReport}
+                    disabled={emailLoading}
+                    className="bg-[#0EA5E9] hover:bg-[#0284C7] disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+                  >
+                    {emailLoading
+                      ? (language === 'es' ? 'Enviando...' : 'Sending...')
+                      : (language === 'es' ? 'Enviar' : 'Send Report')}
+                  </button>
+                </div>
+                {emailError && <p className="text-xs text-[#F97316]">{emailError}</p>}
+              </div>
+            )}
 
             {/* CTA */}
             <a

@@ -244,11 +244,11 @@ export async function sendROIReport(
     const html = roiReportTemplate(params.report);
     const isEs = params.report.locale === 'es';
     const subject = isEs
-      ? `Tu Informe de ROI \u2014 ${params.report.roi}% retorno con ${params.report.tier}`
-      : `Your ROI Report \u2014 ${params.report.roi}% return with ${params.report.tier}`;
+      ? `Tu Informe de Ahorros \u2014 ${params.report.roi}% ROI con ${params.report.tier}`
+      : `Your Overhead Savings Report \u2014 ${params.report.roi}% ROI with ${params.report.tier}`;
     const plainText = isEs
-      ? `Tu an\u00e1lisis de ROI personalizado: ${params.report.roi}% ROI, $${params.report.annualBenefit.toLocaleString()} beneficio anual, recuperaci\u00f3n en ~${params.report.paybackWeeks} semanas. Visita https://kre8tion.com/#pricing para comenzar.`
-      : `Your personalized ROI analysis: ${params.report.roi}% ROI, $${params.report.annualBenefit.toLocaleString()} annual benefit, payback in ~${params.report.paybackWeeks} weeks. Visit https://kre8tion.com/#pricing to get started.`;
+      ? `Tu an\u00e1lisis de recaptura de capital: ${params.report.roi}% ROI, $${Math.round(params.report.totalAnnual).toLocaleString()} recapturados anualmente, recuperaci\u00f3n en ~${params.report.paybackWeeks} semanas. Visita https://kre8tion.com/#pricing para comenzar.`
+      : `Your capital recapture analysis: ${params.report.roi}% ROI, $${Math.round(params.report.totalAnnual).toLocaleString()} recaptured annually, payback in ~${params.report.paybackWeeks} weeks. Visit https://kre8tion.com/#pricing to get started.`;
 
     await sendViaEmailIt({
       apiKey: params.emailitApiKey,
@@ -287,8 +287,8 @@ export async function sendROILeadDossierToAdmin(
 
   try {
     const html = roiLeadDossierTemplate(params.lead);
-    const subject = `ROI Lead: ${params.lead.email} \u2014 ${params.lead.roi}% ROI (${params.lead.tier})`;
-    const plainText = `New ROI report request from ${params.lead.email}. Industry: ${params.lead.industry}, Tier: ${params.lead.tier}, ROI: ${params.lead.roi}%, Annual benefit: $${params.lead.annualBenefit.toLocaleString()}.`;
+    const subject = `Savings Lead: ${params.lead.email} \u2014 ${params.lead.roi}% ROI (${params.lead.tier})`;
+    const plainText = `New savings report request from ${params.lead.email}. Tier: ${params.lead.tier}, ROI: ${params.lead.roi}%, Total annual recaptured: $${Math.round(params.lead.totalAnnual).toLocaleString()}.`;
 
     await sendViaEmailIt({
       apiKey: params.emailitApiKey,
