@@ -33,6 +33,37 @@ export function timeToMinutes(time: string): number {
 }
 
 /**
+ * Extract minutes-from-midnight from any time or datetime string.
+ * Handles:
+ *   "HH:mm"                    — landing page format
+ *   "HH:mm:ss"                 — with seconds
+ *   "YYYY-MM-DDTHH:mm:ss"      — ISO 8601 datetime (CRM format)
+ *   "YYYY-MM-DD HH:mm:ss"      — MySQL datetime (CRM format)
+ */
+export function extractTimeMinutes(timeStr: string): number {
+  let timePart: string;
+  if (timeStr.includes('T')) {
+    // ISO 8601: "2026-02-17T10:00:00" → "10:00"
+    timePart = timeStr.split('T')[1]?.slice(0, 5) ?? '00:00';
+  } else if (timeStr.includes(' ') && timeStr.indexOf(' ') > 5) {
+    // MySQL datetime: "2026-02-17 10:00:00" → "10:00"
+    timePart = timeStr.split(' ')[1]?.slice(0, 5) ?? '00:00';
+  } else {
+    // Already time-only: "10:00" or "10:00:00" → take first 5 chars
+    timePart = timeStr.slice(0, 5);
+  }
+  return timeToMinutes(timePart);
+}
+
+/**
+ * Extract YYYY-MM-DD from a date or datetime string.
+ * Handles "YYYY-MM-DD", "YYYY-MM-DD HH:mm:ss", "YYYY-MM-DDTHH:mm:ss".
+ */
+export function extractDateString(dateStr: string): string {
+  return dateStr.slice(0, 10);
+}
+
+/**
  * Get the day of week (0-6) for a given date string
  */
 export function getDayOfWeek(dateStr: string): number {
@@ -68,7 +99,9 @@ export function getWeekdaySettings(
 }
 
 /**
- * Check if a time slot overlaps with an existing booking
+ * Check if a time slot overlaps with an existing booking.
+ * Handles both time-only ("HH:mm") and full datetime strings ("YYYY-MM-DDTHH:mm:ss")
+ * for start_time/end_time — the CRM stores full datetimes, the landing page stores time-only.
  */
 export function isSlotBooked(
   slotStart: number,
@@ -78,8 +111,8 @@ export function isSlotBooked(
   return bookings.some((booking) => {
     if (booking.status === 'cancelled') return false;
 
-    const bookingStart = timeToMinutes(booking.start_time);
-    const bookingEnd = timeToMinutes(booking.end_time);
+    const bookingStart = extractTimeMinutes(booking.start_time);
+    const bookingEnd = extractTimeMinutes(booking.end_time);
 
     // Check for overlap
     return slotStart < bookingEnd && slotEnd > bookingStart;

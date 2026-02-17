@@ -17,7 +17,7 @@ import {
   validate,
   formatZodErrors,
 } from '@kre8tion/shared-types';
-import { calculateEndTime, timeToMinutes } from '@/lib/booking/availability';
+import { calculateEndTime, timeToMinutes, extractDateString, extractTimeMinutes } from '@/lib/booking/availability';
 import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
 import { runBookingPipeline } from '@/lib/booking/createBooking';
 import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
@@ -26,9 +26,10 @@ export const runtime = 'edge';
 
 
 async function isSlotAvailable(env: Record<string, string>, date: string, time: string, duration: number = MEETING_DURATION): Promise<boolean> {
-  // Filter client-side — NCB datetime filter doesn't match date strings
+  // Filter client-side — NCB datetime filter doesn't match date strings.
+  // extractDateString handles both "YYYY-MM-DD" and full datetime values from the CRM.
   const allBookings = await fetchFromNCB<Booking>(env, 'bookings');
-  const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
+  const bookings = allBookings.filter((b) => b.booking_date && extractDateString(String(b.booking_date)) === date);
 
   const slotStart = timeToMinutes(time);
   const slotEnd = slotStart + duration;
@@ -36,8 +37,10 @@ async function isSlotAvailable(env: Record<string, string>, date: string, time: 
   return !bookings.some((booking) => {
     if (booking.status === 'cancelled') return false;
 
-    const bookingStart = timeToMinutes(booking.start_time);
-    const bookingEnd = timeToMinutes(booking.end_time);
+    // extractTimeMinutes handles both "HH:mm" (landing page) and
+    // full datetime strings like "2026-02-17T10:00:00" (CRM format).
+    const bookingStart = extractTimeMinutes(booking.start_time);
+    const bookingEnd = extractTimeMinutes(booking.end_time);
 
     return slotStart < bookingEnd && slotEnd > bookingStart;
   });

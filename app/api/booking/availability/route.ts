@@ -10,6 +10,7 @@ import { getEnv } from '@/lib/cloudflare/env';
 import {
   getAvailableSlots,
   getAvailableDates,
+  extractDateString,
 } from '@/lib/booking/availability';
 import {
   AvailabilitySetting,
@@ -105,10 +106,11 @@ export async function GET(req: NextRequest) {
 
     // Fetch existing bookings and filter by date client-side
     // (NCB datetime filter doesn't match date strings)
+    // Use extractDateString to handle both "YYYY-MM-DD" and full datetime values.
     let bookings: Booking[];
     try {
       const allBookings = await fetchFromNCB<Booking>(cfEnv, 'bookings');
-      bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
+      bookings = allBookings.filter((b) => b.booking_date && extractDateString(String(b.booking_date)) === date);
     } catch {
       bookings = [];
     }

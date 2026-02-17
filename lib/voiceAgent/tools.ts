@@ -18,6 +18,8 @@ import {
   getAvailableSlots,
   calculateEndTime,
   timeToMinutes,
+  extractDateString,
+  extractTimeMinutes,
   formatTimeLabel,
   formatDateDisplay,
 } from '@/lib/booking/availability';
@@ -241,9 +243,10 @@ async function handleGetAvailableSlots(
   }
 
   const { settings, blockedDates } = await loadSettings(ctx.env);
-  // Filter client-side — NCB datetime filter doesn't match date strings
+  // Filter client-side — NCB datetime filter doesn't match date strings.
+  // extractDateString handles both date-only and full datetime values from the CRM.
   const allBookings = await fetchFromNCB<Booking>(ctx.env, 'bookings');
-  const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
+  const bookings = allBookings.filter((b) => b.booking_date && extractDateString(String(b.booking_date)) === date);
   const slots = getAvailableSlots(date, settings, blockedDates, bookings, timezone);
   const available = slots.filter((s) => s.available);
   const booked = slots.filter((s) => !s.available);
@@ -277,15 +280,16 @@ async function handleCreateConsultation(
     return JSON.stringify({ error: 'Missing required fields: date, time, name, email' });
   }
 
-  // Check slot availability — filter client-side (NCB datetime filter issue)
+  // Check slot availability — filter client-side (NCB datetime filter issue).
+  // extractDateString / extractTimeMinutes handle both landing page and CRM datetime formats.
   const allBookings = await fetchFromNCB<Booking>(ctx.env, 'bookings');
-  const bookings = allBookings.filter((b) => b.booking_date.startsWith(date));
+  const bookings = allBookings.filter((b) => b.booking_date && extractDateString(String(b.booking_date)) === date);
   const slotStart = timeToMinutes(time);
   const slotEnd = slotStart + MEETING_DURATION;
   const isBooked = bookings.some((b) => {
     if (b.status === 'cancelled') return false;
-    const bStart = timeToMinutes(b.start_time);
-    const bEnd = timeToMinutes(b.end_time);
+    const bStart = extractTimeMinutes(b.start_time);
+    const bEnd = extractTimeMinutes(b.end_time);
     return slotStart < bEnd && slotEnd > bStart;
   });
 
