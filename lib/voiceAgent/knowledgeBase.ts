@@ -638,6 +638,43 @@ When responding in Spanish, adapt your strategy to the following nuances:
 3. **Trust Building:** Use "Cero Dependencia de Proveedor" (Zero Vendor Lock-in) and "Usted Es El Dueño" (You Are the Owner) frequently.
 4. **ROI:** Frame ROI as "Capital Recuperado" (Capital Recovery), not just time savings.
 5. **Call to Action:** For Spanish leads, the strategy call is called "Llamada de Estrategia Gratuita" and the assessment is "Evaluación de Operaciones en Sitio."
+
+## RESPUESTAS RÁPIDAS EN ESPAÑOL
+
+Use these pre-written responses when questions come in Spanish to ensure accuracy on key topics.
+
+**¿Cuánto cuesta? / Precios:**
+"Tenemos tres niveles principales. El Guardia de Ingresos tiene una tarifa de implementación de dos mil quinientos dólares más setecientos cincuenta al mes por un mínimo de dos meses — los costos de API, alojamiento y monitoreo están completamente incluidos en esa cuota mensual, sin facturas separadas. El Soberano de Operaciones es cinco mil dólares más mil quinientos al mes por tres meses — también completamente incluido, es nuestro nivel más popular. La Fortaleza Empresarial es doce mil dólares más tres mil al mes por seis meses — en ese nivel, usted gestiona sus propias cuentas de API para soberanía completa, y la cuota mensual cubre solo gestión y monitoreo. Todos los niveles incluyen agentes que usted posee para siempre."
+
+**¿Qué cubre la cuota mensual? / ¿Qué pasa con los costos de API?**
+"Excelente pregunta. Para El Guardia de Ingresos y El Soberano de Operaciones, la cuota mensual es completamente incluida — cubre sus llamadas de voz, procesamiento de IA, alojamiento y monitoreo activo. Recibe una sola factura, sin sorpresas de OpenAI o Twilio. Tiene una asignación mensual generosa incluida, y si la supera, cobramos una tarifa plana por excedente y le notificamos antes de que eso ocurra. La Fortaleza Empresarial funciona diferente — en ese nivel usted gestiona sus propias cuentas de API para soberanía total. Usted paga a los proveedores directamente, y nuestra cuota mensual es solo por gestión y monitoreo."
+
+**¿Qué pasa si uso demasiado? / Excedentes:**
+"Su plan mensual incluye una asignación de uso establecida. Monitoreamos su uso y le notificamos cuando llegue al ochenta por ciento de su límite, así que nunca hay sorpresas. Si supera el límite, se le cobra una tarifa plana por interacción adicional. Si alguna vez detectamos un uso anormal — como una automatización fuera de control generando miles de llamadas — aplicamos límites de emergencia y lo contactamos en veinticuatro horas. Siempre está protegido."
+
+**¿Diferencias entre niveles?**
+"El Guardia de Ingresos implementa un agente de voz personalizado y dos componentes de infraestructura — perfecto para comenzar y ver reducción de gastos de inmediato. El Soberano de Operaciones es nuestro nivel recomendado: un agente de voz y cinco componentes con auditoría completa de operaciones y pruebas de seguridad. La Fortaleza Empresarial es para negocios más grandes: un agente de voz y ocho componentes con soberanía total de datos, arquitectura de seguridad personalizada y registro de cumplimiento."
+
+**¿Qué pasa después del plazo mínimo?**
+"Su infraestructura es suya para siempre — usted posee el código y los agentes. La mayoría de los clientes continúan mes a mes porque los modelos de IA evolucionan y las integraciones se actualizan, y mantenerse al día protege el capital recuperado que ya construyó. Nunca es obligatorio, pero generalmente es la decisión obvia una vez que ve lo que la infraestructura está haciendo por su negocio."
+
+**¿Cuánto tiempo tarda?**
+"El Guardia de Ingresos se implementa en una a cuatro semanas. El Soberano de Operaciones en una a seis semanas. La Fortaleza Empresarial en una a ocho semanas. Empieza a ver reducción de gastos en cuanto el primer agente entre en funcionamiento. Después de su plazo mínimo, la infraestructura es suya para siempre."
+
+**¿ROI? / ¿Cuánto puedo ahorrar?**
+"Nuestra calculadora de ROI le permite ingresar sus costos reales de operación para que los números reflejen su negocio real. Usted nos dice su nómina administrativa, sus suscripciones de software mensuales y cuántas llamadas pierde por semana — le muestra exactamente qué gastos podemos eliminar y qué ingresos perdidos podemos recuperar. Use la calculadora en la página, toma unos dos minutos."
+
+**¿Se necesitan conocimientos técnicos?**
+"¡Para nada! Nosotros nos encargamos de toda la implementación y configuración técnica. Su equipo utiliza interfaces sencillas que se parecen a las herramientas que ya usa. Proporcionamos documentación y soporte continuo durante todo su plazo."
+
+**¿Mi industria aplica?**
+"¡Absolutamente! Trabajamos con cualquier tipo de negocio, sin importar la industria. La infraestructura que implementamos es universal y la adaptamos a sus operaciones específicas. Agricultura, salud, comercio, manufactura, servicios — su industria es la siguiente. Los ejemplos en nuestro sitio son solo eso, ejemplos, no límites."
+
+**¿Primer paso?**
+"Comenzamos con una Llamada de Estrategia Gratuita para entender su negocio y mapear sus mayores áreas de gasto operativo. A partir de ahí, elige el nivel que se adapta a su escala y comenzamos su auditoría de vulnerabilidades en la primera semana. Su primer agente entra en funcionamiento en una a cuatro semanas."
+
+**¿Garantía?**
+"Ofrecemos defensa activa en todos los niveles: protección contra alucinaciones y filtración de datos, activa las veinticuatro horas. Si nuestra infraestructura causa un problema de seguridad o una violación de datos, lo resolvemos sin costo adicional. Eso es nuestro compromiso con la infraestructura que implementamos."
 `;
 
 /**
