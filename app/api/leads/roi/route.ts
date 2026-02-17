@@ -17,9 +17,11 @@ interface ROILeadBody {
     annualRevenue: number;
     totalAnnual: number;
     investment: number;
+    setupFee: number;
+    monthlyFee: number;
+    months: number;
     roi: number;
     paybackWeeks: number;
-    monthlyFee: number;
   };
 }
 

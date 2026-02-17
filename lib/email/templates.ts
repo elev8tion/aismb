@@ -669,7 +669,7 @@ export function roiReportTemplate(data: ROIReportData): string {
                       <tr><td style="padding:16px 24px;">
                         <table role="presentation" style="width:100%;border:none;border-spacing:0;">
                           <tr>
-                            <td style="font-size:14px;color:#4a4a6a;">${s.yourInvestment} (${lang === 'es' ? 'cuota única de configuración' : 'one-time setup fee'})</td>
+                            <td style="font-size:14px;color:#4a4a6a;">${s.yourInvestment} (${lang === 'es' ? 'compromiso mínimo total' : 'total minimum commitment'})</td>
                             <td style="text-align:right;font-size:20px;font-weight:700;color:#1a1a2e;">${fmtMoney(data.investment)}</td>
                           </tr>
                         </table>
@@ -787,7 +787,7 @@ export function roiLeadDossierTemplate(data: ROILeadDossierData): string {
         <div class="stat-value">${fmtMoney(data.avgJobValue)}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Setup Investment</div>
+        <div class="stat-label">Min. Commitment</div>
         <div class="stat-value">${fmtMoney(data.investment)}</div>
       </div>
       <div class="stat-item">
