@@ -712,27 +712,3 @@ Use these pre-written responses when questions come in Spanish to ensure accurac
 export const INFO_KNOWLEDGE_BASE = KNOWLEDGE_BASE
   .replace(/## TOOL USE GUIDELINES[\s\S]*?(?=## SPANISH MARKET STRATEGY)/, '');
 
-// Common cached question IDs (for future caching implementation)
-export const CACHED_QUESTIONS = {
-  PRICING: 'pricing',
-  HOW_IT_WORKS: 'how-it-works',
-  ROI: 'roi',
-  INDUSTRY: 'any-industry',
-  GETTING_STARTED: 'getting-started',
-  TECHNICAL_SKILLS: 'technical-skills',
-  TIMELINE: 'timeline',
-  INDEPENDENCE: 'independence',
-  CASE_STUDIES: 'case-studies',
-  SUPPORT: 'support',
-  TIER_DIFFERENCES: 'tier-differences',
-  UPGRADE_PATH: 'upgrade-path',
-  SETUP_FEE: 'setup-fee',
-  CHATGPT_COMPARISON: 'chatgpt-comparison',
-  ERROR_HANDLING: 'error-handling',
-  DATA_STORAGE: 'data-storage',
-  GUARANTEE: 'guarantee',
-  CANCELLATION: 'cancellation',
-  TIME_SAVINGS: 'time-savings',
-  RESULTS_TIMELINE: 'results-timeline',
-  WORKS_WITH_BUSINESS: 'works-with-business',
-} as const;

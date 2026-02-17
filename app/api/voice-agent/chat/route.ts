@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import { createOpenAI } from '@/lib/openai/config';
-import { KNOWLEDGE_BASE } from '@/lib/voiceAgent/knowledgeBase';
-import { classifyQuestion } from '@/lib/voiceAgent/questionClassifier';
 import { validateQuestion, detectPromptInjection } from '@/lib/security/requestValidator';
 import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
 import { getFeatureFlags, logFeatureFlags } from '@/lib/featureFlags';
@@ -57,41 +55,12 @@ export async function POST(request: NextRequest) {
       console.warn(`⚠️ Possible prompt injection detected: ${injection.pattern}`);
     }
 
-    // Classify question complexity for smart token limits
-    const classification = classifyQuestion(sanitizedQuestion);
-
-    console.log(`📊 Question classified as: ${classification.complexity} (${classification.maxTokens} tokens) - ${classification.reason}`);
-
     // Get session storage with KV namespace from env
     const sessionStorage = getSessionStorage(env.VOICE_SESSIONS);
 
     // Get conversation history from session storage
     const conversationHistory = await sessionStorage.getConversationHistory(sessionId);
     console.log(`💬 Session ${sessionId}: ${conversationHistory.length} previous messages`);
-
-    // Build messages with language instruction FIRST (critical for Spanish compliance)
-    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
-
-    // Language instruction MUST come first to override English knowledge base context
-    if (language === 'es') {
-      messages.push({
-        role: 'system',
-        content:
-          'INSTRUCCIÓN OBLIGATORIA DE IDIOMA: Eres un asistente que SOLO responde en español. Sin excepciones. Toda tu comunicación debe ser en español natural, claro y profesional. El contenido de referencia está en inglés pero TÚ DEBES responder ÚNICAMENTE en español. Mantén el formato de etiquetas de acción exactamente así: [ACTION:SCROLL_TO_...].',
-      });
-    }
-
-    // Knowledge base (reference content - may be in English but response language is controlled above)
-    messages.push({
-      role: 'system',
-      content: KNOWLEDGE_BASE,
-    });
-
-    // Include conversation history from session storage
-    messages.push(...conversationHistory);
-
-    // Current user question
-    messages.push({ role: 'user', content: sanitizedQuestion });
 
     // Classify intent (deterministic, no LLM call)
     const intentResult = classifyIntent(sanitizedQuestion, conversationHistory);

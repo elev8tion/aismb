@@ -186,28 +186,3 @@ export function classifyQuestion(question: string): ClassificationResult {
   };
 }
 
-/**
- * Get analytics on question classifications
- */
-const classificationStats = {
-  simple: 0,
-  moderate: 0,
-  complex: 0,
-};
-
-export function trackClassification(complexity: QuestionComplexity): void {
-  classificationStats[complexity]++;
-}
-
-export function getClassificationStats() {
-  const total = classificationStats.simple + classificationStats.moderate + classificationStats.complex;
-  return {
-    ...classificationStats,
-    total,
-    percentages: {
-      simple: total > 0 ? (classificationStats.simple / total * 100).toFixed(1) : 0,
-      moderate: total > 0 ? (classificationStats.moderate / total * 100).toFixed(1) : 0,
-      complex: total > 0 ? (classificationStats.complex / total * 100).toFixed(1) : 0,
-    },
-  };
-}

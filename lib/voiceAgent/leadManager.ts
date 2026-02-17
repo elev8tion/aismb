@@ -80,37 +80,6 @@ export async function getLeadByEmail(email: string, env: Record<string, string>)
 }
 
 /**
- * Sync ROI Calculation data to CRM
- */
-export async function syncROICalcToCRM(data: {
-  email: string;
-  industry: string;
-  employeeCount: string;
-  hourlyRate: number;
-  selectedTier: string;
-  calculations: Record<string, unknown>;
-}, env: Record<string, string>): Promise<NCBRecord | null> {
-  // First, ensure the lead exists or update it
-  await syncLeadToCRM({
-    email: data.email,
-    industry: data.industry,
-    employeeCount: data.employeeCount,
-    source: 'ROI Calculator'
-  }, env);
-
-  // Then save the ROI calculation linked to the lead if possible
-  return await ncbRequest<NCBRecord>('POST', 'create/roi_calculations', env, {
-    email: data.email,
-    industry: data.industry,
-    employee_count: data.employeeCount,
-    hourly_rate: data.hourlyRate,
-    selected_tier: data.selectedTier,
-    calculations: data.calculations,
-    created_at: new Date().toISOString()
-  });
-}
-
-/**
  * Sync Booking data to CRM and update lead status
  */
 export async function syncBookingToCRM(data: {
