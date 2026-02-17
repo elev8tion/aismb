@@ -107,8 +107,6 @@ Then suggest booking a free consultation to discuss further.
 Keep it concise — 2-3 sentences per turn. This is voice output.
 Use [ACTION:SCROLL_TO_ROI] if the user wants to see the calculator on the page.`;
 
-export const SPANISH_INSTRUCTION = `INSTRUCCION OBLIGATORIA DE IDIOMA: Responde SOLO en espanol. Toda tu comunicacion debe ser en espanol natural. Mantén etiquetas: [ACTION:SCROLL_TO_...].`;
-
 export const SPANISH_INFO_INSTRUCTION = `INSTRUCCION OBLIGATORIA DE IDIOMA: Responde SOLO en espanol. Toda tu comunicacion debe ser en espanol natural. Conserva TODAS las etiquetas de accion exactamente como estan: [ACTION:SCROLL_TO_PRICING], [ACTION:SCROLL_TO_ROI], [ACTION:SCROLL_TO_CASES], [ACTION:SCROLL_TO_PROCESS], [ACTION:SCROLL_TO_BOOKING], [ACTION:OPEN_BOOKING_FORM].
 
 TERMINOLOGIA OFICIAL EN ESPANOL — usa estos terminos exactos:
@@ -199,7 +197,7 @@ REGLAS OBLIGATORIAS — NUNCA LAS VIOLES:
 Zona horaria predeterminada: America/Los_Angeles
 Mantén todas las respuestas cortas y conversacionales — esto es voz.`;
 
-export const SPANISH_BOOKING_INSTRUCTION = BOOKING_AGENT_PROMPT_ES;
+
 
 
 export const ROI_AGENT_PROMPT_ES = `Eres un asistente de calculo de ROI para AI KRE8TION Partners. Respondes SOLO en espanol.
@@ -235,7 +233,6 @@ REGLAS ADICIONALES:
 - Mantén respuestas concisas — 2-3 oraciones por turno. Esto es salida de voz.
 - Usa [ACTION:SCROLL_TO_ROI] si el usuario quiere ver la calculadora en la pagina.`;
 
-export const SPANISH_ROI_INSTRUCTION = ROI_AGENT_PROMPT_ES;
 
 export const HIGH_VALUE_NUDGE = `
 CRITICAL: This is a HIGH-VALUE lead (high score).
