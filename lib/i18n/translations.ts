@@ -127,86 +127,49 @@ export interface Translations {
     tag: string;
     heading: string;
     description: string;
+    overheadTitle: string;
+    overheadSubtitle: string;
+    missedRevenueTitle: string;
+    missedRevenueSubtitle: string;
+    tierSelectLabel: string;
+    tierNote: string;
+    tierScope: {
+      components: string;
+      minimum: string;
+      setup: string;
+    };
+    roiNote: string;
+    tiers: {
+      discovery: string;
+      foundation: string;
+      architect: string;
+    };
     labels: {
-      industry: string;
-      businessSize: string;
-      hourlyLaborCost: string;
-      partnershipTier: string;
-    };
-    hourlyLaborCostNote: string;
-    industries: Array<{ id: string; name: string }>;
-    employeeSizes: Array<{ id: string; name: string }>;
-    tiers: Array<{ id: string; name: string }>;
-    tasks: {
-      scheduling: string;
-      communication: string;
-      dataEntry: string;
-      leadResponse: string;
-      reporting: string;
-      inventory: string;
-      socialMedia: string;
-    };
-    steps: {
-      labels: string[];
-      next: string;
-      back: string;
-      seeResults: string;
-      basics: { title: string; subtitle: string };
-      timeAudit: { title: string; subtitle: string; totalWeeklyHours: string };
-      revenue: {
-        title: string;
-        subtitle: string;
-        monthlyRevenue: string;
-        avgDealValue: string;
-        lostLeads: string;
-        closeRate: string;
-      };
-      results: { title: string; subtitle: string };
+      adminPayroll: string;
+      software: string;
+      missedCalls: string;
+      avgJobValue: string;
     };
     results: {
-      heading: string;
-      timeSaved: string;
-      weeklyValue: string;
-      investment: string;
-      tasksAutomated: string;
-      revenueRecovery: string;
-      recoveredLeadsLabel: string;
-      annualBenefit: string;
-      yourRoi: string;
-      paysForItself: string;
-      continuesGenerating: string;
-      automatedTasksLabel: string;
-      weeksShort: string;
-      monthsShort: string;
-      paybackLabel: string;
+      totalLabel: string;
+      totalSubtitle: string;
+      savingsBreakdown: string;
+      fixedSavings: string;
+      recoveredRevenue: string;
+      annualROI: string;
+      vsCommitment: string;
+      paybackPeriod: string;
+      thenYouOwn: string;
     };
-    inputSummary: {
-      title: string;
-      industry: string;
-      teamSize: string;
-      hourlyRate: string;
-      weeklyHours: string;
-      monthlyRevenue: string;
-      lostLeads: string;
-    };
-    emailCapture: {
-      heading: string;
+    email: {
+      prompt: string;
       placeholder: string;
       send: string;
       sending: string;
-      note: string;
       success: string;
+      error: string;
     };
-    comparison: {
-      heading: string;
-      traditionalConsultant: string;
-      consultantRate: string;
-      doneForYou: string;
-      agencyRate: string;
-      aiSmbPartners: string;
-      savePercent: string;
-      ownCapability: string;
-    };
+    rateNote: string;
     cta: string;
     disclaimer: string;
   };
@@ -724,112 +687,49 @@ export const translations: Record<Language, Translations> = {
       heading: 'Calculate Your Annual Capital Recaptured',
       description:
         'Enter your real overhead costs and missed revenue. See exactly how much capital we can put back in your pocket.',
+      overheadTitle: 'Your Current Overhead',
+      overheadSubtitle: "Tell us what you're spending on admin and software today.",
+      missedRevenueTitle: 'Missed Revenue',
+      missedRevenueSubtitle: 'Calls and leads slipping through the cracks each week.',
+      tierSelectLabel: 'Select Infrastructure Tier',
+      tierNote: 'All tiers eliminate the same overhead. Higher tiers deploy more infrastructure — and cost more.',
+      tierScope: {
+        components: 'infrastructure components',
+        minimum: 'month minimum',
+        setup: 'setup',
+      },
+      roiNote: 'ROI% is calculated against your total minimum commitment (setup + monthly × term). Lower-cost tiers show higher ROI% — that\'s math, not quality. Pick the tier that replaces the most overhead.',
+      tiers: {
+        discovery: 'The Revenue Guard',
+        foundation: 'The Operations Sovereign',
+        architect: 'The Enterprise Fortress',
+      },
       labels: {
-        industry: 'Industry',
-        businessSize: 'Business Size',
-        hourlyLaborCost: 'Hourly Labor Cost',
-        partnershipTier: 'Partnership Tier',
-      },
-      hourlyLaborCostNote: 'Average blended cost per hour of staff time (wages + overhead)',
-      industries: [
-        { id: 'other', name: 'Other/Custom Business' },
-        { id: 'service', name: 'Service Business' },
-        { id: 'professional', name: 'Professional Services' },
-        { id: 'retail', name: 'Retail/Hospitality' },
-        { id: 'realestate', name: 'Real Estate/Property' },
-        { id: 'construction', name: 'Construction/Trades' },
-      ],
-      employeeSizes: [
-        { id: '1-5', name: '1-5 employees' },
-        { id: '5-10', name: '5-10 employees' },
-        { id: '10-25', name: '10-25 employees' },
-        { id: '25-50', name: '25-50 employees' },
-      ],
-      tiers: [
-        { id: 'discovery', name: 'AI Discovery' },
-        { id: 'foundation', name: 'Foundation Builder' },
-        { id: 'architect', name: 'Systems Architect' },
-      ],
-      tasks: {
-        scheduling: 'Scheduling & Appointments',
-        communication: 'Customer Communication & Follow-up',
-        dataEntry: 'Data Entry, Invoicing & Bookkeeping',
-        leadResponse: 'Lead Response & Qualification',
-        reporting: 'Reporting & Analytics',
-        inventory: 'Inventory / Supply Tracking',
-        socialMedia: 'Social Media & Marketing',
-      },
-      steps: {
-        labels: ['Overhead', 'Missed Revenue', 'Tier', 'Results'],
-        next: 'Next',
-        back: 'Back',
-        seeResults: 'Calculate Savings',
-        basics: {
-          title: 'Current Overhead Costs',
-          subtitle: "Tell us what you're paying for admin and software right now.",
-        },
-        timeAudit: {
-          title: 'Missed Revenue',
-          subtitle: 'Estimate the calls and leads slipping through the cracks each week.',
-          totalWeeklyHours: 'Total missed opportunities',
-        },
-        revenue: {
-          title: 'Revenue Impact',
-          subtitle: 'Help us estimate the revenue you could recover.',
-          monthlyRevenue: 'Monthly Revenue',
-          avgDealValue: 'Average Job / Deal Value',
-          lostLeads: 'Missed Calls Per Week',
-          closeRate: 'Close Rate',
-        },
-        results: {
-          title: 'Capital Recaptured',
-          subtitle: "Here's the overhead we eliminate and the revenue we recover.",
-        },
+        adminPayroll: 'Monthly Admin / Support Payroll',
+        software: 'Monthly Software Subscriptions',
+        missedCalls: 'Missed Calls Per Week',
+        avgJobValue: 'Average Job / Deal Value',
       },
       results: {
-        heading: 'Total Annual Capital Recaptured',
-        timeSaved: 'Admin Hours Eliminated',
-        weeklyValue: 'Fixed Monthly Savings',
-        investment: 'Monthly Infrastructure Fee',
-        tasksAutomated: 'Overhead Lines Eliminated',
-        revenueRecovery: 'Recovered Revenue',
-        recoveredLeadsLabel: 'leads captured/mo',
-        annualBenefit: 'Annual Capital Recaptured',
-        yourRoi: 'Your ROI',
-        paysForItself: 'Infrastructure pays for itself in ~',
-        continuesGenerating: 'weeks, then generates pure profit',
-        automatedTasksLabel: 'Overhead Lines Replaced',
-        weeksShort: 'wks',
-        monthsShort: 'mo',
-        paybackLabel: 'Payback Period',
+        totalLabel: 'Total Annual Capital Recaptured',
+        totalSubtitle: 'per year in eliminated overhead + recovered revenue',
+        savingsBreakdown: 'Savings Breakdown',
+        fixedSavings: 'Fixed Monthly Savings',
+        recoveredRevenue: 'Recovered Revenue',
+        annualROI: 'Annual ROI',
+        vsCommitment: 'vs. total commitment',
+        paybackPeriod: 'Payback Period',
+        thenYouOwn: 'then you own the infrastructure',
       },
-      inputSummary: {
-        title: 'Your Inputs',
-        industry: 'Industry',
-        teamSize: 'Team Size',
-        hourlyRate: 'Hourly Rate',
-        weeklyHours: 'Weekly Hours',
-        monthlyRevenue: 'Monthly Revenue',
-        lostLeads: 'Lost Leads/mo',
-      },
-      emailCapture: {
-        heading: 'Email me this full report',
-        placeholder: 'Enter your email',
-        send: 'Send',
+      email: {
+        prompt: 'Get this analysis in your inbox',
+        placeholder: 'you@email.com',
+        send: 'Send Report',
         sending: 'Sending...',
-        note: "We'll send a detailed breakdown of your potential ROI. No spam.",
-        success: 'Report sent successfully! Check your inbox.',
+        success: 'Report sent! Check your inbox.',
+        error: 'Failed to send. Please try again.',
       },
-      comparison: {
-        heading: 'Compare Alternatives (Annual)',
-        traditionalConsultant: 'Traditional Consultant',
-        consultantRate: '$175/hr × your saved hours',
-        doneForYou: 'Done-for-you Agency',
-        agencyRate: '$6,500/mo × 12',
-        aiSmbPartners: 'AI KRE8TION Partners',
-        savePercent: 'Save ',
-        ownCapability: '% vs alternatives + you own the capability forever',
-      },
+      rateNote: '60% call capture rate · 35% close rate · Projections, not guaranteed results',
       cta: 'Deploy My Infrastructure',
       disclaimer:
         'Calculations use your inputs to estimate fixed overhead savings and recovered revenue. Fixed savings = (Payroll + Software) minus our monthly fee. Revenue recovery assumes 60% call capture rate and 35% close rate. Actual results vary by business and implementation.',
@@ -1494,112 +1394,49 @@ export const translations: Record<Language, Translations> = {
       heading: 'Calcula Tu Capital Anual Recuperado',
       description:
         'Ingresa tus costos reales de overhead e ingresos perdidos. Ve exactamente cuanto capital podemos devolverte.',
+      overheadTitle: 'Tu Overhead Actual',
+      overheadSubtitle: 'Cuentanos cuanto gastas en administracion y software hoy.',
+      missedRevenueTitle: 'Ingresos Perdidos',
+      missedRevenueSubtitle: 'Llamadas y prospectos que se pierden cada semana.',
+      tierSelectLabel: 'Seleccionar Nivel de Infraestructura',
+      tierNote: 'Todos los niveles eliminan el mismo overhead. Los niveles superiores despliegan mas infraestructura — y cuestan mas.',
+      tierScope: {
+        components: 'componentes de infraestructura',
+        minimum: 'meses minimo',
+        setup: 'implementacion',
+      },
+      roiNote: 'El ROI% se calcula contra tu compromiso minimo total (implementacion + mensual x plazo). Los niveles de menor costo muestran mayor ROI% — es matematica, no calidad. Elige el nivel que reemplaza mas overhead.',
+      tiers: {
+        discovery: 'El Guardia de Ingresos',
+        foundation: 'El Soberano de Operaciones',
+        architect: 'La Fortaleza Empresarial',
+      },
       labels: {
-        industry: 'Industria',
-        businessSize: 'Tamano del Negocio',
-        hourlyLaborCost: 'Costo Laboral por Hora',
-        partnershipTier: 'Nivel de Infraestructura',
-      },
-      hourlyLaborCostNote: 'Costo promedio combinado por hora de tiempo del personal',
-      industries: [
-        { id: 'other', name: 'Otro/Negocio Personalizado' },
-        { id: 'service', name: 'Negocio de Servicios' },
-        { id: 'professional', name: 'Servicios Profesionales' },
-        { id: 'retail', name: 'Retail/Hospitalidad' },
-        { id: 'realestate', name: 'Bienes Raices/Propiedades' },
-        { id: 'construction', name: 'Construccion/Oficios' },
-      ],
-      employeeSizes: [
-        { id: '1-5', name: '1-5 empleados' },
-        { id: '5-10', name: '5-10 empleados' },
-        { id: '10-25', name: '10-25 empleados' },
-        { id: '25-50', name: '25-50 empleados' },
-      ],
-      tiers: [
-        { id: 'discovery', name: 'El Guardia de Ingresos' },
-        { id: 'foundation', name: 'El Soberano de Operaciones' },
-        { id: 'architect', name: 'La Fortaleza Empresarial' },
-      ],
-      tasks: {
-        scheduling: 'Programacion y Citas',
-        communication: 'Comunicacion con Clientes y Seguimiento',
-        dataEntry: 'Entrada de Datos, Facturacion y Contabilidad',
-        leadResponse: 'Respuesta y Calificacion de Prospectos',
-        reporting: 'Reportes y Analitica',
-        inventory: 'Inventario / Seguimiento de Suministros',
-        socialMedia: 'Redes Sociales y Marketing',
-      },
-      steps: {
-        labels: ['Overhead', 'Ingresos Perdidos', 'Nivel', 'Resultados'],
-        next: 'Siguiente',
-        back: 'Atras',
-        seeResults: 'Calcular Ahorros',
-        basics: {
-          title: 'Costos de Overhead Actuales',
-          subtitle: 'Cuentanos cuanto pagas hoy en administracion y software.',
-        },
-        timeAudit: {
-          title: 'Ingresos Perdidos',
-          subtitle: 'Estima las llamadas y prospectos que se pierden cada semana.',
-          totalWeeklyHours: 'Total de oportunidades perdidas',
-        },
-        revenue: {
-          title: 'Impacto en Ingresos',
-          subtitle: 'Ayudanos a estimar los ingresos que podrias recuperar.',
-          monthlyRevenue: 'Ingresos Mensuales',
-          avgDealValue: 'Valor Promedio de Trabajo / Venta',
-          lostLeads: 'Llamadas Perdidas por Semana',
-          closeRate: 'Tasa de Cierre',
-        },
-        results: {
-          title: 'Capital Recuperado',
-          subtitle: 'Asi es el overhead que eliminamos y los ingresos que recuperamos.',
-        },
+        adminPayroll: 'Nomina Mensual Admin / Soporte',
+        software: 'Suscripciones de Software Mensuales',
+        missedCalls: 'Llamadas Perdidas por Semana',
+        avgJobValue: 'Valor Promedio de Trabajo / Venta',
       },
       results: {
-        heading: 'Capital Anual Total Recuperado',
-        timeSaved: 'Horas Administrativas Eliminadas',
-        weeklyValue: 'Ahorro Mensual Fijo',
-        investment: 'Cuota Mensual de Infraestructura',
-        tasksAutomated: 'Lineas de Overhead Eliminadas',
-        revenueRecovery: 'Ingresos Recuperados',
-        recoveredLeadsLabel: 'prospectos capturados/mes',
-        annualBenefit: 'Capital Anual Recuperado',
-        yourRoi: 'Tu ROI',
-        paysForItself: 'La infraestructura se paga sola en ~',
-        continuesGenerating: 'semanas, luego genera ganancia pura',
-        automatedTasksLabel: 'Lineas de Overhead Reemplazadas',
-        weeksShort: 'sem',
-        monthsShort: 'mes',
-        paybackLabel: 'Periodo de Retorno',
+        totalLabel: 'Capital Anual Total Recuperado',
+        totalSubtitle: 'por ano en overhead eliminado + ingresos recuperados',
+        savingsBreakdown: 'Desglose de Ahorros',
+        fixedSavings: 'Ahorro Mensual Fijo',
+        recoveredRevenue: 'Ingresos Recuperados',
+        annualROI: 'ROI Anual',
+        vsCommitment: 'vs. compromiso total',
+        paybackPeriod: 'Periodo de Retorno',
+        thenYouOwn: 'luego eres dueno de la infraestructura',
       },
-      inputSummary: {
-        title: 'Tus Datos',
-        industry: 'Industria',
-        teamSize: 'Equipo',
-        hourlyRate: 'Tarifa/Hora',
-        weeklyHours: 'Horas Semanales',
-        monthlyRevenue: 'Ingresos Mensuales',
-        lostLeads: 'Llamadas Perdidas/sem',
-      },
-      emailCapture: {
-        heading: 'Enviame este reporte completo',
-        placeholder: 'Ingresa tu email',
-        send: 'Enviar',
+      email: {
+        prompt: 'Recibe este analisis en tu correo',
+        placeholder: 'tu@correo.com',
+        send: 'Enviar Reporte',
         sending: 'Enviando...',
-        note: 'Te enviaremos un desglose detallado de tus ahorros potenciales. Sin spam.',
-        success: 'Reporte enviado exitosamente! Revisa tu bandeja de entrada.',
+        success: 'Reporte enviado! Revisa tu correo.',
+        error: 'Error al enviar. Intentalo de nuevo.',
       },
-      comparison: {
-        heading: 'Comparar Alternativas (Anual)',
-        traditionalConsultant: 'Consultor Tradicional',
-        consultantRate: '$175/hr x tus horas ahorradas',
-        doneForYou: 'Agencia de Servicios Completos',
-        agencyRate: '$6,500/mes x 12',
-        aiSmbPartners: 'AI KRE8TION Partners',
-        savePercent: 'Ahorra ',
-        ownCapability: '% vs alternativas + eres dueno de la infraestructura para siempre',
-      },
+      rateNote: '60% tasa de captura · 35% tasa de cierre · Proyecciones, no resultados garantizados',
       cta: 'Implementar Mi Infraestructura',
       disclaimer:
         'Los calculos usan tus datos para estimar ahorros fijos de overhead e ingresos recuperados. Ahorro fijo = (Nomina + Software) menos nuestra cuota mensual. Recuperacion de ingresos asume 60% de captura de llamadas y 35% de tasa de cierre. Los resultados reales varian por negocio e implementacion.',

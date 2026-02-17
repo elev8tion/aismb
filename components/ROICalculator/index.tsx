@@ -9,7 +9,8 @@ function fmt(n: number) {
 }
 
 export default function ROICalculator() {
-  const { t, language } = useTranslations();
+  const { t } = useTranslations();
+  const rc = t.roiCalculator;
 
   const [payroll, setPayroll] = useState(3000);
   const [software, setSoftware] = useState(500);
@@ -58,7 +59,7 @@ export default function ROICalculator() {
 
   const handleSendReport = async () => {
     if (!email || !email.includes('@')) {
-      setEmailError(language === 'es' ? 'Ingresa un correo válido.' : 'Enter a valid email address.');
+      setEmailError(rc.email.error);
       return;
     }
     setEmailError('');
@@ -70,7 +71,6 @@ export default function ROICalculator() {
         body: JSON.stringify({
           email,
           tier,
-          locale: language,
           metrics: {
             payroll,
             software,
@@ -83,25 +83,27 @@ export default function ROICalculator() {
       if (res.ok) {
         setEmailSent(true);
       } else {
-        setEmailError(language === 'es' ? 'Error al enviar. Inténtalo de nuevo.' : 'Failed to send. Please try again.');
+        setEmailError(rc.email.error);
       }
     } catch {
-      setEmailError(language === 'es' ? 'Error al enviar. Inténtalo de nuevo.' : 'Failed to send. Please try again.');
+      setEmailError(rc.email.error);
     }
     setEmailLoading(false);
   };
+
+  const tierNames = rc.tiers as Record<string, string>;
 
   return (
     <section className="relative py-20 lg:py-32 px-4 sm:px-6" id="roi-calculator">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <div className="tag inline-flex mb-4">{t.roiCalculator.tag}</div>
+          <div className="tag inline-flex mb-4">{rc.tag}</div>
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-            {t.roiCalculator.heading}
+            {rc.heading}
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            {t.roiCalculator.description}
+            {rc.description}
           </p>
         </div>
 
@@ -109,13 +111,13 @@ export default function ROICalculator() {
           {/* Left Column: Inputs */}
           <div className="glass p-4 md:p-6 lg:p-8 space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-white mb-1">Your Current Overhead</h3>
-              <p className="text-sm text-white/50 mb-6">Tell us what you're spending on admin and software today.</p>
+              <h3 className="text-lg font-bold text-white mb-1">{rc.overheadTitle}</h3>
+              <p className="text-sm text-white/50 mb-6">{rc.overheadSubtitle}</p>
 
               {/* Monthly Admin/Support Payroll */}
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium text-white/80">Monthly Admin / Support Payroll</label>
+                  <label className="text-sm font-medium text-white/80">{rc.labels.adminPayroll}</label>
                   <span className="text-sm font-bold text-white">{fmt(payroll)}/mo</span>
                 </div>
                 <input
@@ -136,7 +138,7 @@ export default function ROICalculator() {
               {/* Monthly Software Subscriptions */}
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium text-white/80">Monthly Software Subscriptions</label>
+                  <label className="text-sm font-medium text-white/80">{rc.labels.software}</label>
                   <span className="text-sm font-bold text-white">{fmt(software)}/mo</span>
                 </div>
                 <input
@@ -157,13 +159,13 @@ export default function ROICalculator() {
               {/* Divider */}
               <div className="border-t border-white/10 my-6" />
 
-              <h3 className="text-lg font-bold text-white mb-1">Missed Revenue</h3>
-              <p className="text-sm text-white/50 mb-5">Calls and leads slipping through the cracks each week.</p>
+              <h3 className="text-lg font-bold text-white mb-1">{rc.missedRevenueTitle}</h3>
+              <p className="text-sm text-white/50 mb-5">{rc.missedRevenueSubtitle}</p>
 
               {/* Missed Calls Per Week */}
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium text-white/80">Missed Calls Per Week</label>
+                  <label className="text-sm font-medium text-white/80">{rc.labels.missedCalls}</label>
                   <span className="text-sm font-bold text-white">{missedCalls} calls</span>
                 </div>
                 <input
@@ -176,15 +178,15 @@ export default function ROICalculator() {
                   className="w-full accent-[#F97316]"
                 />
                 <div className="flex justify-between text-xs text-white/40 mt-1">
-                  <span>0 calls</span>
-                  <span>100 calls</span>
+                  <span>0</span>
+                  <span>100</span>
                 </div>
               </div>
 
               {/* Avg Job Value */}
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium text-white/80">Average Job / Deal Value</label>
+                  <label className="text-sm font-medium text-white/80">{rc.labels.avgJobValue}</label>
                   <span className="text-sm font-bold text-white">{fmt(avgJobValue)}</span>
                 </div>
                 <input
@@ -207,10 +209,8 @@ export default function ROICalculator() {
 
               {/* Tier Selection */}
               <div>
-                <label className="text-sm font-medium text-white/80 block mb-1">Select Infrastructure Tier</label>
-                <p className="text-xs text-white/40 mb-3">
-                  All tiers eliminate the same overhead. Higher tiers deploy more infrastructure — and cost more.
-                </p>
+                <label className="text-sm font-medium text-white/80 block mb-1">{rc.tierSelectLabel}</label>
+                <p className="text-xs text-white/40 mb-3">{rc.tierNote}</p>
                 <div className="space-y-2">
                   {Object.values(TIER_DATA).map((td) => (
                     <button
@@ -224,21 +224,19 @@ export default function ROICalculator() {
                     >
                       <div className="flex justify-between items-center">
                         <span className={`text-sm font-semibold ${tier === td.id ? 'text-white' : 'text-white/70'}`}>
-                          {td.name}
+                          {tierNames[td.id] ?? td.name}
                         </span>
                         <span className={`text-sm font-bold ${tier === td.id ? 'text-[#0EA5E9]' : 'text-white/40'}`}>
                           {fmt(td.monthlyFee)}/mo
                         </span>
                       </div>
                       <p className="text-xs text-white/40 mt-0.5">
-                        {td.components} infrastructure components · {td.months}-month minimum · {fmt(td.setupFee)} setup
+                        {td.components} {rc.tierScope.components} · {td.months} {rc.tierScope.minimum} · {fmt(td.setupFee)} {rc.tierScope.setup}
                       </p>
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-white/30 mt-2">
-                  ROI% below reflects your savings against the total minimum commitment ({fmt(results.setupFee)} setup + {results.months} × {fmt(results.monthlyFee)}/mo = {fmt(results.investment)}). Lower investment tiers will show higher ROI% — that&apos;s math, not value judgement.
-                </p>
+                <p className="text-xs text-white/30 mt-2">{rc.roiNote}</p>
               </div>
             </div>
           </div>
@@ -247,21 +245,21 @@ export default function ROICalculator() {
           <div className="flex flex-col gap-4">
             {/* Hero Result */}
             <div className="glass p-6 md:p-8" style={{ borderColor: 'rgba(34, 197, 94, 0.3)' }}>
-              <p className="text-xs text-[#22C55E] font-semibold uppercase tracking-wider mb-2">Total Annual Capital Recaptured</p>
+              <p className="text-xs text-[#22C55E] font-semibold uppercase tracking-wider mb-2">{rc.results.totalLabel}</p>
               <div className={`text-5xl lg:text-6xl font-bold mb-2 ${results.totalAnnual > 0 ? 'text-[#22C55E]' : 'text-white/40'}`}>
                 {results.totalAnnual > 0 ? fmt(results.totalAnnual) : '$0'}
               </div>
-              <p className="text-sm text-white/50">per year in eliminated overhead + recovered revenue</p>
+              <p className="text-sm text-white/50">{rc.results.totalSubtitle}</p>
             </div>
 
             {/* Breakdown */}
             <div className="glass p-5 md:p-6 space-y-4">
-              <h4 className="text-sm font-bold text-white/80 uppercase tracking-wider">Savings Breakdown</h4>
+              <h4 className="text-sm font-bold text-white/80 uppercase tracking-wider">{rc.results.savingsBreakdown}</h4>
 
               {/* Fixed Savings */}
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-sm text-white font-medium">Fixed Monthly Savings</p>
+                  <p className="text-sm text-white font-medium">{rc.results.fixedSavings}</p>
                   <p className="text-xs text-white/50">
                     ({fmt(payroll + software)}/mo overhead) − ({fmt(results.monthlyFee)}/mo fee)
                   </p>
@@ -279,9 +277,9 @@ export default function ROICalculator() {
               {/* Recovered Revenue */}
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-sm text-white font-medium">Recovered Revenue</p>
+                  <p className="text-sm text-white font-medium">{rc.results.recoveredRevenue}</p>
                   <p className="text-xs text-white/50">
-                    {missedCalls} missed calls/wk × 60% capture × 35% close × {fmt(avgJobValue)}
+                    {missedCalls} calls/wk × 60% × 35% × {fmt(avgJobValue)}
                   </p>
                 </div>
                 <div className="text-right">
@@ -297,38 +295,34 @@ export default function ROICalculator() {
             <div className="grid grid-cols-2 gap-3">
               <div className="glass p-4 text-center">
                 <p className="text-2xl font-bold text-white">{results.roi}%</p>
-                <p className="text-xs text-white/50 mt-1">Annual ROI</p>
-                <p className="text-xs text-white/30 mt-0.5">vs. {fmt(results.investment)} total commitment</p>
+                <p className="text-xs text-white/50 mt-1">{rc.results.annualROI}</p>
+                <p className="text-xs text-white/30 mt-0.5">{fmt(results.investment)} {rc.results.vsCommitment}</p>
               </div>
               <div className="glass p-4 text-center">
                 <p className="text-2xl font-bold text-white">
                   {results.paybackWeeks < 999 ? `${results.paybackWeeks}` : '—'}
                   <span className="text-sm font-normal text-white/50"> wks</span>
                 </p>
-                <p className="text-xs text-white/50 mt-1">Payback Period</p>
-                <p className="text-xs text-white/30 mt-0.5">then you own the infrastructure</p>
+                <p className="text-xs text-white/50 mt-1">{rc.results.paybackPeriod}</p>
+                <p className="text-xs text-white/30 mt-0.5">{rc.results.thenYouOwn}</p>
               </div>
             </div>
 
             {/* Email Capture */}
             {emailSent ? (
               <div className="glass p-4 text-center" style={{ borderColor: 'rgba(34, 197, 94, 0.4)' }}>
-                <p className="text-[#22C55E] font-semibold text-sm">
-                  {language === 'es' ? '¡Informe enviado! Revisa tu correo.' : 'Report sent! Check your inbox.'}
-                </p>
+                <p className="text-[#22C55E] font-semibold text-sm">{rc.email.success}</p>
               </div>
             ) : (
               <div className="glass p-4 space-y-3">
-                <p className="text-xs text-white/60 font-medium">
-                  {language === 'es' ? 'Recibe este análisis en tu correo' : 'Get this analysis in your inbox'}
-                </p>
+                <p className="text-xs text-white/60 font-medium">{rc.email.prompt}</p>
                 <div className="flex gap-2">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendReport()}
-                    placeholder={language === 'es' ? 'tu@correo.com' : 'you@email.com'}
+                    placeholder={rc.email.placeholder}
                     className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#0EA5E9]/60"
                   />
                   <button
@@ -336,9 +330,7 @@ export default function ROICalculator() {
                     disabled={emailLoading}
                     className="bg-[#0EA5E9] hover:bg-[#0284C7] disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
                   >
-                    {emailLoading
-                      ? (language === 'es' ? 'Enviando...' : 'Sending...')
-                      : (language === 'es' ? 'Enviar' : 'Send Report')}
+                    {emailLoading ? rc.email.sending : rc.email.send}
                   </button>
                 </div>
                 {emailError && <p className="text-xs text-[#F97316]">{emailError}</p>}
@@ -350,20 +342,16 @@ export default function ROICalculator() {
               href="#pricing"
               className="btn-primary text-center py-4 rounded-2xl font-semibold block"
             >
-              {t.roiCalculator.cta}
+              {rc.cta}
             </a>
 
-            <p className="text-xs text-white/40 text-center">
-              60% call capture rate · 35% close rate · Projections, not guaranteed results
-            </p>
+            <p className="text-xs text-white/40 text-center">{rc.rateNote}</p>
           </div>
         </div>
 
         {/* Disclaimer */}
         <div className="mt-10 text-center">
-          <p className="text-xs text-white/50 max-w-3xl mx-auto">
-            {t.roiCalculator.disclaimer}
-          </p>
+          <p className="text-xs text-white/50 max-w-3xl mx-auto">{rc.disclaimer}</p>
         </div>
       </div>
     </section>
