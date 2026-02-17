@@ -1287,7 +1287,7 @@ export const translations: Record<Language, Translations> = {
           revenue: '$800K–$2M ingresos anuales',
           employees: '3–10 empleados',
           tier: 'El Guardia de Ingresos',
-          investment: '$3,500 configuracion + $750/mes',
+          investment: '$2,500 configuracion + $750/mes',
           timeline: 'Semanas 1–4 de implementacion',
           challenge:
             '$3,000/mes en personal administrativo + 20 llamadas perdidas/semana a $400 por trabajo = mas de $28K/mes en oportunidad recuperable sobre la mesa.',
