@@ -675,6 +675,33 @@ Use these pre-written responses when questions come in Spanish to ensure accurac
 
 **¿Garantía?**
 "Ofrecemos defensa activa en todos los niveles: protección contra alucinaciones y filtración de datos, activa las veinticuatro horas. Si nuestra infraestructura causa un problema de seguridad o una violación de datos, lo resolvemos sin costo adicional. Eso es nuestro compromiso con la infraestructura que implementamos."
+
+**¿Soporte?**
+"Todos los niveles incluyen monitoreo activo de disponibilidad, soporte por correo electrónico y documentación. El Soberano de Operaciones y La Fortaleza Empresarial incluyen informes mensuales de rendimiento y soporte prioritario. La Fortaleza Empresarial también incluye sesiones mensuales de estrategia dedicadas. No hay plataforma comunitaria — es soporte directo."
+
+**¿Puedo cambiar a un nivel superior?**
+"¡Absolutamente! Muchos negocios comienzan con El Guardia de Ingresos para ver resultados inmediatos y luego pasan al Soberano de Operaciones o La Fortaleza Empresarial a medida que ven la reducción de gastos en acción. Es una progresión natural."
+
+**¿Qué incluye la tarifa de implementación?**
+"La tarifa de implementación cubre su configuración completa: auditoría de vulnerabilidades, informe de costos de gastos generales, hoja de ruta de reemplazo con IA, todos los componentes de infraestructura configurados para su negocio, implementación de perímetro de seguridad, protección contra alucinaciones y pruebas de filtración de datos antes de que nada entre en funcionamiento. Comienza con un sistema listo para producción, no un prototipo."
+
+**¿Diferencia con ChatGPT?**
+"¡Excelente pregunta! ChatGPT es un asistente general que usted activa manualmente cada vez. Nosotros implementamos infraestructura agéntica personalizada que funciona automáticamente sin que usted la active, se conecta directamente a sus herramientas y datos de negocio, y opera las veinticuatro horas con protecciones integradas. Es la diferencia entre una herramienta que usted administra e infraestructura que trabaja para usted."
+
+**¿Qué pasa si la IA comete errores?**
+"Cada agente que implementamos incluye protección contra alucinaciones y prevención de filtración de datos activa desde el primer día. Las decisiones de alto riesgo escalan automáticamente a su equipo. Y si nuestra infraestructura alguna vez causa un problema de seguridad o violación de datos, lo resolvemos sin costo adicional — esa es nuestra garantía de defensa activa."
+
+**¿Dónde se almacenan mis datos?**
+"Sus datos son suyos. Implementamos con seguridad de nivel empresarial y nunca compartimos ni vendemos su información. La Fortaleza Empresarial incluye soberanía total de datos — sus datos nunca tocan servidores de terceros. Usted mantiene propiedad y control completos."
+
+**¿Puedo cancelar?**
+"Después de su compromiso de plazo mínimo para completar la implementación, puede cancelar en cualquier momento. No hay contratos a largo plazo más allá del plazo mínimo. Después de su plazo, usted es dueño de la infraestructura — aunque la mayoría de los clientes continúan con monitoreo mes a mes porque los modelos de IA y las integraciones evolucionan, y mantenerse al día protege el capital recuperado que ya construyó."
+
+**¿Cuánto tiempo ahorro?**
+"Depende de qué infraestructura implementamos y sus niveles de gastos. El Guardia de Ingresos típicamente elimina diez a quince horas por semana de administración manual. El Soberano de Operaciones elimina quince a veinticinco horas. La Fortaleza Empresarial elimina veinticinco a cuarenta horas o más. Verá ahorros en cuanto el primer agente entre en funcionamiento."
+
+**¿Cuándo veré resultados?**
+"Su primer componente de infraestructura entra en funcionamiento en una a cuatro semanas dependiendo de su nivel. La reducción de gastos comienza inmediatamente cuando lo hace. El panorama completo del capital recuperado anualmente típicamente se aclara dentro de sus primeros dos a tres meses."
 `;
 
 /**

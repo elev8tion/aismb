@@ -8,7 +8,7 @@
 
 import type OpenAI from 'openai';
 import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
-import { BOOKING_AGENT_PROMPT, SPANISH_BOOKING_INSTRUCTION } from './prompts';
+import { BOOKING_AGENT_PROMPT, BOOKING_AGENT_PROMPT_ES } from './prompts';
 import { BOOKING_TOOLS, executeTool, type ToolContext } from '../tools';
 import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
 import { historyToMessages } from './utils';
@@ -34,13 +34,8 @@ export async function runBookingAgent(
 ): Promise<string> {
   const messages: OpenAI.ChatCompletionMessageParam[] = [];
 
-  // Language instruction
-  if (options.language === 'es') {
-    messages.push({ role: 'system', content: SPANISH_BOOKING_INSTRUCTION });
-  }
-
-  // Agent system prompt (no knowledge base — saves ~575 lines of tokens)
-  messages.push({ role: 'system', content: BOOKING_AGENT_PROMPT });
+  // Agent system prompt — native language version, no knowledge base (saves ~575 lines of tokens)
+  messages.push({ role: 'system', content: options.language === 'es' ? BOOKING_AGENT_PROMPT_ES : BOOKING_AGENT_PROMPT });
 
   // Conversation history
   messages.push(...historyToMessages(history));

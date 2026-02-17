@@ -7,7 +7,7 @@
 
 import type OpenAI from 'openai';
 import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
-import { ROI_AGENT_PROMPT, SPANISH_ROI_INSTRUCTION } from './prompts';
+import { ROI_AGENT_PROMPT, ROI_AGENT_PROMPT_ES } from './prompts';
 import { ROI_TOOLS, executeTool, type ToolContext } from '../tools';
 import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
 import { historyToMessages } from './utils';
@@ -26,13 +26,8 @@ export async function runROIAgent(
 ): Promise<string> {
   const messages: OpenAI.ChatCompletionMessageParam[] = [];
 
-  // Language instruction
-  if (options.language === 'es') {
-    messages.push({ role: 'system', content: SPANISH_ROI_INSTRUCTION });
-  }
-
-  // Agent system prompt (no knowledge base)
-  messages.push({ role: 'system', content: ROI_AGENT_PROMPT });
+  // Agent system prompt — native language version
+  messages.push({ role: 'system', content: options.language === 'es' ? ROI_AGENT_PROMPT_ES : ROI_AGENT_PROMPT });
 
   // Conversation history
   messages.push(...historyToMessages(history));
