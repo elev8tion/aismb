@@ -156,12 +156,14 @@ export function getAvailableSlots(
 }
 
 /**
- * Get available dates for the next N days
+ * Get available dates for the next N days.
+ * Optionally pass existingBookings to filter out fully-booked days.
  */
 export function getAvailableDates(
   daysAhead: number = 30,
   settings: AvailabilitySetting[],
-  blockedDates: BlockedDate[]
+  blockedDates: BlockedDate[],
+  existingBookings?: Booking[]
 ): string[] {
   const dates: string[] = [];
   const today = new Date();
@@ -180,9 +182,19 @@ export function getAvailableDates(
     const weekday = date.getDay();
     const daySettings = getWeekdaySettings(weekday, settings);
 
-    if (daySettings && daySettings.is_available) {
-      dates.push(dateStr);
+    if (!daySettings || !daySettings.is_available) {
+      continue;
     }
+
+    // If bookings provided, skip days where every slot is already taken
+    if (existingBookings) {
+      const slots = getAvailableSlots(dateStr, settings, blockedDates, existingBookings);
+      if (slots.filter((s) => s.available).length === 0) {
+        continue;
+      }
+    }
+
+    dates.push(dateStr);
   }
 
   return dates;

@@ -219,7 +219,9 @@ export async function executeTool(
 
 async function handleGetAvailableDates(ctx: ToolContext): Promise<string> {
   const { settings, blockedDates } = await loadSettings(ctx.env);
-  const dates = getAvailableDates(30, settings, blockedDates);
+  // Fetch existing bookings so fully-booked days are excluded from results
+  const allBookings = await fetchFromNCB<Booking>(ctx.env, 'bookings').catch(() => []);
+  const dates = getAvailableDates(30, settings, blockedDates, allBookings);
   return JSON.stringify({
     available_dates: dates,
     count: dates.length,

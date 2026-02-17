@@ -65,7 +65,6 @@ export async function syncLeadToCRM(leadData: LeadData, env: Record<string, stri
     return await ncbRequest<NCBRecord>('POST', 'create/leads', env, {
       ...leadData,
       status: 'new',
-      created_at: new Date().toISOString()
     });
   }
 }

@@ -124,7 +124,16 @@ export async function ncbRequest<T>(
   body?: Record<string, unknown>,
 ): Promise<T | null> {
   const config = getNCBConfig(env);
-  const url = `${config.openApiUrl}/${path}?Instance=${config.instance}`;
+
+  // For GET requests, append body fields as URL query params (NCB ignores GET request bodies)
+  let url = `${config.openApiUrl}/${path}?Instance=${config.instance}`;
+  if (method === 'GET' && body) {
+    Object.entries(body).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+      }
+    });
+  }
 
   try {
     const res = await fetch(url, {
@@ -133,7 +142,7 @@ export async function ncbRequest<T>(
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.secretKey}`,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: method !== 'GET' && body ? JSON.stringify(body) : undefined,
     });
 
     if (!res.ok) {

@@ -72,8 +72,14 @@ export async function GET(req: NextRequest) {
     }
 
     if (mode === 'dates') {
-      // Return available dates for the next 30 days
-      const availableDates = getAvailableDates(30, settings, blockedDates);
+      // Fetch all bookings so fully-booked days can be excluded
+      let allBookings: Booking[];
+      try {
+        allBookings = await fetchFromNCB<Booking>(cfEnv, 'bookings');
+      } catch {
+        allBookings = [];
+      }
+      const availableDates = getAvailableDates(30, settings, blockedDates, allBookings);
       return NextResponse.json({
         success: true,
         dates: availableDates,
