@@ -59,16 +59,25 @@ export default function PricingSection() {
               <div className="mb-6 pt-2">
                 <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{tier.subtitle}</p>
                 <h3 className="text-2xl font-bold text-white">{tier.name}</h3>
+                {idx === 0 && (
+                  <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                    style={{ background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.4)', color: '#F97316' }}>
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 2a6 6 0 00-6 6c0 3.31 6 10 6 10s6-6.69 6-10a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                    Less than the cost of a part-time intern
+                  </div>
+                )}
               </div>
 
               {/* Pricing */}
               <div className="mb-6 pb-6 border-b border-white/10">
                 <p className="text-sm text-white/50 mb-2">{t.pricing.labels.capabilityTransfer}</p>
-                <div className="text-4xl font-bold text-white mb-4">
+                <div className="text-5xl font-black text-white mb-4 tracking-tight">
                   {tier.setupFee}
                 </div>
                 <div className="flex items-baseline gap-2 mb-3">
-                  <span className="text-xl font-semibold text-[#0EA5E9]">{tier.monthlyFee}</span>
+                  <span className="text-2xl font-bold text-[#0EA5E9]">{tier.monthlyFee}</span>
                   <span className="text-sm text-white/50">{t.pricing.labels.monthPartnership}</span>
                 </div>
                 <p className="text-xs text-white/40">{tier.minimumTerm} {t.pricing.labels.minimumForLearning}</p>
@@ -88,12 +97,12 @@ export default function PricingSection() {
                   </div>
                 )}
 
-                <div className="p-3 rounded-lg border" style={{ background: 'rgba(249, 115, 22, 0.12)', borderColor: 'rgba(249, 115, 22, 0.35)' }}>
+                <div className="p-3 rounded-lg border" style={{ background: 'rgba(14, 165, 233, 0.12)', borderColor: 'rgba(14, 165, 233, 0.35)' }}>
                   <div className="flex items-center gap-2 mb-1">
-                    <svg className="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2m0 14v2m9-9h-2M5 12H3m14.95 4.95l-1.414-1.414M7.464 7.464 6.05 6.05m12.9 0-1.414 1.414M7.464 16.536 6.05 17.95" />
+                    <svg className="w-4 h-4 text-[#0EA5E9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <span className="text-xs text-[#F97316] font-semibold">{t.pricing.labels.flexibleLearning}</span>
+                    <span className="text-xs text-[#0EA5E9] font-semibold">{t.pricing.labels.flexibleLearning}</span>
                   </div>
                   <p className="text-sm text-white/90 font-semibold">{t.pricing.labels.flexibleLearningText}</p>
                 </div>
@@ -168,7 +177,7 @@ export default function PricingSection() {
               </div>
               <div className="text-center lg:text-right">
                 <p className="text-sm text-white/50 mb-2">{t.pricing.labels.capabilityTransfer}</p>
-                <p className="text-3xl font-bold text-white mb-4">{t.pricing.tiers[3].setupFee}</p>
+                <p className="text-4xl font-black text-white mb-4 tracking-tight">{t.pricing.tiers[3].setupFee}</p>
                 <button
                   onClick={() => setBookingOpen(true)}
                   className="btn-glass px-8 py-3 font-semibold inline-block"
