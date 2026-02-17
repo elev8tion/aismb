@@ -112,23 +112,22 @@ export default function CaseStudiesSection() {
             </div>
           </div>
 
-          {/* Additional Result & Quote */}
+          {/* Speed Improvement + Projection Note */}
           <div className="space-y-4">
             <div className="p-4 rounded-lg bg-white/5 border border-white/10">
               <div className="text-xs text-white/50 mb-1">{t.caseStudies.labels.customerExperience}</div>
               <div className="text-sm text-white/80">{activeStudy.results.customerSat}</div>
             </div>
-            <div className="p-5 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-              <div className="flex items-start gap-3">
-                <svg className="w-8 h-8 text-[#22C55E] shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-                <div>
-                  <p className="text-white/90 text-sm lg:text-base italic mb-2 leading-relaxed">{activeStudy.quote}</p>
-                  <p className="text-[#22C55E] font-semibold text-sm">— {activeStudy.owner}, {t.caseStudies.labels.owner}</p>
+            {activeStudy.quote && (
+              <div className="p-5 rounded-lg" style={{ background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)' }}>
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-[#0EA5E9] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-white/60 text-xs leading-relaxed">{activeStudy.quote}</p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
