@@ -86,6 +86,24 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
     }
   }, []);
 
+  // Fetch time slots when date is selected
+  const fetchTimeSlots = useCallback(async (date: string) => {
+    setLoadingSlots(true);
+    setTimeSlots([]);
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const res = await fetch(`/api/booking/availability?date=${date}&timezone=${encodeURIComponent(timezone)}`);
+      const data: { success?: boolean; slots?: TimeSlot[] } = await res.json();
+      if (data.success && data.slots) {
+        setTimeSlots(data.slots);
+      }
+    } catch (err) {
+      console.error('Failed to fetch time slots:', err);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, []);
+
   // Reset state when modal opens/closes
   useEffect(() => {
     if (open) {
@@ -110,24 +128,6 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
       }
     }
   }, [open, fetchTimeSlots]);
-
-  // Fetch time slots when date is selected
-  const fetchTimeSlots = useCallback(async (date: string) => {
-    setLoadingSlots(true);
-    setTimeSlots([]);
-    try {
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const res = await fetch(`/api/booking/availability?date=${date}&timezone=${encodeURIComponent(timezone)}`);
-      const data: { success?: boolean; slots?: TimeSlot[] } = await res.json();
-      if (data.success && data.slots) {
-        setTimeSlots(data.slots);
-      }
-    } catch (err) {
-      console.error('Failed to fetch time slots:', err);
-    } finally {
-      setLoadingSlots(false);
-    }
-  }, []);
 
   // Handle date selection
   const handleDateSelect = (date: string) => {
