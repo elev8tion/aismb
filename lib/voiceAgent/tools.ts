@@ -24,7 +24,7 @@ import {
   formatDateDisplay,
 } from '@/lib/booking/availability';
 import { sendViaEmailIt } from '@/lib/email/sendEmail';
-import { calculateROI } from '@/lib/voiceAgent/roiCalculator';
+import { calculateROI, type ROIInput } from '@/lib/voiceAgent/roiCalculator';
 import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
 import { runBookingPipeline } from '@/lib/booking/createBooking';
 
@@ -133,25 +133,15 @@ export const VOICE_AGENT_TOOLS: OpenAI.ChatCompletionTool[] = [
     type: 'function',
     function: {
       name: 'calculate_roi',
-      description: 'Calculate estimated ROI for AI automation partnership',
+      description: 'Calculate projected annual capital recaptured from deploying sovereign AI infrastructure. Uses overhead elimination model: admin payroll + software eliminated minus monthly fee, plus recovered call revenue.',
       parameters: {
         type: 'object',
         properties: {
-          industry: { type: 'string', description: 'Business industry' },
-          employees: { type: 'number', description: 'Number of employees' },
-          hourlyLaborCost: { type: 'number', description: 'Average hourly labor cost in dollars (default: 25)' },
-          tier: { type: 'string', enum: ['discovery', 'foundation', 'architect'], description: 'Partnership tier (default: foundation)' },
-          schedulingHours: { type: 'number', description: 'Weekly hours on scheduling (default: 6)' },
-          communicationHours: { type: 'number', description: 'Weekly hours on customer communication (default: 8)' },
-          dataEntryHours: { type: 'number', description: 'Weekly hours on data entry (default: 5)' },
-          leadResponseHours: { type: 'number', description: 'Weekly hours on lead response (default: 4)' },
-          reportingHours: { type: 'number', description: 'Weekly hours on reporting (default: 3)' },
-          inventoryHours: { type: 'number', description: 'Weekly hours on inventory (default: 4)' },
-          socialMediaHours: { type: 'number', description: 'Weekly hours on social media (default: 5)' },
-          monthlyRevenue: { type: 'number', description: 'Monthly revenue in dollars' },
-          avgDealValue: { type: 'number', description: 'Average deal value in dollars' },
-          lostLeadsPerMonth: { type: 'number', description: 'Lost leads per month' },
-          closeRate: { type: 'number', description: 'Close rate percentage (0-100)' },
+          adminPayroll: { type: 'number', description: 'Monthly admin/support payroll in dollars (default: 3000)' },
+          softwareSubscriptions: { type: 'number', description: 'Monthly software subscription spend in dollars (default: 500)' },
+          missedCallsPerWeek: { type: 'number', description: 'Number of calls missed per week (default: 20)' },
+          avgJobValue: { type: 'number', description: 'Average job or deal value in dollars (default: 400)' },
+          tier: { type: 'string', enum: ['discovery', 'foundation', 'architect'], description: 'Infrastructure tier (default: foundation). discovery=Revenue Guard, foundation=Operations Sovereign, architect=Enterprise Fortress' },
         },
         required: [],
       },
@@ -432,41 +422,25 @@ async function handleCreateAssessmentCheckout(
 }
 
 function handleCalculateROI(args: Record<string, unknown>): string {
-  const taskHours: Record<string, number> = {};
-  if (args.schedulingHours != null) taskHours.scheduling = args.schedulingHours as number;
-  if (args.communicationHours != null) taskHours.communication = args.communicationHours as number;
-  if (args.dataEntryHours != null) taskHours.dataEntry = args.dataEntryHours as number;
-  if (args.leadResponseHours != null) taskHours.leadResponse = args.leadResponseHours as number;
-  if (args.reportingHours != null) taskHours.reporting = args.reportingHours as number;
-  if (args.inventoryHours != null) taskHours.inventory = args.inventoryHours as number;
-  if (args.socialMediaHours != null) taskHours.socialMedia = args.socialMediaHours as number;
-
-  const revenue: Record<string, number> = {};
-  if (args.monthlyRevenue != null) revenue.monthlyRevenue = args.monthlyRevenue as number;
-  if (args.avgDealValue != null) revenue.avgDealValue = args.avgDealValue as number;
-  if (args.lostLeadsPerMonth != null) revenue.lostLeadsPerMonth = args.lostLeadsPerMonth as number;
-  if (args.closeRate != null) revenue.closeRate = args.closeRate as number;
-
-  const results = calculateROI({
-    hourlyLaborCost: (args.hourlyLaborCost as number) || 25,
-    taskHours,
-    revenue,
+  const input: ROIInput = {
+    adminPayroll: (args.adminPayroll as number) ?? 3000,
+    softwareSubscriptions: (args.softwareSubscriptions as number) ?? 500,
+    missedCallsPerWeek: (args.missedCallsPerWeek as number) ?? 20,
+    avgJobValue: (args.avgJobValue as number) ?? 400,
     tier: (args.tier as string) || 'foundation',
-  });
+  };
+
+  const results = calculateROI(input);
 
   return JSON.stringify({
+    tier: input.tier,
+    tier_name: results.tierName,
+    fixed_monthly_savings: Math.round(results.fixedMonthlySavings),
+    recovered_monthly_revenue: Math.round(results.recoveredMonthlyRevenue),
+    total_annual_capital_recaptured: Math.round(results.totalAnnual),
     roi_percentage: results.roi,
-    payback_weeks: results.paybackWeeks,
-    annual_benefit: results.annualBenefit,
-    weekly_hours_saved: results.totalWeeklyHoursSaved,
-    weekly_labor_savings: results.weeklyLaborSavings,
-    monthly_revenue_recovery: results.monthlyRevenueRecovery,
-    investment: results.investment,
-    tier: (args.tier as string) || 'foundation',
-    comparison: {
-      consultant_annual: results.consultantCost,
-      agency_annual: results.agencyCost,
-    },
-    note: 'Present these results conversationally. Highlight ROI%, payback weeks, annual benefit, and hours saved.',
+    payback_weeks: results.paybackWeeks < 999 ? results.paybackWeeks : null,
+    total_investment: results.investment,
+    note: 'Present these results conversationally. Lead with total_annual_capital_recaptured as the headline number. Mention fixed_monthly_savings and recovered_monthly_revenue as the two sources. Clarify that ROI% is calculated against total minimum commitment. Never guarantee these numbers — they are projections based on inputs provided.',
   });
 }
