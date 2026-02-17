@@ -890,7 +890,7 @@ export default function VoiceAgentFAB() {
                 <div className="mb-4 p-3 rounded-lg border"
                   style={{ background: 'rgba(249,115,22,0.08)', borderColor: 'rgba(249,115,22,0.3)' }}>
                   <p className="text-xs text-orange-300">
-                    ⌨ Typing manually — I&apos;ll resume once you finish.
+                    ⌨ Type your entry in the form, then tap the mic to continue.
                   </p>
                 </div>
               )}
