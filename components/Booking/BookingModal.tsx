@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import CalendarPicker from './CalendarPicker';
 import TimeSlotPicker from './TimeSlotPicker';
 import BookingForm from './BookingForm';
@@ -30,6 +30,31 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [calendarLinks, setCalendarLinks] = useState<{ google: string; outlook: string; ics: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Holds voice-agent pre-selected type/date/time so modal can jump to details step
+  const prefillDataRef = useRef<{ bookingType: BookingType; date: string; time: string } | null>(null);
+
+  // Listen for voice agent booking-prefill event
+  useEffect(() => {
+    const handlePrefill = (event: Event) => {
+      const e = event as CustomEvent<{ bookingType: string; date: string; time: string }>;
+      if (e.detail?.bookingType && e.detail?.date && e.detail?.time) {
+        prefillDataRef.current = {
+          bookingType: e.detail.bookingType as BookingType,
+          date: e.detail.date,
+          time: e.detail.time,
+        };
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('booking-prefill', handlePrefill);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('booking-prefill', handlePrefill);
+      }
+    };
+  }, []);
 
   // Listen for voice agent close event
   useEffect(() => {
@@ -64,14 +89,27 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
   // Reset state when modal opens/closes
   useEffect(() => {
     if (open) {
-      setStep('type');
-      setBookingType(null);
-      setSelectedDate(null);
-      setSelectedTime(null);
       setBooking(null);
       setError(null);
+
+      // If voice agent pre-configured type/date/time, jump straight to the details form
+      if (prefillDataRef.current) {
+        const { bookingType, date, time } = prefillDataRef.current;
+        prefillDataRef.current = null;
+        setBookingType(bookingType);
+        setSelectedDate(date);
+        setSelectedTime(time);
+        setStep('details');
+        // Fetch slots so the slot display is populated (for confirmation screen later)
+        fetchTimeSlots(date);
+      } else {
+        setStep('type');
+        setBookingType(null);
+        setSelectedDate(null);
+        setSelectedTime(null);
+      }
     }
-  }, [open, fetchAvailableDates]);
+  }, [open, fetchTimeSlots]);
 
   // Fetch time slots when date is selected
   const fetchTimeSlots = useCallback(async (date: string) => {

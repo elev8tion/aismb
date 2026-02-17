@@ -332,6 +332,19 @@ export default function VoiceAgentFAB() {
             // Also scroll to the booking section for context
             targetId = 'get-started';
             break;
+          case 'OPEN_BOOKING_WITH':
+            // Voice agent has already collected type|date|time — open form at the details step
+            if (typeof window !== 'undefined' && actionData) {
+              const [bookingType, date, time] = actionData.split('|');
+              // Send prefill data first so BookingModal picks it up when it opens
+              window.dispatchEvent(new CustomEvent('booking-prefill', {
+                detail: { bookingType, date, time },
+              }));
+              // Then open the modal
+              window.dispatchEvent(new CustomEvent('open-booking-form'));
+            }
+            targetId = 'get-started';
+            break;
           case 'CLOSE_BOOKING_FORM':
             // Dispatch event to close booking modal
             if (typeof window !== 'undefined') {
