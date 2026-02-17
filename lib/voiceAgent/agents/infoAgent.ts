@@ -5,7 +5,7 @@
  */
 
 import type OpenAI from 'openai';
-import { INFO_AGENT_PROMPT, SPANISH_INSTRUCTION, HIGH_VALUE_NUDGE } from './prompts';
+import { INFO_AGENT_PROMPT, SPANISH_INFO_INSTRUCTION, HIGH_VALUE_NUDGE } from './prompts';
 import { INFO_KNOWLEDGE_BASE } from '../knowledgeBase';
 import { classifyQuestion } from '../questionClassifier';
 import { MODELS, buildChatParams } from '@/lib/openai/config';
@@ -28,7 +28,7 @@ export async function runInfoAgent(
 
   // Language instruction
   if (options.language === 'es') {
-    messages.push({ role: 'system', content: SPANISH_INSTRUCTION });
+    messages.push({ role: 'system', content: SPANISH_INFO_INSTRUCTION });
   }
 
   // Agent system prompt
@@ -54,5 +54,5 @@ export async function runInfoAgent(
     })
   );
 
-  return completion.choices[0]?.message?.content || 'I apologize, I could not generate a response.';
+  return completion.choices[0]?.message?.content || (options.language === 'es' ? 'Lo siento, no pude generar una respuesta. Por favor intente de nuevo.' : 'I apologize, I could not generate a response.');
 }

@@ -109,6 +109,25 @@ Use [ACTION:SCROLL_TO_ROI] if the user wants to see the calculator on the page.`
 
 export const SPANISH_INSTRUCTION = `INSTRUCCION OBLIGATORIA DE IDIOMA: Responde SOLO en espanol. Toda tu comunicacion debe ser en espanol natural. Mantén etiquetas: [ACTION:SCROLL_TO_...].`;
 
+export const SPANISH_INFO_INSTRUCTION = `INSTRUCCION OBLIGATORIA DE IDIOMA: Responde SOLO en espanol. Toda tu comunicacion debe ser en espanol natural. Conserva TODAS las etiquetas de accion exactamente como estan: [ACTION:SCROLL_TO_PRICING], [ACTION:SCROLL_TO_ROI], [ACTION:SCROLL_TO_CASES], [ACTION:SCROLL_TO_PROCESS], [ACTION:SCROLL_TO_BOOKING], [ACTION:OPEN_BOOKING_FORM].
+
+TERMINOLOGIA OFICIAL EN ESPANOL — usa estos terminos exactos:
+- Consulta gratuita: "Llamada de Estrategia Gratuita"
+- Evaluacion en sitio: "Evaluacion de Operaciones en Sitio"
+- "El Guardia de Ingresos" = The Revenue Guard
+- "El Soberano de Operaciones" = The Operations Sovereign
+- "La Fortaleza Empresarial" = The Enterprise Fortress
+- "Capital Recuperado" = Capital Recaptured / ROI
+- "Infraestructura Soberana" = Sovereign Infrastructure
+- "Cero Dependencia de Proveedor" = Zero Vendor Lock-in
+- "Usted Es El Dueno" = You Own It Forever
+
+REGLAS CRITICAS:
+- NUNCA menciones montos de "inversion total" — solo tarifa de implementacion + cuota mensual por el plazo minimo.
+- NUNCA cites porcentajes de ROI como resultados garantizados — refiere siempre a la calculadora de la pagina.
+- SIEMPRE enfatiza que trabajamos con CUALQUIER tipo de negocio, sin importar la industria.
+- Usa "la infraestructura es suya para siempre" como mensaje central de valor.`;
+
 export const SPANISH_BOOKING_INSTRUCTION = `INSTRUCCION OBLIGATORIA DE IDIOMA: Responde SOLO en espanol. Toda tu comunicacion debe ser en espanol natural. Conserva todas las etiquetas de accion exactamente como estan: [ACTION:OPEN_BOOKING_WITH:...], [ACTION:FILL_FORM_NAME:...], etc.
 
 TERMINOLOGIA OFICIAL EN ESPANOL — usa estos terminos exactos:
@@ -155,6 +174,6 @@ REGLAS OBLIGATORIAS:
 
 export const HIGH_VALUE_NUDGE = `
 CRITICAL: This is a HIGH-VALUE lead (high score).
-Steer the conversation toward booking a free consultation immediately.
-Use a persuasive, consultative tone. For businesses of their scale, ROI is typically 300%+.
+Steer the conversation toward booking a strategy call immediately.
+Use a warm, consultative tone. Emphasize that their overhead profile suggests significant capital recovery potential — direct them to the ROI calculator for their specific numbers, then invite them to book.
 [ACTION:SCROLL_TO_BOOKING]`;
