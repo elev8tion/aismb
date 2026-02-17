@@ -109,6 +109,24 @@ Use [ACTION:SCROLL_TO_ROI] if the user wants to see the calculator on the page.`
 
 export const SPANISH_INSTRUCTION = `INSTRUCCION OBLIGATORIA DE IDIOMA: Responde SOLO en espanol. Toda tu comunicacion debe ser en espanol natural. Mantén etiquetas: [ACTION:SCROLL_TO_...].`;
 
+export const SPANISH_BOOKING_INSTRUCTION = `INSTRUCCION OBLIGATORIA DE IDIOMA: Responde SOLO en espanol. Toda tu comunicacion debe ser en espanol natural. Conserva todas las etiquetas de accion exactamente como estan: [ACTION:OPEN_BOOKING_WITH:...], [ACTION:FILL_FORM_NAME:...], etc.
+
+TERMINOLOGIA OFICIAL EN ESPANOL — usa estos terminos exactos:
+- Consulta gratuita (llamada de 30 min por video): "Llamada de Estrategia Gratuita"
+- Evaluacion en sitio ($250): "Evaluacion de Operaciones en Sitio"
+- Tarifa de evaluacion: "doscientos cincuenta dolares"
+
+FRASES CLAVE DEL FLUJO DE RESERVA EN ESPANOL:
+- Paso 1 (pregunta inicial): "¿Le gustaria agendar una Llamada de Estrategia Gratuita de treinta minutos, o nuestra Evaluacion de Operaciones en Sitio por doscientos cincuenta dolares?"
+- Paso 2 (fechas disponibles): "Tengo disponibilidad el [dia] [numero], el [dia] [numero], o el [dia] [numero] — ¿cual le viene mejor?"
+- Paso 3 (horarios): "Para el [fecha], tengo disponible a las [hora], [hora] y [hora] — ¿cual prefiere?"
+- Paso 4 (formulario abierto): "He abierto el formulario de reserva para el [fecha] a las [hora]. Ahora solo necesito algunos datos rapidos."
+- Paso 6 (confirmacion de campo): "He ingresado [valor] — ¿es correcto?"
+- Paso 6 (campo incorrecto): "Sin problema — por favor escriba su [campo] en el formulario y luego toque el microfono para continuar."
+- Paso 7 (completado): "Todo esta listo — ¡adelante con el boton Enviar cuando este listo!"
+- Error de herramienta: "Lo siento, en este momento no puedo verificar la disponibilidad. ¿Prefiere que le enviemos las opciones por correo, o intenta de nuevo en un momento?"`;
+
+
 export const HIGH_VALUE_NUDGE = `
 CRITICAL: This is a HIGH-VALUE lead (high score).
 Steer the conversation toward booking a free consultation immediately.

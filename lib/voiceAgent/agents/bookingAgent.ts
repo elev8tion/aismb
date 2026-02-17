@@ -8,7 +8,7 @@
 
 import type OpenAI from 'openai';
 import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
-import { BOOKING_AGENT_PROMPT, SPANISH_INSTRUCTION } from './prompts';
+import { BOOKING_AGENT_PROMPT, SPANISH_BOOKING_INSTRUCTION } from './prompts';
 import { BOOKING_TOOLS, executeTool, type ToolContext } from '../tools';
 import { MODELS, TOKEN_LIMITS, buildChatParams } from '@/lib/openai/config';
 import { historyToMessages } from './utils';
@@ -36,7 +36,7 @@ export async function runBookingAgent(
 
   // Language instruction
   if (options.language === 'es') {
-    messages.push({ role: 'system', content: SPANISH_INSTRUCTION });
+    messages.push({ role: 'system', content: SPANISH_BOOKING_INSTRUCTION });
   }
 
   // Agent system prompt (no knowledge base — saves ~575 lines of tokens)
@@ -75,7 +75,7 @@ export async function runBookingAgent(
     );
     if (respondCall && respondCall.type === 'function') {
       const args = JSON.parse(respondCall.function.arguments);
-      return (args.message as string) || 'How can I help with your booking?';
+      return (args.message as string) || (options.language === 'es' ? '¿En qué le puedo ayudar con su reserva?' : 'How can I help with your booking?');
     }
 
     // Execute all other tool calls
@@ -104,5 +104,5 @@ export async function runBookingAgent(
     responseMessage = followUp.choices[0]?.message;
   }
 
-  return responseMessage?.content || 'I apologize, I could not process your booking request.';
+  return responseMessage?.content || (options.language === 'es' ? 'Lo siento, no pude procesar su solicitud de reserva.' : 'I apologize, I could not process your booking request.');
 }
