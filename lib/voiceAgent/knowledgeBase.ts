@@ -201,6 +201,13 @@ These are calculator-based projections based on typical overhead patterns, not c
 - Active monitoring: $750/month
 - Minimum Term: 2 months
 
+**Cost Model: Bundled**
+- Monthly fee covers API usage (voice calls + LLM tokens), hosting, and monitoring
+- Included: Up to 500 inbound interactions/month
+- Overage: Billed at flat rate per interaction above the monthly limit
+- Client notified at 80% of monthly allowance
+- Emergency rate limits applied automatically if abnormal usage is detected
+
 **What Gets Deployed:**
 - Custom voice agent for your website (or your customer's website)
 - 2 core agentic infrastructure components
@@ -211,6 +218,7 @@ These are calculator-based projections based on typical overhead patterns, not c
 - Active monitoring for uptime and performance
 - Hallucination guardrails active from day one
 - Starter documentation and runbooks
+- No third-party API accounts required from the client
 
 **Your Outcome:**
 - First AI infrastructure asset deployed + clear expansion roadmap
@@ -226,6 +234,13 @@ These are calculator-based projections based on typical overhead patterns, not c
 - Active monitoring: $1,500/month
 - Minimum Term: 3 months
 
+**Cost Model: Bundled**
+- Monthly fee covers API usage (voice calls + LLM tokens + workflow agent compute), hosting, and monitoring
+- Included: Up to 1,500 inbound interactions/month + 3 workflow agents
+- Overage: Billed at flat rate per interaction above the monthly limit
+- Client notified at 80% of monthly allowance
+- Emergency rate limits applied automatically if abnormal usage is detected
+
 **What Gets Deployed:**
 - Custom voice agent for your website (or your customer's website)
 - 5 agentic infrastructure components
@@ -236,6 +251,7 @@ These are calculator-based projections based on typical overhead patterns, not c
 - Agents tested for hallucinations and data leaks before launch
 - Priority monitoring and monthly performance reports
 - Security sign-off before any agent goes live
+- No third-party API accounts required from the client
 
 **Your Outcome:**
 - Sovereign workflow infrastructure eliminating your top overhead categories
@@ -251,6 +267,13 @@ These are calculator-based projections based on typical overhead patterns, not c
 - Active monitoring: $3,000/month
 - Minimum Term: 6 months
 
+**Cost Model: Pass-Through**
+- Client holds their own API accounts (OpenAI, Twilio/Vapi, or equivalent)
+- Client pays API providers directly — no bundled usage cap, no overage billing from us
+- Monthly fee covers management, monitoring, optimization, and support only
+- Full infrastructure sovereignty: client holds every credential and API key
+- This is true ownership at every layer — not just the code, but the infrastructure beneath it
+
 **What Gets Deployed:**
 - Custom voice agent for your website (or your customer's website)
 - 8 agentic infrastructure components
@@ -262,6 +285,7 @@ These are calculator-based projections based on typical overhead patterns, not c
 - Advanced multi-agent orchestration with liability guardrails
 - Monthly dedicated strategy sessions
 - Compliance logging for regulated industries
+- API account setup guidance and credential handoff at deployment
 
 **Your Outcome:**
 - Enterprise-grade AI fortress — full data sovereignty, unlimited scale, audit-ready
@@ -289,13 +313,17 @@ These are calculator-based projections based on typical overhead patterns, not c
 
 ## AFTER MINIMUM TERM
 
-Your infrastructure is deployed and you own it forever. You own the code and the agents — no strings attached. Month-to-month active monitoring and support is available if you want us to continue managing it, but it is never required.
+Your infrastructure is deployed and you own it forever. You own the code and the agents — no strings attached. Most clients continue month-to-month because AI models evolve, integrations update, and active monitoring keeps their ROI compounding. It is never required — but it is the smart choice.
 
 ## INVESTMENT PHILOSOPHY
 
 One-time deployment fee + active monitoring during your term.
 
 **You own the infrastructure and code forever. We are not a subscription — we are a deployment.**
+
+The monthly fee structure is designed to reflect actual operating cost:
+- Revenue Guard + Operations Sovereign: Fully bundled — API costs, hosting, and monitoring in one line item. Clients never receive a surprise bill from OpenAI or Twilio. Usage is tracked, capped, and managed by us.
+- Enterprise Fortress: Pass-through — client holds their own API accounts for complete sovereignty. Monthly fee is management and monitoring only.
 
 ## ACTIVE DEFENSE GUARANTEE
 
@@ -307,6 +335,8 @@ Active defense runs on all tiers: hallucination guardrails and data-leak prevent
 - Cancel anytime (after minimum term commitment for deployment completion)
 - Your data stays yours
 - You own the code and agents forever — no lock-in
+- Bundled tiers (Revenue Guard, Operations Sovereign): included usage allowance per month; overage billed at flat rate; client notified at 80% of limit; emergency rate limits applied automatically on abnormal usage
+- Pass-through tier (Enterprise Fortress): client manages own API billing directly with providers
 
 ## ROI CALCULATOR INSIGHTS
 
@@ -418,7 +448,7 @@ When answering:
 ## QUICK RESPONSES TO COMMON QUESTIONS
 
 **Pricing?**
-"We have three main tiers. The Revenue Guard is twenty-five hundred dollars deployment fee plus seven fifty per month for two months minimum — perfect for testing the infrastructure. The Operations Sovereign is five thousand dollars plus fifteen hundred per month for three months — this is our most popular tier. The Enterprise Fortress is twelve thousand dollars plus three thousand per month for six months minimum. All include agents you own forever with no vendor lock-in."
+"We have three main tiers. The Revenue Guard is twenty-five hundred dollars deployment fee plus seven fifty per month for two months minimum — API costs, hosting, and monitoring are all bundled in that monthly fee, no separate bills. The Operations Sovereign is five thousand dollars plus fifteen hundred per month for three months — also fully bundled, our most popular tier. The Enterprise Fortress is twelve thousand dollars plus three thousand per month for six months — at that level, you hold your own API accounts for complete sovereignty, and the monthly covers management and monitoring only. All tiers include agents you own forever."
 
 **How long?**
 "The Revenue Guard deploys in one to four weeks. The Operations Sovereign in one to six weeks. The Enterprise Fortress in one to eight weeks. You start seeing overhead reduction as soon as the first agent goes live. After your minimum term, your infrastructure is yours forever."
@@ -433,7 +463,7 @@ When answering:
 "None required! We handle all the technical deployment and configuration. Your team uses simple interfaces that look like the tools you already use. We provide documentation and ongoing support throughout your term."
 
 **After the term?**
-"Your infrastructure is yours forever. You own the code and the agents — no strings attached. Optional month-to-month active monitoring is available if you want us to continue managing it, but it is never required."
+"Your infrastructure is yours forever — you own the code and the agents. Most clients continue month-to-month because AI models evolve and integrations update, and staying current protects the ROI you've built. It's never required, but it's usually the obvious choice once you see what the infrastructure is doing for your business."
 
 **Support?**
 "All tiers include active uptime monitoring, email support, and documentation. The Operations Sovereign and Enterprise Fortress tiers include monthly performance reports and priority support. The Enterprise Fortress also includes monthly dedicated strategy sessions. There's no community platform — it's direct support."
@@ -460,7 +490,13 @@ When answering:
 "We offer active defense on all tiers: hallucination guardrails and data-leak prevention run twenty-four-seven. If our infrastructure causes a security issue or data breach, we fix it at no charge. That's our commitment to the infrastructure we deploy."
 
 **Can I cancel?**
-"After your minimum term commitment for deployment completion, you can cancel anytime. There are no long-term contracts beyond the minimum term needed to fully deploy and test your infrastructure. After your term, you own everything — no ongoing obligation."
+"After your minimum term commitment for deployment completion, you can cancel anytime. There are no long-term contracts beyond the minimum term. After your term, you own the infrastructure — though most clients continue month-to-month monitoring because AI models and integrations evolve, and staying current protects the ROI you've already built."
+
+**API costs? / What's included in the monthly fee?**
+"Great question. For The Revenue Guard and Operations Sovereign, the monthly fee is fully bundled — it covers your voice calls, AI processing, hosting, and active monitoring. You get one invoice, no surprise bills from OpenAI or Twilio. There's a generous monthly usage allowance included, and if you go over, we charge a flat overage rate and notify you before you get there. The Enterprise Fortress works differently — at that tier you hold your own API accounts for complete sovereignty. You pay providers directly, and our monthly fee is for management and monitoring only."
+
+**Overage? / What happens if my usage is high?**
+"Your monthly plan includes a set usage allowance. We monitor your usage and notify you when you hit eighty percent of your limit, so there are never surprises. If you go over, you're billed a flat rate per additional interaction. If we ever detect abnormal usage — like a runaway automation creating thousands of calls — we apply emergency rate limits and contact you within twenty-four hours. You're always protected."
 
 **Time savings?**
 "It depends on which infrastructure we deploy and your overhead levels. The Revenue Guard typically eliminates ten to fifteen hours per week of manual admin. The Operations Sovereign eliminates fifteen to twenty-five hours. The Enterprise Fortress eliminates twenty-five to forty-plus hours. You'll see savings as soon as the first agent goes live."

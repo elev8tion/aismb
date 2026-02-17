@@ -4,18 +4,6 @@ import { useState, useMemo } from 'react';
 import { useTranslations } from '@/contexts/LanguageContext';
 import { TIER_DATA } from './types';
 
-const TIER_MONTHLY: Record<string, number> = {
-  discovery: 750,
-  foundation: 1500,
-  architect: 3000,
-};
-
-const TIER_NAMES: Record<string, string> = {
-  discovery: 'The Revenue Guard — $750/mo',
-  foundation: 'The Operations Sovereign — $1,500/mo',
-  architect: 'The Enterprise Fortress — $3,000/mo',
-};
-
 function fmt(n: number) {
   return '$' + Math.round(n).toLocaleString();
 }
@@ -34,8 +22,8 @@ export default function ROICalculator() {
   const [emailError, setEmailError] = useState('');
 
   const results = useMemo(() => {
-    const monthlyFee = TIER_MONTHLY[tier] ?? 750;
     const tierData = TIER_DATA[tier] ?? TIER_DATA.discovery;
+    const { monthlyFee, cost: investment, setupFee, months } = tierData;
 
     // Fixed savings: what we eliminate minus what we charge
     const fixedMonthlySavings = payroll + software - monthlyFee;
@@ -48,7 +36,6 @@ export default function ROICalculator() {
     const annualRevenue = recoveredMonthlyRevenue * 12;
     const totalAnnual = annualFixed + annualRevenue;
 
-    const investment = tierData.cost;
     const roi = investment > 0 ? Math.round(((totalAnnual - investment) / investment) * 100) : 0;
     const paybackWeeks = totalAnnual > 0 ? Math.ceil(investment / (totalAnnual / 52)) : 999;
 
@@ -59,9 +46,11 @@ export default function ROICalculator() {
       annualRevenue,
       totalAnnual,
       investment,
+      setupFee,
+      monthlyFee,
+      months,
       roi,
       paybackWeeks,
-      monthlyFee,
     };
   }, [payroll, software, missedCalls, avgJobValue, tier]);
 
@@ -218,22 +207,38 @@ export default function ROICalculator() {
 
               {/* Tier Selection */}
               <div>
-                <label className="text-sm font-medium text-white/80 block mb-3">Select Infrastructure Tier</label>
+                <label className="text-sm font-medium text-white/80 block mb-1">Select Infrastructure Tier</label>
+                <p className="text-xs text-white/40 mb-3">
+                  All tiers eliminate the same overhead. Higher tiers deploy more infrastructure — and cost more.
+                </p>
                 <div className="space-y-2">
-                  {Object.entries(TIER_NAMES).map(([id, label]) => (
+                  {Object.values(TIER_DATA).map((td) => (
                     <button
-                      key={id}
-                      onClick={() => setTier(id)}
-                      className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all border ${
-                        tier === id
-                          ? 'bg-[#0EA5E9]/20 border-[#0EA5E9]/60 text-white'
-                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+                      key={td.id}
+                      onClick={() => setTier(td.id)}
+                      className={`w-full text-left px-4 py-3 rounded-xl transition-all border ${
+                        tier === td.id
+                          ? 'bg-[#0EA5E9]/20 border-[#0EA5E9]/60'
+                          : 'bg-white/5 border-white/10 hover:bg-white/10'
                       }`}
                     >
-                      {label}
+                      <div className="flex justify-between items-center">
+                        <span className={`text-sm font-semibold ${tier === td.id ? 'text-white' : 'text-white/70'}`}>
+                          {td.name}
+                        </span>
+                        <span className={`text-sm font-bold ${tier === td.id ? 'text-[#0EA5E9]' : 'text-white/40'}`}>
+                          {fmt(td.monthlyFee)}/mo
+                        </span>
+                      </div>
+                      <p className="text-xs text-white/40 mt-0.5">
+                        {td.components} infrastructure components · {td.months}-month minimum · {fmt(td.setupFee)} setup
+                      </p>
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-white/30 mt-2">
+                  ROI% below reflects your savings against the total minimum commitment ({fmt(results.setupFee)} setup + {results.months} × {fmt(results.monthlyFee)}/mo = {fmt(results.investment)}). Lower investment tiers will show higher ROI% — that&apos;s math, not value judgement.
+                </p>
               </div>
             </div>
           </div>
@@ -293,6 +298,7 @@ export default function ROICalculator() {
               <div className="glass p-4 text-center">
                 <p className="text-2xl font-bold text-white">{results.roi}%</p>
                 <p className="text-xs text-white/50 mt-1">Annual ROI</p>
+                <p className="text-xs text-white/30 mt-0.5">vs. {fmt(results.investment)} total commitment</p>
               </div>
               <div className="glass p-4 text-center">
                 <p className="text-2xl font-bold text-white">
@@ -300,6 +306,7 @@ export default function ROICalculator() {
                   <span className="text-sm font-normal text-white/50"> wks</span>
                 </p>
                 <p className="text-xs text-white/50 mt-1">Payback Period</p>
+                <p className="text-xs text-white/30 mt-0.5">then you own the infrastructure</p>
               </div>
             </div>
 
@@ -347,7 +354,7 @@ export default function ROICalculator() {
             </a>
 
             <p className="text-xs text-white/40 text-center">
-              60% call capture rate · 35% close rate · Actual results vary
+              60% call capture rate · 35% close rate · Projections, not guaranteed results
             </p>
           </div>
         </div>

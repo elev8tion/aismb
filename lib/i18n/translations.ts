@@ -617,7 +617,7 @@ export const translations: Record<Language, Translations> = {
           revenue: '$800K–$2M annual revenue',
           employees: '3–10 employees',
           tier: 'The Revenue Guard',
-          investment: '$3,500 setup + $750/mo',
+          investment: '$2,500 setup + $750/mo',
           timeline: 'Week 1–4 deployment',
           challenge:
             '$3,000/mo admin staff cost + 20 missed calls/week at $400 avg job = over $28K/mo in recoverable opportunity sitting on the table.',
@@ -841,7 +841,7 @@ export const translations: Record<Language, Translations> = {
       description:
         'Sovereign AI infrastructure—deployed, secured, and monitored by us. No vendor lock-in. No monthly seat fees. Full ownership.',
       afterMinimum:
-        "After the minimum term, the infrastructure is yours. Extend active monitoring month-to-month at your discretion.",
+        "After the minimum term, the infrastructure is yours. Most clients continue month-to-month — AI models evolve, integrations update, and active monitoring keeps your ROI compounding. Cancel anytime.",
       tiers: [
         {
           name: 'The Revenue Guard',
@@ -850,7 +850,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$750',
           minimumTerm: '2 months',
           description: 'One latency-optimized voice agent that answers 24/7, qualifies leads, and books appointments. Capture 100% of leads. Zero missed revenue.',
-          includes: 'Revenue Guard voice agent deployed & monitored',
+          includes: 'Revenue Guard voice agent deployed, monitored & infrastructure bundled',
           features: [
             'Replaces your answering service ($500/mo value)',
             'Captures ~$5K/mo in otherwise-lost leads',
@@ -858,6 +858,7 @@ export const translations: Record<Language, Translations> = {
             'Hallucination guardrails (liability protection)',
             'Instant-pickup latency optimization',
             'Lead qualification & appointment booking',
+            'API & hosting costs bundled — no surprise bills',
             'Monthly performance reports',
           ],
           outcome: 'Capture 100% of leads. Zero missed revenue.',
@@ -872,7 +873,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$1,500',
           minimumTerm: '3 months',
           description: 'Voice Agent + 3 Workflow Agents (Invoicing, Scheduling, Dispatch). Cut overhead by 60%. Eliminate data entry and per-user software fees.',
-          includes: 'Revenue Guard + 3 Sovereign Workflow agents',
+          includes: 'Revenue Guard + 3 Sovereign Workflow agents, infrastructure bundled',
           features: [
             'Everything in The Revenue Guard',
             'Replaces 1 full-time admin ($40K/yr savings)',
@@ -880,6 +881,7 @@ export const translations: Record<Language, Translations> = {
             '20+ hours/week returned to the owner',
             'Invoicing, scheduling & dispatch automation',
             'Zero-trust CRM and bank data integration',
+            'API & hosting costs bundled — no separate infrastructure invoices',
             'Active defense monitoring 24/7',
           ],
           outcome: 'Cut overhead by 60%. Eliminate data entry.',
@@ -893,10 +895,11 @@ export const translations: Record<Language, Translations> = {
           setupFee: '$12,000',
           monthlyFee: '$3,000',
           minimumTerm: '6 months',
-          description: 'Multi-agent swarm with edge-compute optimization. Scale without headcount. Full code, weights, and data sovereignty.',
-          includes: 'Full multi-agent stack + sovereignty package',
+          description: 'Multi-agent swarm with edge-compute optimization. Scale without headcount. Full code, weights, and data sovereignty. You hold your own API accounts — true independence at every layer.',
+          includes: 'Full multi-agent stack + sovereignty package + pass-through API model',
           features: [
             'Everything in The Operations Sovereign',
+            'Client-owned API accounts — you hold your OpenAI, Twilio & infra credentials',
             'Audit-ready compliance & security documentation',
             'Unlimited scale — handle 10K+ interactions simultaneously',
             'Full sovereignty: you own the code, weights, and data',
@@ -956,7 +959,7 @@ export const translations: Record<Language, Translations> = {
         {
           question: 'Do I own the AI agents you deploy?',
           answer:
-            "Yes. Unlike SaaS tools you rent, the infrastructure we deploy is yours. The code, the integrations, the trained models—all owned by you. If you stop paying for monitoring, the agents keep running.",
+            "Yes. Unlike SaaS tools you rent, the infrastructure we deploy is yours. The code, the integrations, the trained models—all owned by you. Your agents run independently of our billing — but we strongly recommend continued monitoring as AI models and integrations evolve over time.",
         },
         {
           question: 'How is this different from hiring an agency or using a chatbot?',
@@ -982,6 +985,11 @@ export const translations: Record<Language, Translations> = {
           question: 'What systems do you integrate with?',
           answer:
             'We integrate with QuickBooks, ServiceTitan, Jobber, Google Workspace, Microsoft 365, most CRMs, and custom APIs. The Operations Sovereign tier includes a Zero-Trust CRM and bank data integration layer.',
+        },
+        {
+          question: 'What does the monthly fee actually cover?',
+          answer:
+            "For The Revenue Guard and Operations Sovereign, the monthly fee is fully bundled — it covers your active monitoring, API usage (voice calls, LLM tokens), hosting, and infrastructure costs. No separate bills from third-party providers. Usage beyond your included allowance is billed at a flat overage rate, and you're notified at 80% of your monthly limit. The Enterprise Fortress operates on a pass-through model: you hold your own API accounts (OpenAI, Twilio, etc.) for true infrastructure sovereignty, and the monthly fee covers management, monitoring, and optimization only.",
         },
       ],
       contact: {
@@ -1603,7 +1611,7 @@ export const translations: Record<Language, Translations> = {
       description:
         'Infraestructura de IA soberana — implementada, asegurada y monitoreada por nosotros. Sin dependencia de proveedores. Sin cuotas por usuario. Propiedad total.',
       afterMinimum:
-        'Despues del termino minimo, la infraestructura es tuya. Extiende el monitoreo activo mes a mes a tu discrecion.',
+        'Despues del termino minimo, la infraestructura es tuya. La mayoria de los clientes continuan mes a mes — los modelos de IA evolucionan, las integraciones se actualizan, y el monitoreo activo mantiene tu ROI creciendo. Cancela en cualquier momento.',
       tiers: [
         {
           name: 'El Guardia de Ingresos',
@@ -1612,7 +1620,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$750',
           minimumTerm: '2 meses',
           description: 'Un agente de voz optimizado en latencia que responde 24/7, califica prospectos y reserva citas. Captura el 100% de los prospectos. Cero ingresos perdidos.',
-          includes: 'Agente de voz Revenue Guard implementado y monitoreado',
+          includes: 'Agente de voz Revenue Guard implementado, monitoreado e infraestructura incluida',
           features: [
             'Reemplaza tu servicio de contestador (valor $500/mes)',
             'Captura ~$5K/mes en prospectos que de otro modo se perderian',
@@ -1620,6 +1628,7 @@ export const translations: Record<Language, Translations> = {
             'Barandillas anti-alucinacion (proteccion de responsabilidad)',
             'Optimizacion de latencia para contestacion instantanea',
             'Calificacion de prospectos y reservacion de citas',
+            'Costos de API e infraestructura incluidos — sin facturas sorpresa',
             'Reportes de desempeno mensuales',
           ],
           outcome: 'Captura el 100% de prospectos. Cero ingresos perdidos.',
@@ -1634,7 +1643,7 @@ export const translations: Record<Language, Translations> = {
           monthlyFee: '$1,500',
           minimumTerm: '3 meses',
           description: 'Agente de Voz + 3 Agentes de Flujo de Trabajo (Facturacion, Programacion, Despacho). Reduce el overhead en un 60%. Elimina la entrada de datos y cuotas por usuario.',
-          includes: 'Revenue Guard + 3 agentes de Flujo de Trabajo Soberano',
+          includes: 'Revenue Guard + 3 agentes de Flujo de Trabajo Soberano, infraestructura incluida',
           features: [
             'Todo en El Guardia de Ingresos',
             'Reemplaza 1 administrador de tiempo completo (ahorro $40K/ano)',
@@ -1642,6 +1651,7 @@ export const translations: Record<Language, Translations> = {
             '20+ horas/semana devueltas al propietario',
             'Automatizacion de facturacion, programacion y despacho',
             'Integracion de datos CRM y bancarios de confianza cero',
+            'Costos de API e infraestructura incluidos — sin facturas de terceros separadas',
             'Monitoreo de defensa activa 24/7',
           ],
           outcome: 'Reduce el overhead en un 60%. Elimina la entrada de datos.',
@@ -1655,10 +1665,11 @@ export const translations: Record<Language, Translations> = {
           setupFee: '$12,000',
           monthlyFee: '$3,000',
           minimumTerm: '6 meses',
-          description: 'Enjambre multi-agente con optimizacion de computo en el borde. Escala sin contratar personal. Soberania total de codigo, pesos y datos.',
-          includes: 'Stack multi-agente completo + paquete de soberania',
+          description: 'Enjambre multi-agente con optimizacion de computo en el borde. Escala sin contratar personal. Soberania total de codigo, pesos y datos. Tu gestionas tus propias cuentas de API — independencia verdadera en cada capa.',
+          includes: 'Stack multi-agente completo + paquete de soberania + modelo de API directo',
           features: [
             'Todo en El Soberano de Operaciones',
+            'Cuentas de API propias — tu gestionas tus credenciales de OpenAI, Twilio e infraestructura',
             'Cumplimiento y documentacion de seguridad listos para auditorias',
             'Escala ilimitada — maneja 10K+ interacciones simultaneamente',
             'Soberania total: posees el codigo, los pesos y los datos',
@@ -1718,7 +1729,7 @@ export const translations: Record<Language, Translations> = {
         {
           question: 'Soy dueno de los agentes de IA que implementan?',
           answer:
-            'Si. A diferencia de las herramientas SaaS que rentas, la infraestructura que implementamos es tuya. El codigo, las integraciones, los modelos entrenados — todo en tu propiedad. Si dejas de pagar el monitoreo, los agentes siguen funcionando.',
+            'Si. A diferencia de las herramientas SaaS que rentas, la infraestructura que implementamos es tuya. El codigo, las integraciones, los modelos entrenados — todo en tu propiedad. Tus agentes funcionan independientemente de nuestra facturacion — pero recomendamos ampliamente el monitoreo continuo a medida que los modelos de IA y las integraciones evolucionan con el tiempo.',
         },
         {
           question: 'En que se diferencia de contratar una agencia o usar un chatbot?',
@@ -1744,6 +1755,11 @@ export const translations: Record<Language, Translations> = {
           question: 'Con que sistemas se integran?',
           answer:
             'Nos integramos con QuickBooks, ServiceTitan, Jobber, Google Workspace, Microsoft 365, la mayoria de CRMs y APIs personalizadas. El nivel Soberano de Operaciones incluye una capa de integracion de datos CRM y bancarios de Confianza Cero.',
+        },
+        {
+          question: 'Que cubre exactamente la cuota mensual?',
+          answer:
+            'Para El Guardia de Ingresos y El Soberano de Operaciones, la cuota mensual es completamente incluida — cubre tu monitoreo activo, uso de API (llamadas de voz, tokens LLM), alojamiento y costos de infraestructura. Sin facturas separadas de proveedores externos. El uso por encima de tu asignacion incluida se factura a una tarifa plana por excedente, y se te notifica al alcanzar el 80% de tu limite mensual. La Fortaleza Empresarial opera con un modelo de API directo: tu gestionas tus propias cuentas de API (OpenAI, Twilio, etc.) para soberania total, y la cuota mensual cubre gestion, monitoreo y optimizacion solamente.',
         },
       ],
       contact: {
