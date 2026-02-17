@@ -87,7 +87,7 @@ export const VOICE_AGENT_TOOLS: OpenAI.ChatCompletionTool[] = [
     type: 'function',
     function: {
       name: 'create_consultation_booking',
-      description: 'Book a free 30-minute strategy consultation call',
+      description: 'Book a free 30-minute strategy consultation call. ONLY use when the booking form is NOT open. If the form is open, use FILL actions instead.',
       parameters: {
         type: 'object',
         properties: {
@@ -109,7 +109,7 @@ export const VOICE_AGENT_TOOLS: OpenAI.ChatCompletionTool[] = [
     type: 'function',
     function: {
       name: 'create_assessment_checkout',
-      description: 'Create a $250 Stripe checkout link for the onsite assessment and email it to the user',
+      description: 'Create a $250 Stripe checkout link for the onsite assessment and email it to the user. ONLY use when the booking form is NOT open. If the form is open, use FILL actions instead.',
       parameters: {
         type: 'object',
         properties: {

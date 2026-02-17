@@ -62,6 +62,7 @@ export default function BookingForm({
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [voicePausedField, setVoicePausedField] = useState<string | null>(null);
 
   // Listen for voice agent form filling events
   useEffect(() => {
@@ -116,12 +117,37 @@ export default function BookingForm({
       }
     };
 
+    const handleClearField = (event: Event) => {
+      const e = event as CustomEvent<{ field: string }>;
+      const field = e.detail?.field;
+      if (!field) return;
+
+      switch (field) {
+        case 'name':        setName('');        setErrors(p => { const n={...p}; delete n.name; return n; }); break;
+        case 'email':       setEmail('');       setErrors(p => { const n={...p}; delete n.email; return n; }); break;
+        case 'companyName': setCompanyName(''); setErrors(p => { const n={...p}; delete n.companyName; return n; }); break;
+        case 'phone':       setPhone('');       break;
+        case 'industry':    setIndustry('');    break;
+      }
+      setVoicePausedField(field);
+
+      // Focus the cleared field after state settles
+      setTimeout(() => {
+        const ids: Record<string, string> = {
+          name: 'booking-name', email: 'booking-email',
+          companyName: 'booking-company', phone: 'booking-phone', industry: 'booking-industry'
+        };
+        document.getElementById(ids[field])?.focus();
+      }, 100);
+    };
+
     if (typeof window !== 'undefined') {
       window.addEventListener('fill-booking-email', handleFillEmail);
       window.addEventListener('fill-booking-name', handleFillName);
       window.addEventListener('fill-booking-company', handleFillCompany);
       window.addEventListener('fill-booking-phone', handleFillPhone);
       window.addEventListener('fill-booking-industry', handleFillIndustry);
+      window.addEventListener('clear-booking-field', handleClearField);
     }
 
     return () => {
@@ -131,6 +157,7 @@ export default function BookingForm({
         window.removeEventListener('fill-booking-company', handleFillCompany);
         window.removeEventListener('fill-booking-phone', handleFillPhone);
         window.removeEventListener('fill-booking-industry', handleFillIndustry);
+        window.removeEventListener('clear-booking-field', handleClearField);
       }
     };
   }, []);
@@ -226,11 +253,18 @@ export default function BookingForm({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onBlur={() => {
+                  if (voicePausedField === 'name' && name.trim()) {
+                    setVoicePausedField(null);
+                    window.dispatchEvent(new CustomEvent('voice-manual-entry-complete', { detail: { field: 'name' } }));
+                  }
+                }}
                 placeholder={translations.namePlaceholder}
                 disabled={loading}
                 className={`
                   w-full input-glass
                   ${errors.name ? 'border-[#EF4444]' : ''}
+                  ${voicePausedField === 'name' ? 'border-[#F97316] ring-1 ring-[#F97316]/40' : ''}
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               />
@@ -249,11 +283,18 @@ export default function BookingForm({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => {
+                  if (voicePausedField === 'email' && email.trim()) {
+                    setVoicePausedField(null);
+                    window.dispatchEvent(new CustomEvent('voice-manual-entry-complete', { detail: { field: 'email' } }));
+                  }
+                }}
                 placeholder={translations.emailPlaceholder}
                 disabled={loading}
                 className={`
                   w-full input-glass
                   ${errors.email ? 'border-[#EF4444]' : ''}
+                  ${voicePausedField === 'email' ? 'border-[#F97316] ring-1 ring-[#F97316]/40' : ''}
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               />
@@ -272,9 +313,15 @@ export default function BookingForm({
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                onBlur={() => {
+                  if (voicePausedField === 'phone' && phone.trim()) {
+                    setVoicePausedField(null);
+                    window.dispatchEvent(new CustomEvent('voice-manual-entry-complete', { detail: { field: 'phone' } }));
+                  }
+                }}
                 placeholder={translations.phonePlaceholder}
                 disabled={loading}
-                className="w-full input-glass disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`w-full input-glass disabled:opacity-50 disabled:cursor-not-allowed ${voicePausedField === 'phone' ? 'border-[#F97316] ring-1 ring-[#F97316]/40' : ''}`}
               />
             </div>
           </div>
@@ -294,11 +341,18 @@ export default function BookingForm({
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
+                onBlur={() => {
+                  if (voicePausedField === 'companyName' && companyName.trim()) {
+                    setVoicePausedField(null);
+                    window.dispatchEvent(new CustomEvent('voice-manual-entry-complete', { detail: { field: 'companyName' } }));
+                  }
+                }}
                 placeholder={translations.companyNamePlaceholder}
                 disabled={loading}
                 className={`
                   w-full input-glass
                   ${errors.companyName ? 'border-[#EF4444]' : ''}
+                  ${voicePausedField === 'companyName' ? 'border-[#F97316] ring-1 ring-[#F97316]/40' : ''}
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               />
@@ -317,11 +371,18 @@ export default function BookingForm({
                 type="text"
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
+                onBlur={() => {
+                  if (voicePausedField === 'industry' && industry.trim()) {
+                    setVoicePausedField(null);
+                    window.dispatchEvent(new CustomEvent('voice-manual-entry-complete', { detail: { field: 'industry' } }));
+                  }
+                }}
                 placeholder={translations.industryPlaceholder}
                 disabled={loading}
                 className={`
                   w-full input-glass
                   ${errors.industry ? 'border-[#EF4444]' : ''}
+                  ${voicePausedField === 'industry' ? 'border-[#F97316] ring-1 ring-[#F97316]/40' : ''}
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               />

@@ -36,6 +36,8 @@ export default function VoiceAgentFAB() {
   const [textInputValue, setTextInputValue] = useState('');
   const [textInputError, setTextInputError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isPausedForManualEntry, setIsPausedForManualEntry] = useState(false);
+  const [pausedFieldName, setPausedFieldName] = useState<string | null>(null);
 
   const audioURLManagerRef = useRef<AudioURLManager>(new AudioURLManager());
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -129,6 +131,27 @@ export default function VoiceAgentFAB() {
     };
   }, []);
 
+  // Listen for manual entry completion from BookingForm
+  useEffect(() => {
+    const handleManualEntryComplete = (event: Event) => {
+      const e = event as CustomEvent<{ field: string }>;
+      if (!pausedFieldName || e.detail?.field === pausedFieldName) {
+        setIsPausedForManualEntry(false);
+        setPausedFieldName(null);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('voice-manual-entry-complete', handleManualEntryComplete);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('voice-manual-entry-complete', handleManualEntryComplete);
+      }
+    };
+  }, [pausedFieldName]);
+
   // Start auto-close countdown (30 seconds to give customer time to absorb)
   const startAutoCloseCountdown = useCallback(() => {
     setCountdown(30); // Increased from 15 to 30 seconds
@@ -147,6 +170,8 @@ export default function VoiceAgentFAB() {
           setDisplayError(null);
           setShowAutoClosePrompt(false);
           setCountdown(null);
+          setIsPausedForManualEntry(false);
+          setPausedFieldName(null);
           clearSessionId(); // Clear session when auto-closing
           setSessionId(null);
           return null;
@@ -290,6 +315,15 @@ export default function VoiceAgentFAB() {
               window.dispatchEvent(new CustomEvent('fill-booking-industry', {
                 detail: { value: actionData }
               }));
+            }
+            break;
+          case 'CLEAR_FORM_FIELD':
+            if (typeof window !== 'undefined' && actionData) {
+              window.dispatchEvent(new CustomEvent('clear-booking-field', {
+                detail: { field: actionData }
+              }));
+              setIsPausedForManualEntry(true);
+              setPausedFieldName(actionData);
             }
             break;
           case 'SHOW_TOAST':
@@ -851,6 +885,16 @@ export default function VoiceAgentFAB() {
                 </motion.div>
               )}
 
+              {/* Manual Entry Pause Banner */}
+              {isPausedForManualEntry && (
+                <div className="mb-4 p-3 rounded-lg border"
+                  style={{ background: 'rgba(249,115,22,0.08)', borderColor: 'rgba(249,115,22,0.3)' }}>
+                  <p className="text-xs text-orange-300">
+                    ⌨ Typing manually — I&apos;ll resume once you finish.
+                  </p>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex gap-2 mt-4">
                 {voiceState === 'listening' && (
@@ -865,7 +909,7 @@ export default function VoiceAgentFAB() {
                     {t.voiceAgent.buttons.stop}
                   </button>
                 )}
-                {voiceState === 'idle' && !showAutoClosePrompt && (
+                {voiceState === 'idle' && !showAutoClosePrompt && !isPausedForManualEntry && (
                   <button
                     onClick={() => {
                       // CRITICAL: Unlock iOS audio during user tap
@@ -889,6 +933,8 @@ export default function VoiceAgentFAB() {
                     setTranscript('');
                     setAiResponse('');
                     setDisplayError(null);
+                    setIsPausedForManualEntry(false);
+                    setPausedFieldName(null);
                     clearSessionId(); // Clear session on close
                     setSessionId(null);
                   }}
