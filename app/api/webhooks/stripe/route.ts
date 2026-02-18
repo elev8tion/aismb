@@ -9,89 +9,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getEnv } from '@/lib/cloudflare/env';
-import { ASSESSMENT_FEE_CENTS, ASSESSMENT_DURATION } from '@kre8tion/shared-types';
+import {
+  ASSESSMENT_FEE_CENTS,
+  ASSESSMENT_DURATION,
+  type LandingPageBooking as Booking,
+} from '@kre8tion/shared-types';
 import { calculateEndTime } from '@/lib/booking/availability';
+import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
+import { runBookingPipeline } from '@/lib/booking/createBooking';
 
 export const runtime = 'edge';
-
-function getNCBConfig() {
-  const env = getEnv();
-  const instance = env.NCB_INSTANCE;
-  const dataApiUrl = env.NCB_DATA_API_URL;
-  if (!instance || !dataApiUrl) throw new Error('Missing NCB environment variables');
-  return { instance, dataApiUrl };
-}
-
-async function bookingExistsForSession(stripeSessionId: string): Promise<boolean> {
-  try {
-    const config = getNCBConfig();
-    const params = new URLSearchParams({
-      instance: config.instance,
-      stripe_session_id: stripeSessionId,
-    });
-    const url = `${config.dataApiUrl}/read/bookings?${params.toString()}`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Database-Instance': config.instance,
-      },
-    });
-    if (!res.ok) return false;
-    const data: { data?: unknown[] } = await res.json();
-    return (data.data?.length || 0) > 0;
-  } catch {
-    return false;
-  }
-}
-
-async function createBookingFromSession(metadata: Record<string, string>, sessionId: string): Promise<boolean> {
-  try {
-    const config = getNCBConfig();
-    const endTime = calculateEndTime(metadata.time, ASSESSMENT_DURATION);
-
-    const params = new URLSearchParams({ instance: config.instance });
-    const url = `${config.dataApiUrl}/create/bookings?${params.toString()}`;
-
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Database-Instance': config.instance,
-      },
-      body: JSON.stringify({
-        guest_name: metadata.name,
-        guest_email: metadata.email,
-        guest_phone: metadata.phone || '',
-        booking_date: metadata.date,
-        start_time: metadata.time,
-        end_time: endTime,
-        timezone: metadata.timezone,
-        company_name: metadata.company_name || '',
-        industry: metadata.industry || '',
-        employee_count: metadata.employee_count || '',
-        challenge: metadata.challenge || '',
-        referral_source: metadata.referral_source || '',
-        website_url: metadata.website_url || '',
-        status: 'confirmed',
-        booking_type: 'assessment',
-        stripe_session_id: sessionId,
-        payment_status: 'paid',
-        payment_amount_cents: ASSESSMENT_FEE_CENTS,
-        created_at: new Date().toISOString(),
-      }),
-    });
-
-    return res.ok;
-  } catch (err) {
-    console.error('Webhook: Failed to create booking:', err);
-    return false;
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {
     const env = getEnv();
+    const cfEnv = env as unknown as Record<string, string>;
     const stripeKey = env.STRIPE_SECRET_KEY;
     const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 
@@ -124,17 +56,61 @@ export async function POST(req: NextRequest) {
       }
 
       // Dedup: check if booking already created by success page
-      const exists = await bookingExistsForSession(session.id);
-      if (exists) {
+      const existing = await fetchFromNCB<Booking>(cfEnv, 'bookings', {
+        stripe_session_id: session.id,
+      });
+      if (existing.length > 0) {
+        console.log(`Webhook: booking already exists for session ${session.id}, skipping`);
         return NextResponse.json({ received: true });
       }
 
       const metadata = session.metadata as Record<string, string>;
-      const created = await createBookingFromSession(metadata, session.id);
+      const endTime = calculateEndTime(metadata.time, ASSESSMENT_DURATION);
 
-      if (!created) {
+      const bookingData: Partial<Booking> = {
+        guest_name: metadata.name,
+        guest_email: metadata.email,
+        guest_phone: metadata.phone || null,
+        booking_date: metadata.date,
+        start_time: metadata.time,
+        end_time: endTime,
+        timezone: metadata.timezone || 'America/Los_Angeles',
+        company_name: metadata.company_name || null,
+        industry: metadata.industry || null,
+        employee_count: metadata.employee_count || null,
+        challenge: metadata.challenge || null,
+        referral_source: metadata.referral_source || null,
+        website_url: metadata.website_url || null,
+        notes: null,
+        status: 'confirmed',
+        booking_type: 'assessment',
+        stripe_session_id: session.id,
+        payment_status: 'paid',
+        payment_amount_cents: ASSESSMENT_FEE_CENTS,
+      };
+
+      const booking = await createInNCB<Booking>(cfEnv, 'bookings', bookingData);
+
+      if (!booking) {
         console.error(`Webhook: Failed to create booking for session ${session.id}`);
+        return NextResponse.json({ received: true });
       }
+
+      console.log(`Webhook: Created booking ${booking.id} for session ${session.id}`);
+
+      // Run full pipeline: confirmation email, CRM sync, admin dossier
+      await runBookingPipeline({
+        booking,
+        bookingType: 'assessment',
+        env: cfEnv,
+        companyName: metadata.company_name,
+        industry: metadata.industry,
+        employeeCount: metadata.employee_count,
+        challenge: metadata.challenge,
+        referralSource: metadata.referral_source,
+        websiteUrl: metadata.website_url,
+        paymentAmountCents: ASSESSMENT_FEE_CENTS,
+      });
     }
 
     return NextResponse.json({ received: true });
