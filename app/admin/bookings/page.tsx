@@ -79,18 +79,12 @@ export default function AdminBookingsPage() {
         {/* Quick Actions */}
         <div className="mt-8 glass p-6">
           <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <a
               href="/admin/bookings/list"
               className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-center transition-colors"
             >
               View All Bookings
-            </a>
-            <a
-              href="/admin/settings"
-              className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-center transition-colors"
-            >
-              Calendar Settings
             </a>
             <button
               onClick={() => window.location.href = '/'}
