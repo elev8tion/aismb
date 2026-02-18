@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Run the shared booking pipeline (calendar links, emails, CRM sync, admin dossier)
-    const { calendarLinks, sideEffectResults } = await runBookingPipeline({
+    const { calendarLinks } = await runBookingPipeline({
       booking,
       bookingType: validatedData.bookingType || 'consultation',
       env: cfEnv,
@@ -135,13 +135,6 @@ export async function POST(req: NextRequest) {
       websiteUrl: validatedData.websiteUrl,
       paymentAmountCents: validatedData.payment_amount_cents,
     });
-
-    const labels = ['confirmation email', 'CRM sync', 'admin dossier'];
-    const pipelineStatus = sideEffectResults.map((r, i) => ({
-      step: labels[i] || `step-${i}`,
-      status: r.status,
-      ...(r.status === 'rejected' ? { error: String((r as PromiseRejectedResult).reason) } : {}),
-    }));
 
     return NextResponse.json({
       success: true,
@@ -160,7 +153,6 @@ export async function POST(req: NextRequest) {
         outlook: calendarLinks.outlook,
         ics: calendarLinks.icsDataUri,
       },
-      _pipeline: pipelineStatus,
     });
   } catch (error) {
     console.error('Booking create error:', error);
