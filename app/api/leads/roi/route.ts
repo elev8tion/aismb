@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import { sendROIReport, sendROILeadDossierToAdmin } from '@/lib/email/sendEmail';
+import { syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
 
 interface ROILeadBody {
   email: string;
@@ -53,13 +54,8 @@ export async function POST(request: NextRequest) {
     const tierName = tierNameMap[lang][tier] || tierNameMap.en[tier] || tier;
 
     // Get env from Cloudflare context
-    let emailitApiKey: string | undefined;
-    try {
-      const env = getEnv();
-      emailitApiKey = env.EMAILIT_API_KEY;
-    } catch {
-      console.warn('[Email] Cloudflare context unavailable (local dev), skipping emails');
-    }
+    const env = getEnv() as unknown as Record<string, string>;
+    const emailitApiKey = env.EMAILIT_API_KEY;
 
     if (!emailitApiKey) {
       console.error('[ROI] EMAILIT_API_KEY missing — cannot send emails');
@@ -120,6 +116,19 @@ export async function POST(request: NextRequest) {
       });
     } catch (err) {
       console.error('[Email] Failed to send ROI dossier:', err instanceof Error ? err.message : err);
+    }
+
+    // Sync to CRM — create or update lead by email
+    // If this email later books, syncLeadToCRM will find this record and update it
+    try {
+      await syncLeadToCRM({
+        email,
+        source: 'roi-calculator',
+        sourceDetail: `${tierName} — ${metrics.roi}% ROI, ${Math.round(metrics.totalAnnual / 1000)}k/yr, payback ${metrics.paybackWeeks} wks`,
+        qualified_score: Math.min(100, Math.round(metrics.roi / 5)),
+      }, env);
+    } catch (err) {
+      console.error('[ROI] CRM sync failed:', err instanceof Error ? err.message : err);
     }
 
     return NextResponse.json({
