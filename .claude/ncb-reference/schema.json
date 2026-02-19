@@ -29,6 +29,8 @@
         "calendar_provider": { "type": "enum", "nullable": true },
         "calendar_event_id": { "type": "string", "nullable": true },
         "meeting_link": { "type": "string", "nullable": true },
+        "crm_lead_id": { "type": "string", "nullable": true },
+        "crm_sync_status": { "type": "string", "nullable": true },
         "created_at": { "type": "datetime", "default": "current_timestamp()" }
       }
     },
