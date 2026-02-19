@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# MCP config (contains API tokens)
+.mcp.json
+
 # working documentation
 *.docx
 lib/voiceAgent/*.md
