@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
       success: true,
       booking: {
         id: booking.id,
-        date: booking.booking_date,
+        booking_date: booking.booking_date,
         start_time: booking.start_time,
         end_time: booking.end_time,
         timezone: booking.timezone,
