@@ -132,6 +132,7 @@ describe('isSlotBooked', () => {
       timezone: 'America/New_York', status: 'confirmed', booking_type: 'consultation',
       stripe_session_id: null, payment_status: null, payment_amount_cents: null,
       calendar_provider: null, calendar_event_id: null, meeting_link: null,
+      crm_lead_id: null, crm_sync_status: null,
       created_at: '',
     },
   ];
@@ -193,6 +194,7 @@ describe('getAvailableSlots', () => {
       timezone: 'America/New_York', status: 'confirmed', booking_type: 'consultation',
       stripe_session_id: null, payment_status: null, payment_amount_cents: null,
       calendar_provider: null, calendar_event_id: null, meeting_link: null,
+      crm_lead_id: null, crm_sync_status: null,
       created_at: '',
     }];
     const slots = getAvailableSlots('2026-02-09', [], [], bookings);

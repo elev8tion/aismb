@@ -79,9 +79,11 @@ export async function syncLeadToCRM(leadData: LeadData, env: Record<string, stri
   });
 
   if (existingLeads && existingLeads.length > 0) {
-    // 2. Update existing lead
-    const leadId = existingLeads[0].id;
-    return await ncbRequest<NCBRecord>('PUT', `update/leads/${leadId}`, env, payload);
+    // 2. Update existing lead — PUT returns { status: "success" } with no id,
+    //    so return the pre-fetched record (which has the correct id).
+    const existingLead = existingLeads[0];
+    await ncbRequest<NCBRecord>('PUT', `update/leads/${existingLead.id}`, env, payload);
+    return existingLead;
   } else {
     // 3. Create new lead
     return await ncbRequest<NCBRecord>('POST', 'create/leads', env, {
@@ -103,7 +105,8 @@ export async function getLeadByEmail(email: string, env: Record<string, string>)
 }
 
 /**
- * Sync Booking data to CRM and update lead status
+ * Sync Booking data to CRM and update lead status.
+ * Returns the NCB lead ID on success, null on failure.
  */
 export async function syncBookingToCRM(data: {
   email: string;
@@ -116,20 +119,27 @@ export async function syncBookingToCRM(data: {
   industry?: string;
   employeeCount?: string;
   challenge?: string;
-}, env: Record<string, string>): Promise<boolean> {
-  await syncLeadToCRM({
-    email: data.email,
-    firstName: data.name.split(' ')[0],
-    lastName: data.name.split(' ').slice(1).join(' '),
-    phone: data.phone,
-    companyName: data.companyName,
-    industry: data.industry,
-    employeeCount: data.employeeCount,
-    source: 'other',
-    sourceDetail: `${data.date} at ${data.time}${data.challenge ? ` — ${data.challenge}` : ''}`,
-  }, env);
+  leadScore?: number;
+}, env: Record<string, string>): Promise<string | null> {
+  try {
+    const record = await syncLeadToCRM({
+      email: data.email,
+      firstName: data.name.split(' ')[0],
+      lastName: data.name.split(' ').slice(1).join(' '),
+      phone: data.phone,
+      companyName: data.companyName,
+      industry: data.industry,
+      employeeCount: data.employeeCount,
+      source: 'other',
+      sourceDetail: `${data.date} at ${data.time}${data.challenge ? ` — ${data.challenge}` : ''}`,
+      qualified_score: data.leadScore,
+    }, env);
 
-  return true;
+    return record ? String(record.id) : null;
+  } catch (err) {
+    console.error('[syncBookingToCRM] unexpected error:', err);
+    return null;
+  }
 }
 
 // ─── Keyword patterns for extraction ─────────────────────────────────────────

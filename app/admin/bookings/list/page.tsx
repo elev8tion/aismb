@@ -161,6 +161,7 @@ export default function AdminBookingsListPage() {
                       <th className="px-6 py-4 text-left text-sm font-medium text-white/80">Company</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-white/80">Type</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-white/80">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-white/80">CRM</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-white/80">Contact</th>
                     </tr>
                   </thead>
@@ -222,6 +223,19 @@ export default function AdminBookingsListPage() {
                         </td>
                         <td className="px-6 py-4">
                           {getStatusBadge(booking.status)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {booking.crm_sync_status === 'synced' ? (
+                            <span className="px-2 py-1 text-xs font-medium rounded border bg-[#22C55E]/20 text-[#22C55E] border-[#22C55E]/30">
+                              Synced
+                            </span>
+                          ) : booking.crm_sync_status === 'failed' ? (
+                            <span className="px-2 py-1 text-xs font-medium rounded border bg-[#EF4444]/20 text-[#EF4444] border-[#EF4444]/30">
+                              Failed
+                            </span>
+                          ) : (
+                            <span className="text-xs text-white/30">—</span>
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-col gap-1">

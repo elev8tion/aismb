@@ -19,6 +19,7 @@ import {
 } from '@/lib/email/sendEmail';
 import { syncBookingToCRM, getLeadByEmail } from '@/lib/voiceAgent/leadManager';
 import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
+import { ncbRequest } from '@/lib/ncb/client';
 
 export interface BookingPipelineInput {
   booking: Booking;
@@ -104,20 +105,35 @@ export async function runBookingPipeline(input: BookingPipelineInput): Promise<B
     );
   }
 
-  // CRM sync
+  // CRM sync + store lead ID back on booking
   sideEffects.push(
-    syncBookingToCRM({
-      email: booking.guest_email,
-      name: booking.guest_name,
-      phone: booking.guest_phone ?? undefined,
-      date: booking.booking_date,
-      time: booking.start_time,
-      timezone: booking.timezone,
-      companyName: input.companyName,
-      industry: input.industry,
-      employeeCount: input.employeeCount,
-      challenge: input.challenge,
-    }, env),
+    (async () => {
+      const leadScore = calculateLeadScore({
+        email: booking.guest_email,
+        phone: booking.guest_phone ?? undefined,
+        industry: input.industry,
+        employeeCount: input.employeeCount,
+      });
+
+      const crmLeadId = await syncBookingToCRM({
+        email: booking.guest_email,
+        name: booking.guest_name,
+        phone: booking.guest_phone ?? undefined,
+        date: booking.booking_date,
+        time: booking.start_time,
+        timezone: booking.timezone,
+        companyName: input.companyName,
+        industry: input.industry,
+        employeeCount: input.employeeCount,
+        challenge: input.challenge,
+        leadScore: leadScore.score,
+      }, env);
+
+      await ncbRequest('PUT', `update/bookings/${booking.id}`, env, {
+        crm_lead_id: crmLeadId ?? null,
+        crm_sync_status: crmLeadId ? 'synced' : 'failed',
+      });
+    })(),
   );
 
   // Admin dossier (1s delay to avoid EmailIt 2 req/s rate limit)
