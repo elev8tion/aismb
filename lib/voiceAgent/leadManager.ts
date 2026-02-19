@@ -43,10 +43,35 @@ interface NCBRecord {
 }
 
 /**
+ * Map LeadData (camelCase) → NCB leads table payload (snake_case).
+ * Only includes fields that exist in the NCB schema.
+ * NCB leads columns: id, user_id, email, first_name, last_name, phone,
+ *   company_name, source, source_detail, industry, employee_count, status, lead_score
+ */
+function toNCBLeadPayload(leadData: Partial<LeadData>): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+  if (leadData.email !== undefined)         payload.email          = leadData.email;
+  if (leadData.firstName !== undefined)     payload.first_name     = leadData.firstName;
+  if (leadData.lastName !== undefined)      payload.last_name      = leadData.lastName;
+  if (leadData.phone !== undefined)         payload.phone          = leadData.phone;
+  if (leadData.companyName !== undefined)   payload.company_name   = leadData.companyName;
+  if (leadData.industry !== undefined)      payload.industry       = leadData.industry;
+  if (leadData.employeeCount !== undefined) payload.employee_count = leadData.employeeCount;
+  if (leadData.source !== undefined)        payload.source         = leadData.source;
+  if (leadData.sourceDetail !== undefined)  payload.source_detail  = leadData.sourceDetail;
+  // qualified_score maps to lead_score in NCB schema
+  if (leadData.qualified_score !== undefined) payload.lead_score   = leadData.qualified_score;
+  // sentiment, intents, pain_points, objections, outcome, notes are not NCB columns — omitted
+  return payload;
+}
+
+/**
  * Create or update a lead in the CRM
  */
 export async function syncLeadToCRM(leadData: LeadData, env: Record<string, string>): Promise<NCBRecord | null> {
   if (!leadData.email) return null;
+
+  const payload = toNCBLeadPayload(leadData);
 
   // 1. Check if lead exists
   const existingLeads = await ncbRequest<NCBRecord[]>('GET', `read/leads`, env, {
@@ -56,14 +81,11 @@ export async function syncLeadToCRM(leadData: LeadData, env: Record<string, stri
   if (existingLeads && existingLeads.length > 0) {
     // 2. Update existing lead
     const leadId = existingLeads[0].id;
-    return await ncbRequest<NCBRecord>('PUT', `update/leads/${leadId}`, env, {
-      ...leadData,
-      updated_at: new Date().toISOString()
-    });
+    return await ncbRequest<NCBRecord>('PUT', `update/leads/${leadId}`, env, payload);
   } else {
     // 3. Create new lead
     return await ncbRequest<NCBRecord>('POST', 'create/leads', env, {
-      ...leadData,
+      ...payload,
       status: 'new',
     });
   }
@@ -102,8 +124,8 @@ export async function syncBookingToCRM(data: {
     companyName: data.companyName,
     industry: data.industry,
     employeeCount: data.employeeCount,
-    notes: `Booked strategy call for ${data.date} at ${data.time}. Challenge: ${data.challenge || 'None'}`,
-    source: 'Calendar Booking'
+    source: 'Calendar Booking',
+    sourceDetail: `${data.date} at ${data.time}${data.challenge ? ` — ${data.challenge}` : ''}`,
   }, env);
 
   return true;
