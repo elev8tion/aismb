@@ -128,6 +128,64 @@ describe('syncBookingToCRM — failure path', () => {
   });
 });
 
+describe('syncBookingToCRM — industry/employee_count enum normalization', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockNcbRequest
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce({ status: 'success', id: 1 } as any);
+  });
+
+  it('maps "contractor" → "construction" (the exact Tony Nine failure case)', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, industry: 'contractor' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    expect(body.industry).toBe('construction');
+  });
+
+  it('maps plain number "9" → "5-10" for employee_count', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, employeeCount: '9' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    expect(body.employee_count).toBe('5-10');
+  });
+
+  it('passes valid industry enum value through unchanged', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, industry: 'hvac' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    expect(body.industry).toBe('hvac');
+  });
+
+  it('maps "plumbing contractor" → "construction"', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, industry: 'plumbing contractor' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    // "plumb" matches plumbing first
+    expect(body.industry).toBe('plumbing');
+  });
+
+  it('maps unrecognized industry → "other"', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, industry: 'underwater basket weaving' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    expect(body.industry).toBe('other');
+  });
+
+  it('maps valid employee_count range through unchanged', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, employeeCount: '10-25' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    expect(body.employee_count).toBe('10-25');
+  });
+
+  it('maps "3" → "1-5"', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, employeeCount: '3' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    expect(body.employee_count).toBe('1-5');
+  });
+
+  it('omits employee_count when value is unrecognizable', async () => {
+    await syncBookingToCRM({ ...BASE_DATA, employeeCount: 'many' }, MOCK_ENV);
+    const body = mockNcbRequest.mock.calls[1][3] as Record<string, unknown>;
+    expect(body.employee_count).toBeUndefined();
+  });
+});
+
 describe('syncBookingToCRM — sourceDetail formatting', () => {
   beforeEach(() => {
     vi.clearAllMocks();

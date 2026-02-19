@@ -42,11 +42,67 @@ interface NCBRecord {
   [key: string]: unknown;
 }
 
+// NCB leads table valid enum values
+const NCB_INDUSTRY_ENUM = ['hvac', 'plumbing', 'property management', 'construction', 'retail', 'e-commerce', 'professional services', 'real estate', 'other'] as const;
+const NCB_EMPLOYEE_COUNT_ENUM = ['1-5', '5-10', '10-25', '25-50', '50+'] as const;
+
+/**
+ * Normalize a free-text industry string → valid NCB industry enum value.
+ * Falls back to "other" for unrecognized values.
+ */
+function normalizeIndustry(raw: string): string {
+  const s = raw.toLowerCase().trim();
+  if (NCB_INDUSTRY_ENUM.includes(s as typeof NCB_INDUSTRY_ENUM[number])) return s;
+  if (/hvac|heat|cool|air.cond/i.test(s)) return 'hvac';
+  if (/plumb/i.test(s)) return 'plumbing';
+  if (/property.manage|prop.mgmt|prop.manage/i.test(s)) return 'property management';
+  if (/construct|contractor|builder|build|trades?|electrical|electrician|roofi/i.test(s)) return 'construction';
+  if (/retail|shop|store|boutique/i.test(s)) return 'retail';
+  if (/e.?commerce|ecommerce|online.store|shopify/i.test(s)) return 'e-commerce';
+  if (/real.estate|realtor|broker|mortgage|propery(?!.manage)/i.test(s)) return 'real estate';
+  if (/agency|consult|legal|law|account|market|PR\b|staffing|recruit|insurance|financial|finance/i.test(s)) return 'professional services';
+  return 'other';
+}
+
+/**
+ * Normalize a free-text employee count → valid NCB employee_count enum value.
+ * Handles ranges ("5-10"), plain numbers ("9"), and labels ("50+").
+ */
+function normalizeEmployeeCount(raw: string): string | undefined {
+  const s = raw.trim();
+  // Already a valid enum value
+  if (NCB_EMPLOYEE_COUNT_ENUM.includes(s as typeof NCB_EMPLOYEE_COUNT_ENUM[number])) return s;
+  // Parse a plain number
+  const n = parseInt(s, 10);
+  if (!isNaN(n)) {
+    if (n <= 5)  return '1-5';
+    if (n <= 10) return '5-10';
+    if (n <= 25) return '10-25';
+    if (n <= 50) return '25-50';
+    return '50+';
+  }
+  // Parse a range like "6-12" — use the upper bound
+  const rangeMatch = s.match(/(\d+)\s*[-–]\s*(\d+)/);
+  if (rangeMatch) {
+    const upper = parseInt(rangeMatch[2], 10);
+    if (upper <= 5)  return '1-5';
+    if (upper <= 10) return '5-10';
+    if (upper <= 25) return '10-25';
+    if (upper <= 50) return '25-50';
+    return '50+';
+  }
+  // "50+" style already handled above; "100+" or similar
+  if (/50\+|51\+|100\+|\blarge\b|\benter/i.test(s)) return '50+';
+  return undefined; // omit if unrecognizable
+}
+
 /**
  * Map LeadData (camelCase) → NCB leads table payload (snake_case).
  * Only includes fields that exist in the NCB schema.
  * NCB leads columns: id, user_id, email, first_name, last_name, phone,
  *   company_name, source, source_detail, industry, employee_count, status, lead_score
+ *
+ * industry and employee_count are normalized to valid NCB enum values.
  */
 function toNCBLeadPayload(leadData: Partial<LeadData>): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
@@ -55,8 +111,12 @@ function toNCBLeadPayload(leadData: Partial<LeadData>): Record<string, unknown> 
   if (leadData.lastName !== undefined)      payload.last_name      = leadData.lastName;
   if (leadData.phone !== undefined)         payload.phone          = leadData.phone;
   if (leadData.companyName !== undefined)   payload.company_name   = leadData.companyName;
-  if (leadData.industry !== undefined)      payload.industry       = leadData.industry;
-  if (leadData.employeeCount !== undefined) payload.employee_count = leadData.employeeCount;
+  // Normalize to valid NCB enum values before sending
+  if (leadData.industry !== undefined)      payload.industry       = normalizeIndustry(leadData.industry);
+  if (leadData.employeeCount !== undefined) {
+    const normalized = normalizeEmployeeCount(leadData.employeeCount);
+    if (normalized !== undefined)           payload.employee_count = normalized;
+  }
   if (leadData.source !== undefined)        payload.source         = leadData.source;
   if (leadData.sourceDetail !== undefined)  payload.source_detail  = leadData.sourceDetail;
   // qualified_score maps to lead_score in NCB schema
