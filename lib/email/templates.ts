@@ -620,7 +620,7 @@ export function roiReportTemplate(data: ROIReportData): string {
                       <tr>
                         <td style="padding:16px 20px;">
                           <span style="font-size:14px;font-weight:600;color:#1a1a2e;">${s.recoveredRevenue}</span><br>
-                          <span style="font-size:12px;color:#8a8aaa;">${data.missedCalls} ${lang === 'es' ? 'llamadas/sem' : 'calls/wk'} \u00d7 60% ${lang === 'es' ? 'captura' : 'capture'} \u00d7 35% ${lang === 'es' ? 'cierre' : 'close'} \u00d7 ${fmtMoney(data.avgJobValue)}</span>
+                          <span style="font-size:12px;color:#8a8aaa;">${data.missedCalls} ${lang === 'es' ? 'llamadas/sem' : 'calls/wk'} \u00d7 4.33 ${lang === 'es' ? 'sem/mes' : 'wks/mo'} \u00d7 60% ${lang === 'es' ? 'captura' : 'capture'} \u00d7 35% ${lang === 'es' ? 'cierre' : 'close'} \u00d7 ${fmtMoney(data.avgJobValue)}</span>
                         </td>
                         <td style="padding:16px 20px;text-align:right;vertical-align:top;white-space:nowrap;">
                           <span style="font-size:20px;font-weight:700;color:#0EA5E9;">${fmtMoney(data.recoveredMonthlyRevenue)}/mo</span><br>

@@ -279,7 +279,7 @@ export default function ROICalculator() {
                 <div>
                   <p className="text-sm text-white font-medium">{rc.results.recoveredRevenue}</p>
                   <p className="text-xs text-white/50">
-                    {missedCalls} calls/wk × 60% × 35% × {fmt(avgJobValue)}
+                    {missedCalls} calls/wk × 4.33 wks/mo × 60% × 35% × {fmt(avgJobValue)}
                   </p>
                 </div>
                 <div className="text-right">
