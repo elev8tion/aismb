@@ -41,6 +41,11 @@ yarn-error.log*
 *.docx
 lib/voiceAgent/*.md
 
+# generated artifacts (vision canvas outputs, skill files, QR codes)
+*vision*.html
+*.skill
+kre8tion-qr-code*.png
+
 # vercel
 .vercel
 
