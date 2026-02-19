@@ -39,6 +39,11 @@ interface BookingFormProps {
     required: string;
     termsAgreement: string;
     termsRequired: string;
+    nameRequired: string;
+    emailRequired: string;
+    companyRequired: string;
+    industryRequired: string;
+    employeeCountRequired: string;
   };
 }
 
@@ -169,23 +174,23 @@ export default function BookingForm({
     const newErrors: Record<string, string> = {};
 
     if (!name.trim() || name.trim().length < 2) {
-      newErrors.name = 'Please enter your full name';
+      newErrors.name = translations.nameRequired;
     }
 
     if (!email.trim() || !email.includes('@') || !email.includes('.')) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = translations.emailRequired;
     }
 
     if (!companyName.trim() || companyName.trim().length < 2) {
-      newErrors.companyName = 'Please enter your company name';
+      newErrors.companyName = translations.companyRequired;
     }
 
     if (!industry.trim() || industry.trim().length < 2) {
-      newErrors.industry = 'Please enter your industry';
+      newErrors.industry = translations.industryRequired;
     }
 
     if (!employeeCount.trim()) {
-      newErrors.employeeCount = 'Please enter your number of employees';
+      newErrors.employeeCount = translations.employeeCountRequired;
     }
 
     if (!termsAgreed) {

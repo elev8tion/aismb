@@ -33,6 +33,15 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
 
   // Holds voice-agent pre-selected type/date/time so modal can jump to details step
   const prefillDataRef = useRef<{ bookingType: BookingType; date: string; time: string } | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Focus the close button when modal opens
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => closeButtonRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   // Listen for voice agent booking-prefill event
   useEffect(() => {
@@ -279,6 +288,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
               </div>
               {step !== 'confirmation' && (
                 <button
+                  ref={closeButtonRef}
                   onClick={handleClose}
                   className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                   aria-label="Close"

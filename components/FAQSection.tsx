@@ -31,6 +31,7 @@ export default function FAQSection() {
               className="bg-[#111113] border border-[#27272A] rounded-xl overflow-hidden"
             >
               <button
+                aria-expanded={openIndex === idx}
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
                 className="w-full flex items-center justify-between p-5 text-left hover:bg-[#18181B] transition-colors"
               >

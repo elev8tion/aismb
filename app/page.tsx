@@ -16,7 +16,7 @@ import { LazyROICalculator, LazyVoiceAgentFAB } from '@/components/LazyClientCom
 export default function Home() {
   return (
     <ClientLayout>
-      <main className="min-h-screen bg-[#0A0A0B]">
+      <main id="main-content" className="min-h-screen bg-[#0A0A0B]">
         <Header />
         <HeroSection />
         <SocialProofBar />

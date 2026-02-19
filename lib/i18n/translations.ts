@@ -10,6 +10,7 @@ export interface Translations {
     getStarted: string;
     openMenu: string;
     closeMenu: string;
+    skipToMain: string;
   };
 
   hero: {
@@ -346,6 +347,11 @@ export interface Translations {
       required: string;
       termsAgreement: string;
       termsRequired: string;
+      nameRequired: string;
+      emailRequired: string;
+      companyRequired: string;
+      industryRequired: string;
+      employeeCountRequired: string;
     };
     confirmation: {
       title: string;
@@ -390,6 +396,7 @@ export const translations: Record<Language, Translations> = {
       getStarted: 'Get Started',
       openMenu: 'Open menu',
       closeMenu: 'Close menu',
+      skipToMain: 'Skip to main content',
     },
 
     hero: {
@@ -1049,6 +1056,11 @@ export const translations: Record<Language, Translations> = {
         required: 'Required fields',
         termsAgreement: 'I agree to the <terms>Terms of Service</terms> and <refund>Refund Policy</refund>',
         termsRequired: 'You must agree to the Terms of Service and Refund Policy',
+        nameRequired: 'Please enter your full name',
+        emailRequired: 'Please enter a valid email address',
+        companyRequired: 'Please enter your company name',
+        industryRequired: 'Please enter your industry',
+        employeeCountRequired: 'Please enter your number of employees',
       },
       confirmation: {
         title: 'Booking Confirmed!',
@@ -1097,6 +1109,7 @@ export const translations: Record<Language, Translations> = {
       getStarted: 'Comenzar',
       openMenu: 'Abrir menu',
       closeMenu: 'Cerrar menu',
+      skipToMain: 'Saltar al contenido principal',
     },
 
     hero: {
@@ -1756,6 +1769,11 @@ export const translations: Record<Language, Translations> = {
         required: 'Campos requeridos',
         termsAgreement: 'Acepto los <terms>Terminos de Servicio</terms> y la <refund>Politica de Reembolso</refund>',
         termsRequired: 'Debe aceptar los Terminos de Servicio y la Politica de Reembolso',
+        nameRequired: 'Por favor ingresa tu nombre completo',
+        emailRequired: 'Por favor ingresa un correo electronico valido',
+        companyRequired: 'Por favor ingresa el nombre de tu empresa',
+        industryRequired: 'Por favor ingresa tu industria',
+        employeeCountRequired: 'Por favor ingresa tu numero de empleados',
       },
       confirmation: {
         title: 'Reserva Confirmada!',

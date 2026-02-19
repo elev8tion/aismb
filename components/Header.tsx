@@ -28,6 +28,12 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-6 focus:left-6 focus:z-[100] focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded-lg focus:font-medium focus:shadow-lg"
+      >
+        {t.nav.skipToMain}
+      </a>
       <div className="mx-4 mt-4">
         <div
           className={`liquid-glass liquid-glass-glow max-w-6xl mx-auto px-6 py-4 transition-all duration-500 ${
