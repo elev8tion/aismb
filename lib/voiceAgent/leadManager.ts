@@ -86,6 +86,7 @@ export async function syncLeadToCRM(leadData: LeadData, env: Record<string, stri
     // 3. Create new lead
     return await ncbRequest<NCBRecord>('POST', 'create/leads', env, {
       ...payload,
+      user_id: env.NCB_DEFAULT_USER_ID || 'GlF8YbrMWMq3YsUF3jlLovv3VtKsWyQp',
       status: 'new',
     });
   }
@@ -124,7 +125,7 @@ export async function syncBookingToCRM(data: {
     companyName: data.companyName,
     industry: data.industry,
     employeeCount: data.employeeCount,
-    source: 'Calendar Booking',
+    source: 'other',
     sourceDetail: `${data.date} at ${data.time}${data.challenge ? ` — ${data.challenge}` : ''}`,
   }, env);
 
