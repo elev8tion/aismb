@@ -43,6 +43,7 @@ lib/voiceAgent/*.md
 
 # generated artifacts (vision canvas outputs, skill files, QR codes)
 *vision*.html
+*-canvas.html
 *.skill
 kre8tion-qr-code*.png
 
