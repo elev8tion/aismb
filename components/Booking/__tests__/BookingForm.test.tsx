@@ -122,7 +122,7 @@ describe('BookingForm', () => {
     render(
       <BookingForm date="2026-03-15" time="14:30" onSubmit={onSubmit} translations={defaultTranslations} />
     );
-    expect(screen.getByText('Sunday, March 15')).toBeInTheDocument();
+    expect(screen.getByText('Sunday, March 15, 2026')).toBeInTheDocument();
     expect(screen.getByText(/2:30 PM/)).toBeInTheDocument();
   });
 

@@ -14,7 +14,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     include: ['**/*.test.{ts,tsx}'],
-    exclude: ['node_modules', '.next'],
+    exclude: ['node_modules', '**/node_modules/**', '.next', 'ai_smb_crm_frontend/**', 'tests/**'],
     testTimeout: 30000, // 30 seconds for OpenAI API calls
   },
 });

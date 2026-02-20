@@ -8,28 +8,37 @@ describe('TIER_PRICING', () => {
 
   it('has discovery tier with correct values', () => {
     expect(TIER_PRICING.discovery).toEqual({
+      name: 'The Revenue Guard',
       setup: 250000,
       monthly: 75000,
-      name: 'AI Discovery',
       minMonths: 2,
+      costModel: 'bundled',
+      includedInteractions: 500,
+      overageRateCents: 8,
     });
   });
 
   it('has foundation tier with correct values', () => {
     expect(TIER_PRICING.foundation).toEqual({
+      name: 'The Operations Sovereign',
       setup: 500000,
       monthly: 150000,
-      name: 'Foundation Builder',
       minMonths: 3,
+      costModel: 'bundled',
+      includedInteractions: 1500,
+      overageRateCents: 8,
     });
   });
 
   it('has architect tier with correct values', () => {
     expect(TIER_PRICING.architect).toEqual({
+      name: 'The Enterprise Fortress',
       setup: 1200000,
       monthly: 300000,
-      name: 'Systems Architect',
       minMonths: 6,
+      costModel: 'pass_through',
+      includedInteractions: null,
+      overageRateCents: null,
     });
   });
 });
