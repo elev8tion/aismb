@@ -8,7 +8,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import { calculateEndTime } from '@/lib/booking/availability';
-// import { runBookingPipeline } from '@/lib/booking/createBooking';
 import { adminBookingRequestSchema, validate, formatZodErrors, LandingPageBooking as Booking } from '@kre8tion/shared-types';
 
 export const runtime = 'edge';
@@ -17,12 +16,6 @@ export async function POST(req: NextRequest) {
   try {
     const env = getEnv();
     const cfEnv = env as unknown as Record<string, string>;
-
-    // TODO: Add authentication check here
-    // const authHeader = req.headers.get('authorization');
-    // if (!authHeader || !isValidAdminToken(authHeader)) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
 
     const rawBody = await req.json();
 

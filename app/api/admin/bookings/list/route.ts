@@ -16,12 +16,6 @@ export async function GET(req: NextRequest) {
     const env = getEnv();
     const cfEnv = env as unknown as Record<string, string>;
 
-    // TODO: Add authentication check here
-    // const authHeader = req.headers.get('authorization');
-    // if (!authHeader || !isValidAdminToken(authHeader)) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
-
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '100');
     const status = searchParams.get('status'); // Filter by status if provided
