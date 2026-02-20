@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createOpenAI, MODELS } from '@/lib/openai/config';
 import { validateAudioFile } from '@/lib/security/requestValidator';
 import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
-import { getEnv } from '@/lib/env';
+import { getEnv } from '@/lib/cloudflare/env';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();

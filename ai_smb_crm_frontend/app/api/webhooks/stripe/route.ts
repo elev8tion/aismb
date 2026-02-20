@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
 
         // Alert admin about payment failure
         await sendPaymentFailedAlert({
-          adminEmail: 'connect@elev8tion.one',
+          adminEmail: env.ADMIN_EMAIL || 'connect@elev8tion.one',
           customerEmail: invoice.customer_email || '',
           customerName: invoice.customer_name || '',
           tier: meta.tier || 'unknown',
