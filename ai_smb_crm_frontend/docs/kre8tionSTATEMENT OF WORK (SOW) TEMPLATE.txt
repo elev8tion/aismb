@@ -1,0 +1,271 @@
+📄 STATEMENT OF WORK (SOW) TEMPLATE
+
+ELEV8TION LLC
+
+This Statement of Work ("SOW") is entered into under the Master Services Agreement between ELEV8TION LLC ("ELEV8TION") and Client.
+
+⸻
+
+1. Project Overview
+
+ELEV8TION will provide consulting, training, and intelligent systems architecture services to support Client's development and implementation of AI-enabled systems and workflows.
+
+⸻
+
+2. Scope of Services
+
+ELEV8TION will provide the following services:
+	•	AI system design and planning
+	•	workflow architecture
+	•	agent and automation configuration
+	•	capability transfer and training
+	•	implementation guidance
+	•	advisory support
+
+Specific deliverables for this engagement:
+
+[INSERT PROJECT DETAILS HERE]
+
+Examples:
+	•	build internal AI workflow
+	•	design automation pipeline
+	•	train team on agent development
+	•	configure integrations
+
+Any work outside this scope requires a written amendment.
+
+⸻
+
+3. Deliverables
+
+ELEV8TION will provide:
+	•	system architecture guidance
+	•	configured workflows
+	•	training sessions
+	•	documentation (if applicable)
+
+Final deliverables:
+
+[INSERT DELIVERABLE LIST]
+
+⸻
+
+4. Timeline
+
+Start Date: ______
+Estimated Completion: ______
+
+Timelines depend on Client responsiveness and access.
+
+Delays in feedback or access may extend timeline.
+
+⸻
+
+5. Fees
+
+Project Fee: $________
+Monthly Partnership Fee: $________
+
+Payment Schedule:
+	•	deposit due at signing
+	•	remaining payments per agreed schedule
+
+All completed work and deposits are non-refundable.
+
+If Client terminates early:
+	•	future unpaid installments are canceled
+	•	completed phases remain due
+
+Minimum engagement term (if applicable): ______ months
+
+⸻
+
+6. Client Responsibilities
+
+Client agrees to:
+	•	provide timely feedback
+	•	attend training sessions
+	•	review outputs
+	•	supervise system use
+	•	approve automation deployment
+
+⸻
+
+7. Access & Tools
+
+Client may provide system access or API keys for implementation purposes.
+
+Client remains responsible for:
+	•	credential security
+	•	permission scope
+	•	key rotation
+
+⸻
+
+8. Acceptance
+
+Services are considered accepted upon delivery of training, systems, or documentation as defined above.
+
+⸻
+
+9. Governing Agreement
+
+This SOW is governed by the Master Services Agreement and all attached addenda.
+
+⸻
+
+Signatures
+
+ELEV8TION LLC
+
+Signature: __________________
+Name:
+Title:
+Date:
+
+CLIENT
+
+Signature: __________________
+Name:
+Company:
+Title:
+Date:
+
+⸻
+
+🔁 MONTHLY PARTNERSHIP / RETAINER AGREEMENT
+
+(For your tiered pricing)
+
+This can be embedded as a section inside SOW or separate.
+
+⸻
+
+Monthly Partnership Terms
+
+Client engages ELEV8TION for ongoing advisory, training, and system support.
+
+Monthly services may include:
+	•	strategy sessions
+	•	system reviews
+	•	architecture guidance
+	•	troubleshooting
+	•	optimization recommendations
+
+Monthly services do not include full system builds unless specified.
+
+⸻
+
+Minimum Term
+
+Client agrees to a minimum engagement term:
+	•	The Revenue Guard → 2 months
+	•	The Operations Sovereign → 3 months
+	•	The Enterprise Fortress → 6 months
+
+After minimum term, either party may cancel with written notice.
+
+⸻
+
+Fees
+
+Monthly Fee: $________
+
+Fees are billed in advance each month.
+
+If Client cancels:
+	•	future unpaid months are canceled
+	•	paid months are non-refundable
+
+⸻
+
+Response Time
+
+ELEV8TION will provide reasonable response times but does not guarantee immediate support.
+
+Emergency support not included unless specified.
+
+⸻
+
+Scope Limits
+
+Monthly partnership includes advisory and training support only.
+
+Additional builds or major implementation work require separate SOW.
+
+⸻
+
+Active Monitoring (Post-Term Option)
+
+After the minimum term, Client may continue month-to-month under Active Monitoring.
+
+Includes:
+	•	system health reviews
+	•	agent performance checks
+	•	issue response
+	•	optimization guidance
+
+Either party may cancel with 30 days written notice.
+
+If Client does not elect Active Monitoring, Client assumes full responsibility for ongoing system operation and supervision.
+
+⸻
+
+🧾 PRICING TIER LANGUAGE FOR YOUR CONTRACTS
+
+You can paste this into proposals or SOWs.
+
+⸻
+
+The Revenue Guard — Bundled AI Partnership
+
+One-time: $2,500
+Monthly: $750
+Minimum: 2 months
+Cost Model: Bundled (API & infrastructure costs included)
+Monthly Usage Allowance: 500 AI interactions
+Overage: $0.08/interaction above allowance
+
+Includes:
+	•	foundational AI training
+	•	workflow identification
+	•	guided system setup
+	•	capability transfer sessions
+	•	API & infrastructure costs bundled — no surprise bills
+
+⸻
+
+The Operations Sovereign — Bundled AI Partnership
+
+One-time: $5,000
+Monthly: $1,500
+Minimum: 3 months
+Cost Model: Bundled (API & infrastructure costs included)
+Monthly Usage Allowance: 1,500 AI interactions
+Overage: $0.08/interaction above allowance
+
+Includes:
+	•	system architecture
+	•	agent workflow creation
+	•	deeper training
+	•	implementation guidance
+	•	API & infrastructure costs bundled — no surprise bills
+
+⸻
+
+The Enterprise Fortress — Pass-Through AI Partnership
+
+One-time: $12,000
+Monthly: $3,000
+Minimum: 6 months
+Cost Model: Pass-Through (client holds own API accounts)
+Monthly Usage Allowance: Client-managed
+Overage: N/A
+
+Includes:
+	•	advanced system design
+	•	multi-agent workflows
+	•	integration planning
+	•	high-level advisory
+	•	full capability transfer
+	•	pass-through model — client holds own API accounts
