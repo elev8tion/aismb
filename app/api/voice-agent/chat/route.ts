@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
               email: leadInfo.email!, // TypeScript: we know email exists from line 124 check
               qualified_score: scoreResult.score,
               notes: `Voice Agent | Score: ${scoreResult.tier} (${scoreResult.factors.join(', ')})`,
-              source: 'Voice Agent',
+              source: 'voice-agent',
               sourceDetail: `Session ${sessionId.slice(0, 8)}`,
             };
 
