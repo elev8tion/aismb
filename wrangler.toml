@@ -25,7 +25,7 @@ id = "cbef44c800ca49eb81e2b08b95f05d11"
 
 # Production environment
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", FF_VOICE_LEAD_EXTRACTION = "true", FF_VOICE_LEAD_SCORING = "true", FF_VOICE_CRM_SYNC = "true" }
 kv_namespaces = [
   { binding = "VOICE_SESSIONS", id = "23e84aa024414eeb9b5edb2b254bbe3b" },
   { binding = "RATE_LIMIT_KV", id = "b7addbaac289495ba3cac09e573fe279" },
