@@ -94,65 +94,22 @@ headers: {
 
 ## Usage Pattern (Cloudflare Pages Edge Runtime)
 
+All NCB calls go through `lib/ncb/client.ts`. Never call the OpenAPI directly from routes.
+
 ```typescript
-import { getRequestContext } from '@cloudflare/next-on-pages';
+// In an API route:
+import { getOptionalRequestContext } from '@cloudflare/next-on-pages';
+import { getNCBConfig, ncbCreate, ncbRead } from '@/lib/ncb/client';
 
-function getConfig() {
-  const { env } = getRequestContext();
-  const instance = env.NCB_INSTANCE;
-  const openApiUrl = env.NCB_OPENAPI_URL;
-  const secretKey = env.NCB_SECRET_KEY;
+export const runtime = 'edge';
 
-  if (!instance || !openApiUrl || !secretKey) {
-    throw new Error('Missing NCB environment variables');
-  }
+export async function POST(req: Request) {
+  const ctx = getOptionalRequestContext();
+  const env = (ctx?.env || process.env) as any;
+  const config = getNCBConfig(env, 'admin'); // or 'guest' for public writes
 
-  return { instance, openApiUrl, secretKey };
-}
-
-async function createRecord(table: string, data: Record<string, unknown>) {
-  const config = getConfig();
-  const url = `${config.openApiUrl}/create/${table}?Instance=${config.instance}`;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.secretKey}`,
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    console.error(`NCB create error:`, res.status, error);
-    return null;
-  }
-
-  const result = await res.json();
-  // Returns { status: "success", id: N }
-  if (result.status === 'success' && result.id) {
-    return { ...data, id: result.id };
-  }
-  return null;
-}
-
-async function readRecords<T>(table: string): Promise<T[]> {
-  const config = getConfig();
-  const url = `${config.openApiUrl}/read/${table}?Instance=${config.instance}`;
-
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.secretKey}`,
-    },
-  });
-
-  if (!res.ok) return [];
-
-  const result = await res.json();
-  return result.data || [];
+  const record = await ncbCreate(config, 'bookings', payload);
+  const records = await ncbRead(config, 'bookings');
 }
 ```
 
