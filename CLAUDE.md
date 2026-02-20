@@ -28,13 +28,21 @@ npm install --ignore-scripts
 
 ## Architecture
 
-### Multi-App Overview
+### Monorepo Structure
+This is a monorepo containing both apps. The single remote is `github.com/elev8tion/aismb.git`.
+
 ```
-Landing Page (kre8tion.com) — this repo
+/ (root)                        — Landing page (kre8tion.com)
+ai_smb_crm_frontend/            — CRM (app.kre8tion.com)
+packages/shared-types/          — Shared TypeScript/Zod types
+```
+
+```
+Landing Page (kre8tion.com)
   ↓ writes via NCB OpenAPI
 NoCodeBackend (36905_ai_smb_crm) — shared database
   ↑ reads via NCB Data Proxy
-CRM (app.kre8tion.com) — ai_smb_crm_frontend/ sibling directory
+CRM (app.kre8tion.com)
 ```
 
 Both apps share the same NCB instance — writes from the landing page appear in the CRM immediately with no sync layer.
@@ -91,6 +99,14 @@ All API routes run on Cloudflare's edge. Critical rules:
 - Never send `created_at` — let the DB default handle it
 
 ## Deployment
-- **Landing page**: Push to `main` → GitHub Actions auto-deploys to Cloudflare Pages (`kre8tion-app`). Check with `gh run list --limit 3`.
-- **CRM**: Manual deploy only — see `ai_smb_crm_frontend/DEPLOYMENT.md`
-- See `.claude/DEPLOYMENT.md` for full deployment details including required secrets
+
+### Landing page (kre8tion.com)
+- Push to `main` → GitHub Actions auto-deploys to Cloudflare Pages (`kre8tion-app`)
+- **Path filter**: only fires when files outside `ai_smb_crm_frontend/` change
+- Check status: `gh run list --limit 3`
+- See `.claude/DEPLOYMENT.md` for required secrets
+
+### CRM (app.kre8tion.com)
+- **No auto-deploy** — manual CLI only, run from inside `ai_smb_crm_frontend/`
+- `npm run pages:build && npx wrangler pages deploy .vercel/output/static --project-name=ai-smb-crm --commit-dirty=true --no-bundle`
+- See `ai_smb_crm_frontend/DEPLOYMENT.md` for full details
