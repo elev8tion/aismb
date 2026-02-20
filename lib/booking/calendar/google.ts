@@ -109,12 +109,13 @@ export class GoogleCalendarProvider implements ICalendarProvider {
       newExpiresAt.setSeconds(newExpiresAt.getSeconds() + expiresIn);
 
       // Update token in database
-      await this.updateIntegrationTokens(newAccessToken, newExpiresAt.toISOString());
+      const expiresAtMysql = newExpiresAt.toISOString().replace('T', ' ').slice(0, 19);
+      await this.updateIntegrationTokens(newAccessToken, expiresAtMysql);
 
       this.integration = {
         ...integration,
         access_token: newAccessToken,
-        expires_at: newExpiresAt.toISOString(),
+        expires_at: expiresAtMysql,
       };
 
       return newAccessToken;

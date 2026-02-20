@@ -132,17 +132,35 @@ export async function POST(request: NextRequest) {
     }
 
     // Write ROI calculation record to NCB roi_calculations table
+    // Required fields: industry, employee_count, hourly_rate, weekly_admin_hours
+    // We derive these from available metrics; full data stored in calculations JSON
     try {
       await createInNCB(env, 'roi_calculations', {
+        user_id: env.NCB_DEFAULT_USER_ID,
         email,
         selected_tier: tier,
         email_captured: 1,
-        roi: Math.round(metrics.roi),
-        investment: metrics.investment,
-        total_annual_savings: metrics.totalAnnual,
-        payback_weeks: metrics.paybackWeeks,
-        report_sent_at: new Date().toISOString(),
-        user_id: env.NCB_DEFAULT_USER_ID || null,
+        report_requested: 1,
+        report_sent_at: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        // Derived from payroll metric (monthly payroll ÷ 160 = hourly rate)
+        hourly_rate: metrics.payroll > 0 ? Math.round(metrics.payroll / 160) : 25,
+        weekly_admin_hours: metrics.payroll > 0 ? Math.round(metrics.payroll / (metrics.payroll / 160) / 4) : 10,
+        // Full ROI data stored as JSON
+        calculations: JSON.stringify({
+          roi: Math.round(metrics.roi),
+          investment: metrics.investment,
+          totalAnnual: metrics.totalAnnual,
+          paybackWeeks: metrics.paybackWeeks,
+          fixedMonthlySavings: metrics.fixedMonthlySavings,
+          recoveredMonthlyRevenue: metrics.recoveredMonthlyRevenue,
+          annualFixed: metrics.annualFixed,
+          annualRevenue: metrics.annualRevenue,
+          missedCalls: metrics.missedCalls,
+          avgJobValue: metrics.avgJobValue,
+          setupFee: metrics.setupFee,
+          monthlyFee: metrics.monthlyFee,
+          months: metrics.months,
+        }),
       });
     } catch (err) {
       console.error('[ROI] roi_calculations sync failed:', err instanceof Error ? err.message : err);

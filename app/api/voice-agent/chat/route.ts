@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
           language: language || 'en',
           total_questions: userMessages.length,
           sentiment: leadInfo.sentiment || 'neutral',
-          start_time: new Date().toISOString(),
+          start_time: new Date().toISOString().replace('T', ' ').slice(0, 19),
           user_id: defaultUserId,
         };
 

@@ -126,7 +126,7 @@ export async function GET(req: NextRequest) {
       provider: 'google',
       access_token,
       refresh_token,
-      expires_at: expiresAt.toISOString(),
+      expires_at: expiresAt.toISOString().replace('T', ' ').slice(0, 19),
       calendar_id: calendarId,
       is_active: true,
     };
