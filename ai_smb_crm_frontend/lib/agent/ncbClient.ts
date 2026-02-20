@@ -161,30 +161,20 @@ export async function ncbDelete(
 
 // ─── Server-only helpers (no user session) ─────────────────────────────────
 // Used by webhooks, contract signing routes, and other server-to-server contexts.
+// These delegate to the OpenAPI functions with Bearer auth — NOT the Data Proxy.
 
 export async function ncbServerRead(env: NCBEnv, table: string, filters?: Record<string, string>): Promise<any[]> {
-  const config = getConfig(env);
-  const params = new URLSearchParams({ instance: config.instance });
-  if (filters) {
-    Object.entries(filters).forEach(([k, v]) => params.append(k, v));
-  }
-  const url = `${config.dataApiUrl}/read/${table}?${params}`;
-  const res = await fetch(url, {
-    headers: { 'X-Database-instance': config.instance },
-  });
-  if (!res.ok) return [];
-  const data: any = await res.json();
-  return Array.isArray(data) ? data : data.data || [];
+  return ncbOpenApiRead(env, table, filters);
 }
 
 export async function ncbServerCreate(env: NCBEnv, table: string, data: Record<string, unknown>): Promise<Response> {
   const config = getConfig(env);
-  const url = `${config.dataApiUrl}/create/${table}?instance=${config.instance}`;
+  const url = `${config.openApiUrl}/create/${table}?Instance=${config.instance}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Database-instance': config.instance,
+      'Authorization': `Bearer ${config.secretKey}`,
     },
     body: JSON.stringify(data),
   });
@@ -197,12 +187,12 @@ export async function ncbServerCreate(env: NCBEnv, table: string, data: Record<s
 
 export async function ncbServerUpdate(env: NCBEnv, table: string, id: string, data: Record<string, unknown>): Promise<Response> {
   const config = getConfig(env);
-  const url = `${config.dataApiUrl}/update/${table}/${id}?instance=${config.instance}`;
+  const url = `${config.openApiUrl}/update/${table}/${id}?Instance=${config.instance}`;
   const res = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-Database-instance': config.instance,
+      'Authorization': `Bearer ${config.secretKey}`,
     },
     body: JSON.stringify(data),
   });

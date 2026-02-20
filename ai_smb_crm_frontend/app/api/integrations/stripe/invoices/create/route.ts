@@ -78,14 +78,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Finalize and send
-    await stripe.invoices.finalizeInvoice(invoice.id);
+    // Finalize and send — capture finalized invoice for the hosted URL
+    const finalized = await stripe.invoices.finalizeInvoice(invoice.id);
     await stripe.invoices.sendInvoice(invoice.id);
 
     return NextResponse.json({
       success: true,
       invoice_id: invoice.id,
-      invoice_url: invoice.hosted_invoice_url,
+      invoice_url: finalized.hosted_invoice_url,
       customer_id: customer.id,
     });
   } catch (err: any) {

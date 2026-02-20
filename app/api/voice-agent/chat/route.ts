@@ -5,6 +5,7 @@ import { validateQuestion, detectPromptInjection } from '@/lib/security/requestV
 import { getSessionStorage } from '@/lib/voiceAgent/sessionStorage';
 import { getFeatureFlags, logFeatureFlags } from '@/lib/featureFlags';
 import { extractLeadInfo, syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
+import { fetchFromNCB, createInNCB, ncbRequest } from '@/lib/ncb/client';
 import { calculateLeadScore } from '@/lib/voiceAgent/leadScorer';
 import { sendViaEmailIt } from '@/lib/email/sendEmail';
 import { classifyIntent } from '@/lib/voiceAgent/intentRouter';
@@ -170,6 +171,42 @@ export async function POST(request: NextRequest) {
           }
         }
       }
+    }
+
+    // Sync voice session to NCB voice_sessions table (best-effort)
+    try {
+      const defaultUserId = (env as Record<string, string>).NCB_DEFAULT_USER_ID;
+      if (defaultUserId) {
+        const updatedHistory = await sessionStorage.getConversationHistory(sessionId);
+        const userMessages = updatedHistory.filter(m => m.role === 'user');
+        const leadInfo = extractLeadInfo(updatedHistory);
+
+        const sessionPayload = {
+          external_session_id: sessionId,
+          messages: JSON.stringify(updatedHistory),
+          language: language || 'en',
+          total_questions: userMessages.length,
+          sentiment: leadInfo.sentiment || 'neutral',
+          start_time: new Date().toISOString(),
+          user_id: defaultUserId,
+        };
+
+        // Upsert: update existing record or create new one
+        const existing = await fetchFromNCB<{ id: number }>(
+          env as Record<string, string>,
+          'voice_sessions',
+          { external_session_id: sessionId },
+        );
+
+        if (existing.length > 0) {
+          const { start_time: _st, ...updatePayload } = sessionPayload;
+          await ncbRequest('PUT', `update/voice_sessions/${existing[0].id}`, env as Record<string, string>, updatePayload);
+        } else {
+          await createInNCB(env as Record<string, string>, 'voice_sessions', sessionPayload);
+        }
+      }
+    } catch (sessionSyncErr) {
+      console.error('[Voice] Session NCB sync failed:', sessionSyncErr instanceof Error ? sessionSyncErr.message : sessionSyncErr);
     }
 
     const duration = Date.now() - startTime;

@@ -29,7 +29,7 @@ export default function LeadsPage() {
   const [viewLead, setViewLead] = useState<Lead | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const emptyForm = { email: '', first_name: '', last_name: '', phone: '', company_name: '', source: 'website', industry: '', lead_score: 0 };
+  const emptyForm = { email: '', first_name: '', last_name: '', phone: '', company_name: '', source: 'other', industry: '', lead_score: 0 };
   const [form, setForm] = useState(emptyForm);
 
   const fetchLeads = useCallback(async () => {
@@ -132,7 +132,7 @@ export default function LeadsPage() {
     if (!editLead) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/data/update/leads?id=${editLead.id}`, {
+      const res = await fetch(`/api/data/update/leads/${editLead.id}`, {
         method: 'PUT', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

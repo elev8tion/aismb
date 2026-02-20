@@ -29,9 +29,14 @@ export async function GET(req: NextRequest) {
       throw new Error('NCB_SECRET_KEY not configured');
     }
 
+    const ncbInstance = cfEnv.NCB_INSTANCE;
+    if (!ncbInstance) {
+      throw new Error('NCB_INSTANCE not configured');
+    }
+
     // Fetch all bookings from NCB
     const res = await fetch(
-      `${ncbUrl}/read/bookings?Instance=36905_ai_smb_crm`,
+      `${ncbUrl}/read/bookings?Instance=${ncbInstance}`,
       {
         headers: {
           'Authorization': `Bearer ${secretKey}`,

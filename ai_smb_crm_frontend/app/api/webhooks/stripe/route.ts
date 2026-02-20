@@ -3,7 +3,7 @@ import { getEnv } from '@/lib/cloudflare/env';
 import Stripe from 'stripe';
 import { getTierPricing, getPriceEnvVar, type TierKey } from '@/lib/stripe/pricing';
 import { sendWelcomeEmail, sendPaymentFailedAlert } from '@/lib/email/sendEmail';
-import { ncbServerCreate, ncbServerUpdate, type NCBEnv } from '@/lib/agent/ncbClient';
+import { ncbServerCreate, ncbServerUpdate, ncbOpenApiRead, type NCBEnv } from '@/lib/agent/ncbClient';
 
 export const runtime = 'edge';
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
+    event = await stripe.webhooks.constructEventAsync(payload, sig, webhookSecret);
   } catch (err: any) {
     console.error('Stripe signature verification failed:', err?.message);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
@@ -128,15 +128,23 @@ export async function POST(req: NextRequest) {
             }
           }
         } else if (invoice.subscription) {
-          // Recurring subscription payment — update subscription period
+          // Recurring subscription payment — update subscription period in NCB
           const subId = typeof invoice.subscription === 'string' ? invoice.subscription : '';
           if (subId) {
             try {
               const sub = await stripe.subscriptions.retrieve(subId);
-              // Find NCB subscription record by stripe_subscription_id and update period
-              console.log(`[Webhook] Recurring payment for subscription ${subId}, period ends ${new Date(sub.current_period_end * 1000).toISOString()}`);
+              const existing = await ncbOpenApiRead(env, 'subscriptions', { stripe_subscription_id: subId });
+              if (existing.length > 0) {
+                const record = existing[0] as { id: string | number };
+                await ncbServerUpdate(env, 'subscriptions', String(record.id), {
+                  status: sub.status,
+                  current_period_start: new Date(sub.current_period_start * 1000).toISOString().split('T')[0],
+                  current_period_end: new Date(sub.current_period_end * 1000).toISOString().split('T')[0],
+                });
+                console.log(`[Webhook] Updated subscription period for ${subId}`);
+              }
             } catch (subErr: any) {
-              console.error('[Webhook] Failed to retrieve subscription:', subErr?.message);
+              console.error('[Webhook] Failed to update subscription period:', subErr?.message);
             }
           }
         }
@@ -177,7 +185,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Alert admin about payment failure
-        sendPaymentFailedAlert({
+        await sendPaymentFailedAlert({
           adminEmail: 'connect@elev8tion.one',
           customerEmail: invoice.customer_email || '',
           customerName: invoice.customer_name || '',
@@ -196,16 +204,20 @@ export async function POST(req: NextRequest) {
         const meta = subscription.metadata || {};
         console.log(`[Webhook] subscription.created: ${subscription.id}`, meta);
 
-        // Record in NCB (may already be recorded from invoice.paid handler)
-        await ncbServerCreate(env, 'subscriptions', {
-          stripe_subscription_id: subscription.id,
-          stripe_customer_id: typeof subscription.customer === 'string' ? subscription.customer : '',
-          partnership_id: meta.partnership_id || null,
-          tier: meta.tier || '',
-          status: subscription.status,
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
-        });
+        // Only write to NCB if not already written by the invoice.paid handler.
+        // invoice.paid writes it when creating the subscription from a setup invoice.
+        const existing = await ncbOpenApiRead(env, 'subscriptions', { stripe_subscription_id: subscription.id });
+        if (existing.length === 0) {
+          await ncbServerCreate(env, 'subscriptions', {
+            stripe_subscription_id: subscription.id,
+            stripe_customer_id: typeof subscription.customer === 'string' ? subscription.customer : '',
+            partnership_id: meta.partnership_id || null,
+            tier: meta.tier || '',
+            status: subscription.status,
+            current_period_start: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
+          });
+        }
         break;
       }
 

@@ -170,6 +170,24 @@ body {
   color: #EF4444;
 }
 
+.tag-danger {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+}
+
+.tag-info {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.3);
+  color: #00E5FF;
+}
+
+.tag-neutral {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.6);
+}
+
 /* Button Styles */
 .btn-primary {
   background: var(--brand-primary);

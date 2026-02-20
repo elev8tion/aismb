@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import { sendROIReport, sendROILeadDossierToAdmin } from '@/lib/email/sendEmail';
 import { syncLeadToCRM } from '@/lib/voiceAgent/leadManager';
+import { createInNCB } from '@/lib/ncb/client';
 
 interface ROILeadBody {
   email: string;
@@ -118,8 +119,7 @@ export async function POST(request: NextRequest) {
       console.error('[Email] Failed to send ROI dossier:', err instanceof Error ? err.message : err);
     }
 
-    // Sync to CRM — create or update lead by email
-    // If this email later books, syncLeadToCRM will find this record and update it
+    // Sync lead to CRM
     try {
       await syncLeadToCRM({
         email,
@@ -128,7 +128,27 @@ export async function POST(request: NextRequest) {
         qualified_score: Math.min(100, Math.round(metrics.roi / 5)),
       }, env);
     } catch (err) {
-      console.error('[ROI] CRM sync failed:', err instanceof Error ? err.message : err);
+      console.error('[ROI] Lead CRM sync failed:', err instanceof Error ? err.message : err);
+    }
+
+    // Write ROI calculation record to NCB roi_calculations table
+    try {
+      const defaultUserId = env.NCB_DEFAULT_USER_ID;
+      if (defaultUserId) {
+        await createInNCB(env, 'roi_calculations', {
+          email,
+          selected_tier: tier,
+          email_captured: 1,
+          roi: Math.round(metrics.roi),
+          investment: metrics.investment,
+          total_annual_savings: metrics.totalAnnual,
+          payback_weeks: metrics.paybackWeeks,
+          report_sent_at: new Date().toISOString(),
+          user_id: defaultUserId,
+        });
+      }
+    } catch (err) {
+      console.error('[ROI] roi_calculations sync failed:', err instanceof Error ? err.message : err);
     }
 
     return NextResponse.json({
