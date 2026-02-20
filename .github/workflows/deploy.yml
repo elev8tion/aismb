@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'ai_smb_crm_frontend/**'
   workflow_dispatch:
 
 jobs:
