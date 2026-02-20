@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     // Admin dossier
     try {
       await sendROILeadDossierToAdmin({
-        adminEmail: 'connect@elev8tion.one',
+        adminEmail: env.ADMIN_EMAIL || 'connect@elev8tion.one',
         lead: {
           email,
           tier: tierName,
@@ -133,20 +133,17 @@ export async function POST(request: NextRequest) {
 
     // Write ROI calculation record to NCB roi_calculations table
     try {
-      const defaultUserId = env.NCB_DEFAULT_USER_ID;
-      if (defaultUserId) {
-        await createInNCB(env, 'roi_calculations', {
-          email,
-          selected_tier: tier,
-          email_captured: 1,
-          roi: Math.round(metrics.roi),
-          investment: metrics.investment,
-          total_annual_savings: metrics.totalAnnual,
-          payback_weeks: metrics.paybackWeeks,
-          report_sent_at: new Date().toISOString(),
-          user_id: defaultUserId,
-        });
-      }
+      await createInNCB(env, 'roi_calculations', {
+        email,
+        selected_tier: tier,
+        email_captured: 1,
+        roi: Math.round(metrics.roi),
+        investment: metrics.investment,
+        total_annual_savings: metrics.totalAnnual,
+        payback_weeks: metrics.paybackWeeks,
+        report_sent_at: new Date().toISOString(),
+        user_id: env.NCB_DEFAULT_USER_ID || null,
+      });
     } catch (err) {
       console.error('[ROI] roi_calculations sync failed:', err instanceof Error ? err.message : err);
     }

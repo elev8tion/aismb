@@ -106,6 +106,7 @@ export async function POST(req: NextRequest) {
       website_url: validatedData.websiteUrl ?? null,
       status: 'confirmed',
       booking_type: validatedData.bookingType || 'consultation',
+      user_id: cfEnv.NCB_DEFAULT_USER_ID || null,
       ...(validatedData.stripe_session_id && {
         stripe_session_id: validatedData.stripe_session_id,
         payment_status: 'paid',
