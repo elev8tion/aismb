@@ -113,7 +113,6 @@ export interface LandingPageBooking {
   meeting_link: Nullable<string>;
   crm_lead_id: Nullable<string>;
   crm_sync_status: Nullable<string>;
-  user_id: Nullable<string>;
   created_at: string;
 }
 
@@ -250,7 +249,6 @@ export function toLandingPageBooking(
     meeting_link: unified.calendar?.meetingLink || null,
     crm_lead_id: null,
     crm_sync_status: null,
-    user_id: null,
     created_at: unified.createdAt,
   };
 }
