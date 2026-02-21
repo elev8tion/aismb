@@ -13,25 +13,13 @@ export interface NCBConfig {
   secretKey: string;
 }
 
-export type NCBAccessLevel = 'admin' | 'guest';
-
-/**
- * Get NCB configuration with appropriate key based on access level.
- *
- * @param env - Environment variables
- * @param accessLevel - 'admin' (full access) or 'guest' (read-only for public bookings)
- */
-export function getNCBConfig(env: Record<string, string>, accessLevel: NCBAccessLevel = 'admin'): NCBConfig {
+export function getNCBConfig(env: Record<string, string>): NCBConfig {
   const instance = env.NCB_INSTANCE;
   const openApiUrl = env.NCB_OPENAPI_URL;
-
-  // Select appropriate key based on access level
-  const secretKey = accessLevel === 'guest'
-    ? (env.NCB_GUEST_KEY || env.NCB_SECRET_KEY) // Fallback to admin key if guest key not set
-    : env.NCB_SECRET_KEY;
+  const secretKey = env.NCB_SECRET_KEY;
 
   if (!instance || !openApiUrl || !secretKey) {
-    throw new Error('Missing NCB environment variables (NCB_INSTANCE, NCB_OPENAPI_URL, NCB_SECRET_KEY/NCB_GUEST_KEY)');
+    throw new Error('Missing NCB environment variables (NCB_INSTANCE, NCB_OPENAPI_URL, NCB_SECRET_KEY)');
   }
 
   return { instance, openApiUrl, secretKey };

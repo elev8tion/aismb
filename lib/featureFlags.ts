@@ -9,7 +9,6 @@
  * FF_VOICE_LEAD_EXTRACTION=true
  * FF_VOICE_LEAD_SCORING=true
  * FF_VOICE_CRM_SYNC=true
- * FF_VOICE_ANALYTICS=true
  * FF_VOICE_ADMIN_ALERTS=true
  */
 
@@ -22,9 +21,6 @@ export interface FeatureFlags {
 
   /** Sync qualified leads to CRM via NCB OpenAPI */
   VOICE_CRM_SYNC: boolean;
-
-  /** Track analytics (sentiment, topics, conversion funnel) */
-  VOICE_ANALYTICS: boolean;
 
   /** Send email alerts to admin for high-value leads */
   VOICE_ADMIN_ALERTS: boolean;
@@ -40,7 +36,6 @@ export function getFeatureFlags(env: Record<string, string | undefined>): Featur
     VOICE_LEAD_EXTRACTION: isEnabled(env.FF_VOICE_LEAD_EXTRACTION),
     VOICE_LEAD_SCORING: isEnabled(env.FF_VOICE_LEAD_SCORING),
     VOICE_CRM_SYNC: isEnabled(env.FF_VOICE_CRM_SYNC),
-    VOICE_ANALYTICS: isEnabled(env.FF_VOICE_ANALYTICS),
     VOICE_ADMIN_ALERTS: isEnabled(env.FF_VOICE_ADMIN_ALERTS),
   };
 }
@@ -53,7 +48,6 @@ export function logFeatureFlags(flags: FeatureFlags): void {
     extraction: flags.VOICE_LEAD_EXTRACTION ? '✅' : '❌',
     scoring: flags.VOICE_LEAD_SCORING ? '✅' : '❌',
     crmSync: flags.VOICE_CRM_SYNC ? '✅' : '❌',
-    analytics: flags.VOICE_ANALYTICS ? '✅' : '❌',
     adminAlerts: flags.VOICE_ADMIN_ALERTS ? '✅' : '❌',
   });
 }

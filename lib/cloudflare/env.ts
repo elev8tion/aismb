@@ -49,7 +49,6 @@ export interface CloudflareEnv {
   FF_VOICE_LEAD_EXTRACTION?: string;
   FF_VOICE_LEAD_SCORING?: string;
   FF_VOICE_CRM_SYNC?: string;
-  FF_VOICE_ANALYTICS?: string;
   FF_VOICE_ADMIN_ALERTS?: string;
 
   [key: string]: string | KVNamespace | undefined;
