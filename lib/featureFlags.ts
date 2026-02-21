@@ -35,12 +35,13 @@ export interface FeatureFlags {
  * All flags default to false if not explicitly set to 'true'
  */
 export function getFeatureFlags(env: Record<string, string | undefined>): FeatureFlags {
+  const isEnabled = (val: string | undefined) => (val || '').trim() === 'true';
   return {
-    VOICE_LEAD_EXTRACTION: env.FF_VOICE_LEAD_EXTRACTION === 'true',
-    VOICE_LEAD_SCORING: env.FF_VOICE_LEAD_SCORING === 'true',
-    VOICE_CRM_SYNC: env.FF_VOICE_CRM_SYNC === 'true',
-    VOICE_ANALYTICS: env.FF_VOICE_ANALYTICS === 'true',
-    VOICE_ADMIN_ALERTS: env.FF_VOICE_ADMIN_ALERTS === 'true',
+    VOICE_LEAD_EXTRACTION: isEnabled(env.FF_VOICE_LEAD_EXTRACTION),
+    VOICE_LEAD_SCORING: isEnabled(env.FF_VOICE_LEAD_SCORING),
+    VOICE_CRM_SYNC: isEnabled(env.FF_VOICE_CRM_SYNC),
+    VOICE_ANALYTICS: isEnabled(env.FF_VOICE_ANALYTICS),
+    VOICE_ADMIN_ALERTS: isEnabled(env.FF_VOICE_ADMIN_ALERTS),
   };
 }
 
