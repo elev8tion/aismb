@@ -15,6 +15,11 @@ export async function GET() {
         responseCache: !!env.RESPONSE_CACHE_KV,
         voiceSessions: !!env.VOICE_SESSIONS,
       },
+      featureFlags: {
+        FF_VOICE_LEAD_EXTRACTION: env.FF_VOICE_LEAD_EXTRACTION,
+        FF_VOICE_LEAD_SCORING: env.FF_VOICE_LEAD_SCORING,
+        FF_VOICE_CRM_SYNC: env.FF_VOICE_CRM_SYNC,
+      },
     });
   } catch (error) {
     return NextResponse.json(
