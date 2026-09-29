@@ -1,0 +1,63 @@
+name: Configure Cloudflare DNS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Configure landing-page DNS records
+        env:
+          CLOUDFLARE_DNS_API_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CLOUDFLARE_DNS_API_TOKEN:-}" ] || [ "$CLOUDFLARE_DNS_API_TOKEN" = "REPLACE_WITH_CLOUDFLARE_DNS_API_TOKEN" ]; then
+            echo "Missing GitHub secret CLOUDFLARE_DNS_API_TOKEN. Add a scoped Cloudflare API token first."
+            exit 1
+          fi
+
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_DNS_API_TOKEN" -H 'Content-Type: application/json')
+          api='https://api.cloudflare.com/client/v4'
+          zone_id=$(curl -fsS "$api/zones?name=kre8tion.com&status=active" "${auth[@]}" | jq -r '.result[0].id // empty')
+          test -n "$zone_id"
+
+          delete_conflicting_records() {
+            local name="$1"
+            for type in A AAAA; do
+              curl -fsS "$api/zones/$zone_id/dns_records?name=$name&type=$type&per_page=100" "${auth[@]}" \
+                | jq -r '.result[].id' \
+                | while read -r record_id; do
+                    [ -z "$record_id" ] || curl -fsS -X DELETE "$api/zones/$zone_id/dns_records/$record_id" "${auth[@]}" >/dev/null
+                  done
+            done
+          }
+
+          ensure_pages_cname() {
+            local name="$1"
+            local target='kre8tion-app.pages.dev'
+            delete_conflicting_records "$name"
+
+            existing=$(curl -fsS "$api/zones/$zone_id/dns_records?name=$name&type=CNAME&per_page=100" "${auth[@]}")
+            matching=$(jq -r --arg target "$target" '[.result[] | select(.content == $target and .proxied == true)] | length' <<<"$existing")
+            if [ "$matching" = "1" ]; then
+              echo "$name already points to $target"
+              return
+            fi
+
+            jq -c '.result[].id' <<<"$existing" | while read -r record_id; do
+              [ -z "$record_id" ] || curl -fsS -X DELETE "$api/zones/$zone_id/dns_records/$record_id" "${auth[@]}" >/dev/null
+            done
+
+            curl -fsS -X POST "$api/zones/$zone_id/dns_records" "${auth[@]}" \
+              --data "$(jq -nc --arg name "$name" --arg target "$target" '{type:"CNAME",name:$name,content:$target,ttl:1,proxied:true}')" \
+              | jq -e '.success == true' >/dev/null
+            echo "Configured $name -> $target"
+          }
+
+          ensure_pages_cname 'kre8tion.com'
+          ensure_pages_cname 'www.kre8tion.com'
+          echo 'DNS records configured. Add kre8tion.com and www.kre8tion.com under Pages → kre8tion-app → Custom domains if they are not already listed.'

@@ -67,6 +67,17 @@ npx wrangler pages deploy .vercel/output/static --project-name=kre8tion-app --co
 
 ---
 
+## Landing DNS repair
+
+The manual `Configure Cloudflare DNS` workflow uses the GitHub Actions secret
+`CLOUDFLARE_DNS_API_TOKEN`. Create a Cloudflare API token scoped to the
+`kre8tion.com` zone with **Zone → DNS → Edit**, then add it under GitHub →
+Settings → Secrets and variables → Actions. Run the workflow from the Actions tab.
+It configures `kre8tion.com` and `www.kre8tion.com` to point to
+`kre8tion-app.pages.dev`.
+
+Also add both hostnames under Cloudflare Pages → `kre8tion-app` → Custom domains.
+
 ## KV Namespaces
 
 These are already configured in `wrangler.toml`:
