@@ -12,6 +12,7 @@ jobs:
       - name: Configure landing-page DNS records
         env:
           CLOUDFLARE_DNS_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
 
@@ -70,4 +71,16 @@ jobs:
 
           ensure_pages_cname 'kre8tion.com'
           ensure_pages_cname 'www.kre8tion.com'
-          echo 'DNS records configured. Add kre8tion.com and www.kre8tion.com under Pages → kre8tion-app → Custom domains if they are not already listed.'
+
+          pages_domains=$(curl -fsS "$api/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/kre8tion-app/domains" "${auth[@]}")
+          for domain in kre8tion.com www.kre8tion.com; do
+            if ! jq -e --arg domain "$domain" '.result[]?.name == $domain' <<<"$pages_domains" >/dev/null; then
+              curl -fsS -X POST "$api/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/kre8tion-app/domains" "${auth[@]}" \
+                --data "$(jq -nc --arg name "$domain" '{name:$name}')" \
+                | jq -e '.success == true' >/dev/null
+              echo "Added Pages custom domain $domain"
+            else
+              echo "Pages custom domain already exists: $domain"
+            fi
+          done
+          echo 'DNS and Pages custom domains configured.'
