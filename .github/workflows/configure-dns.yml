@@ -11,12 +11,12 @@ jobs:
     steps:
       - name: Configure landing-page DNS records
         env:
-          CLOUDFLARE_DNS_API_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
+          CLOUDFLARE_DNS_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
 
           if [ -z "${CLOUDFLARE_DNS_API_TOKEN:-}" ] || [ "$CLOUDFLARE_DNS_API_TOKEN" = "REPLACE_WITH_CLOUDFLARE_DNS_API_TOKEN" ]; then
-            echo "Missing GitHub secret CLOUDFLARE_DNS_API_TOKEN. Add a scoped Cloudflare API token first."
+            echo "Missing GitHub secret CLOUDFLARE_API_TOKEN. Add a scoped Cloudflare API token first."
             exit 1
           fi
 
