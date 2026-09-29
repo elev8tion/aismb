@@ -1,0 +1,26 @@
+name: Audit Cloudflare DNS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect DNS and Pages domains
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          zone=$(curl -fsS "https://api.cloudflare.com/client/v4/zones?name=kre8tion.com&status=active" "${auth[@]}")
+          zone_id=$(jq -r '.result[0].id // empty' <<<"$zone")
+          test -n "$zone_id"
+          echo "Zone: kre8tion.com"
+          echo "DNS records:"
+          curl -fsS "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?per_page=100" "${auth[@]}" \
+            | jq -r '.result[] | [.name, .type, .content, .proxied] | @tsv'
+          echo "Landing Pages domains:"
+          curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/kre8tion-app/domains" "${auth[@]}" \
+            | jq -r '.result[]? | [.name, .status, .verification_data.status] | @tsv'
