@@ -123,7 +123,7 @@ export default function ContactsPage() {
       const payload: any = { ...form };
       if (payload.company_id) { payload.company_id = Number(payload.company_id); }
       else { delete payload.company_id; }
-      const res = await fetch(`/api/data/update/contacts?id=${editContact.id}`, {
+      const res = await fetch(`/api/data/update/contacts/${editContact.id}`, {
         method: 'PUT', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

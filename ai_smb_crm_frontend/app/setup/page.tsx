@@ -138,7 +138,7 @@ export default function SetupWizardPage() {
       };
 
       if (existing?.id) {
-        await fetch(`/api/data/update/user_profiles?id=${existing.id}`, {
+        await fetch(`/api/data/update/user_profiles/${existing.id}`, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

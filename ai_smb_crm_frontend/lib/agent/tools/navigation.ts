@@ -13,7 +13,10 @@ type NavigateTarget =
   | 'voice_sessions'
   | 'roi_calculations'
   | 'reports_weekly'
-  | 'settings';
+  | 'settings'
+  | 'documents'
+  | 'help'
+  | 'setup';
 
 const TARGET_TO_ROUTE: Record<NavigateTarget, string> = {
   dashboard: '/dashboard',
@@ -29,6 +32,9 @@ const TARGET_TO_ROUTE: Record<NavigateTarget, string> = {
   roi_calculations: '/roi-calculations',
   reports_weekly: '/reports/weekly',
   settings: '/settings',
+  documents: '/documents',
+  help: '/help',
+  setup: '/setup',
 };
 
 export async function navigate(

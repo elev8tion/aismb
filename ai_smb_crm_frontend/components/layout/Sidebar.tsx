@@ -43,7 +43,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileC
   // Auto-close mobile drawer on route change
   useEffect(() => {
     onMobileClose();
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const sidebarContent = (isMobile: boolean) => {
     const expanded = isMobile || !isCollapsed;

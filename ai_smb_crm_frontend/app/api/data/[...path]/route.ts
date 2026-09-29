@@ -5,21 +5,30 @@ import { extractAuthCookies, getSessionUser, type NCBEnv } from "@/lib/agent/ncb
 
 export const runtime = 'edge';
 
-// Tables any authenticated user can access (public booking data + own profile via RLS)
-const PUBLIC_TABLES = new Set([
-  'bookings',
-  'availability_settings',
-  'blocked_dates',
-  'user_profiles',
-  'customer_access',
-]);
+// User-scoped tables. Access is restricted by operation below; these are not public.
+const USER_PROFILE_TABLE = 'user_profiles';
+const CUSTOMER_ACCESS_TABLE = 'customer_access';
 
-// Tables customers can READ (not write). Admins have full access.
-// Bypasses RLS via secret key so customers can see admin-owned records.
+// Tables customers can READ (not write). Customer IDs are checked against
+// customer_access before the request is sent through the secret-key path.
 const CUSTOMER_TABLES = new Set([
   'partnerships',
   'delivered_systems',
   'companies',
+]);
+
+// Internal team members can work CRM records but cannot delete or alter access/settings.
+const TEAM_MEMBER_TABLES = new Set([
+  'leads',
+  'contacts',
+  'companies',
+  'opportunities',
+  'partnerships',
+  'drafts',
+  'voice_sessions',
+  'roi_calculations',
+  'activities',
+  'bookings',
 ]);
 
 // Tables without a user_id column — NCB Data Proxy can't filter by user,
@@ -65,7 +74,7 @@ async function getUserRole(config: DataProxyConfig, userId: string): Promise<str
   if (res.ok) {
     const data: any = await res.json();
     if (data.data && Array.isArray(data.data)) {
-      const profile = data.data.find((p: any) => p.user_id === userId);
+      const profile = data.data.find((p: any) => String(p.user_id) === String(userId));
       return profile?.role ?? null;
     }
   }
@@ -87,20 +96,126 @@ function extractOperation(path: string): string {
 
 function isAuthorized(table: string | null, role: string | null, operation: string): boolean {
   if (!table) return false;
-  if (PUBLIC_TABLES.has(table)) return true;
-  if (CUSTOMER_TABLES.has(table)) {
-    if (role === 'admin') return true;
-    if (role === 'customer' && operation === 'read') return true;
-    return false;
+  if (role === 'admin') return true;
+  if (role === 'team_member' && table && TEAM_MEMBER_TABLES.has(table)) {
+    return operation !== 'delete';
   }
-  return role === 'admin';
+
+  // Profiles are created on first login and edited only by their owner.
+  if (table === USER_PROFILE_TABLE) {
+    return ['read', 'create', 'update'].includes(operation);
+  }
+
+  // Customers may inspect their own access records, but cannot grant or revoke access.
+  if (table === CUSTOMER_ACCESS_TABLE) {
+    return operation === 'read';
+  }
+
+  // Customers may only read their own bookings, enforced by customerScopeAllowed.
+  if (table === 'bookings') {
+    return operation === 'read';
+  }
+
+  // Customer-owned CRM data is read-only and scoped by customer_access.
+  if (CUSTOMER_TABLES.has(table)) {
+    return role === 'customer' && operation === 'read';
+  }
+
+  // Availability and all other tables are admin-only.
+  return false;
 }
 
-function customerNeedsFilter(table: string | null, role: string | null, searchParams: URLSearchParams): boolean {
-  if (role !== 'customer' || !table || !CUSTOMER_TABLES.has(table)) return false;
-  // Customers must provide a filter to prevent listing all records
-  return !searchParams.has('id__in') && !searchParams.has('id') &&
-    !searchParams.has('partnership_id') && !searchParams.has('partnership_id__in');
+async function readOpenApiRows(
+  config: DataProxyConfig,
+  table: string,
+  params: Record<string, string> = {},
+): Promise<any[]> {
+  if (!config.secretKey) return [];
+
+  const url = new URL(`${config.openApiUrl}/read/${table}`);
+  url.searchParams.set('Instance', config.instance);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
+
+  const res = await fetch(url.toString(), {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${config.secretKey}`,
+    },
+  });
+  if (!res.ok) return [];
+
+  const data: any = await res.json();
+  return Array.isArray(data.data) ? data.data : [];
+}
+
+async function customerScopeAllowed(
+  config: DataProxyConfig,
+  table: string | null,
+  operation: string,
+  searchParams: URLSearchParams,
+  user: { id: string; email: string },
+): Promise<boolean> {
+  if (!table || operation !== 'read') return false;
+
+  if (table === 'bookings') {
+    return searchParams.get('guest_email')?.toLowerCase() === user.email.toLowerCase();
+  }
+
+  if (table === CUSTOMER_ACCESS_TABLE) {
+    return searchParams.get('user_id') === user.id;
+  }
+
+  if (!CUSTOMER_TABLES.has(table)) return true;
+
+  const accessRows = await readOpenApiRows(config, CUSTOMER_ACCESS_TABLE);
+  const partnershipIds = new Set(
+    accessRows
+      .filter((row) => String(row.user_id) === String(user.id))
+      .map((row) => String(row.partnership_id)),
+  );
+  if (partnershipIds.size === 0) return false;
+
+  const requestedIds = (key: string) => (searchParams.get(key) || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (table === 'partnerships') {
+    const ids = [...requestedIds('id'), ...requestedIds('id__in')];
+    return ids.length > 0 && ids.every((id) => partnershipIds.has(id));
+  }
+
+  if (table === 'delivered_systems') {
+    const ids = [...requestedIds('partnership_id'), ...requestedIds('partnership_id__in')];
+    return ids.length > 0 && ids.every((id) => partnershipIds.has(id));
+  }
+
+  const partnerships = await readOpenApiRows(config, 'partnerships', {
+    id__in: [...partnershipIds].join(','),
+  });
+  const companyIds = new Set(partnerships.map((row) => String(row.company_id)));
+  const ids = [...requestedIds('id'), ...requestedIds('id__in')];
+  return ids.length > 0 && ids.every((id) => companyIds.has(id));
+}
+
+async function profileMutationAllowed(
+  config: DataProxyConfig,
+  path: string,
+  req: NextRequest,
+  role: string | null,
+  user: { id: string },
+): Promise<boolean> {
+  if (role === 'admin' || !path.startsWith(`update/${USER_PROFILE_TABLE}`)) return true;
+
+  const profileId = path.split('/')[2] || req.nextUrl.searchParams.get('id');
+  if (!profileId) return false;
+
+  const profiles = await readOpenApiRows(config, USER_PROFILE_TABLE);
+  return profiles.some((profile) =>
+    String(profile.id) === String(profileId) && String(profile.user_id) === String(user.id),
+  );
 }
 
 function forbidden() {
@@ -128,17 +243,27 @@ async function rateLimit(req: NextRequest, env: Record<string, unknown>): Promis
 }
 
 async function proxyToNCB(config: DataProxyConfig, req: NextRequest, path: string, body?: string, bypassRLS = false) {
+  // Accept legacy ?id= callers during migration, but forward the canonical NCB path.
+  const parts = path.split('/');
+  const legacyId = parts.length === 2 &&
+    (parts[0] === 'update' || parts[0] === 'delete')
+    ? req.nextUrl.searchParams.get('id')
+    : null;
+  const targetPath = legacyId ? `${path}/${encodeURIComponent(legacyId)}` : path;
+
   const searchParams = new URLSearchParams();
   searchParams.set("Instance", config.instance);
 
   req.nextUrl.searchParams.forEach((val, key) => {
-    if (key !== "Instance" && key !== "instance" && key !== "path") searchParams.append(key, val);
+    if (key !== "Instance" && key !== "instance" && key !== "path" && !(legacyId && key === 'id')) {
+      searchParams.append(key, val);
+    }
   });
 
   // bypassRLS: use OpenAPI endpoint (Bearer token, no RLS) so guest records are visible.
   // Data Proxy endpoint only understands cookie auth — Bearer token there does nothing.
   const baseUrl = bypassRLS ? config.openApiUrl : config.dataApiUrl;
-  const url = `${baseUrl}/${path}?${searchParams.toString()}`;
+  const url = `${baseUrl}/${targetPath}?${searchParams.toString()}`;
   const origin = req.headers.get("origin") || req.nextUrl.origin;
 
   const headers: Record<string, string> = {
@@ -162,7 +287,7 @@ async function proxyToNCB(config: DataProxyConfig, req: NextRequest, path: strin
 
   // NCB returns 404 for empty result sets on reads. Normalize to 200 with empty data
   // so the browser doesn't log "Failed to load resource" console errors.
-  if (res.status === 404 && path.startsWith("read/")) {
+  if (res.status === 404 && targetPath.startsWith("read/")) {
     return new NextResponse(JSON.stringify({ data: [] }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -171,7 +296,7 @@ async function proxyToNCB(config: DataProxyConfig, req: NextRequest, path: strin
 
   const data = await res.text();
 
-  const isRead = path.startsWith("read/");
+  const isRead = targetPath.startsWith("read/");
   return new NextResponse(data, {
     status: res.status,
     headers: {
@@ -214,7 +339,13 @@ export async function GET(
     return forbidden();
   }
 
-  if (customerNeedsFilter(table, role, req.nextUrl.searchParams)) {
+  if (role === 'customer' && !(await customerScopeAllowed(
+    config,
+    table,
+    operation,
+    req.nextUrl.searchParams,
+    user,
+  ))) {
     return forbidden();
   }
 
@@ -263,6 +394,10 @@ export async function POST(
     return forbidden();
   }
 
+  if (!(await profileMutationAllowed(config, pathStr, req, role, user))) {
+    return forbidden();
+  }
+
   if (pathStr.startsWith("create/") && body) {
     try {
       const parsed = JSON.parse(body);
@@ -307,6 +442,10 @@ export async function PUT(
   const table = extractTableName(pathStr);
   const operation = extractOperation(pathStr);
   if (!isAuthorized(table, role, operation)) {
+    return forbidden();
+  }
+
+  if (!(await profileMutationAllowed(config, pathStr, req, role, user))) {
     return forbidden();
   }
 

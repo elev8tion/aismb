@@ -192,7 +192,6 @@ export default function LiquidMorphLogo({
               times: [0, 0.3, 0.7, 1],
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}
               alt={alt}

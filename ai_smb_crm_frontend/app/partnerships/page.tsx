@@ -238,7 +238,7 @@ export default function PartnershipsPage() {
     if (!updatePartnership) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/data/update/partnerships?id=${updatePartnership.id}`, {
+      const res = await fetch(`/api/data/update/partnerships/${updatePartnership.id}`, {
         method: 'PUT', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateForm),
@@ -280,7 +280,7 @@ export default function PartnershipsPage() {
       const data: any = await res.json();
       if (data.success) {
         // Update partnership payment_status locally
-        await fetch(`/api/data/update/partnerships?id=${invoicePartnership.id}`, {
+        await fetch(`/api/data/update/partnerships/${invoicePartnership.id}`, {
           method: 'PUT', credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

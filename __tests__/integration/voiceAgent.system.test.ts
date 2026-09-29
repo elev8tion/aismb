@@ -5,6 +5,7 @@
  * Tests continue on error to reveal all issues, not just the first failure.
  *
  * Run with: npm test -- voiceAgent.system.test.ts
+ * Run with the required server: RUN_INTEGRATION=true npm test -- voiceAgent.system.test.ts
  * Run with tracing: TRACE=true npm test -- voiceAgent.system.test.ts
  */
 
@@ -14,8 +15,8 @@ import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 // Test Configuration
 // ═══════════════════════════════════════════════════════════════════════════
 
+const RUN_INTEGRATION = process.env.RUN_INTEGRATION === 'true';
 const TRACE = process.env.TRACE === 'true';
-const USE_REAL_APIS = process.env.USE_REAL_APIS === 'true';
 const API_BASE = process.env.API_BASE || 'http://localhost:3000';
 
 interface TraceLog {
@@ -89,7 +90,7 @@ function generateReport() {
 // Test Scenarios
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe('Voice Agent System Tests - Landing Page', () => {
+describe.skipIf(!RUN_INTEGRATION)('Voice Agent System Tests - Landing Page', () => {
 
   // ─────────────────────────────────────────────────────────────────────────
   // Scenario 1: Simple English Conversation

@@ -29,13 +29,13 @@ export default function PipelinePage() {
   // Start Stripe Checkout for a deal
   const startCheckout = async (deal: Opportunity) => {
     try {
-      const amountDollars = Number(deal.total_contract_value || deal.setup_fee || 0);
+      const amountDollars = Number(deal.setup_fee || 0);
       const res = await fetch('/api/integrations/stripe/checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: 'payment',
-          amount: Math.round(amountDollars * 100), // cents
+          amount: Math.round(amountDollars * 100), // cents; server re-derives this from the opportunity
           currency: 'usd',
           metadata: { tier: deal.tier, stage: deal.stage },
           opportunity_id: deal.id,

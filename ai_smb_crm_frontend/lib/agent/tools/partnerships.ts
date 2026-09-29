@@ -6,6 +6,9 @@ interface Partnership {
   opportunity_id: string;
   tier: string;
   status?: string;
+  phase?: string;
+  health_score?: number;
+  // Legacy aliases used by older NCB records during migration.
   current_phase?: string;
   satisfaction_score?: number;
   engagement_level?: string;
@@ -24,10 +27,17 @@ const VALID_PHASES = ['discover', 'co-create', 'deploy', 'independent'];
 
 export async function list_partnerships(params: { phase?: string; status?: string }, cookies: string, env: NCBEnv) {
   const filters: Record<string, string> = {};
-  if (params.phase) filters.current_phase = params.phase;
+  if (params.phase) filters.phase = params.phase;
   if (params.status) filters.status = params.status;
-  const result = await ncbRead<Partnership>(env, 'partnerships', cookies, filters);
-  return { partnerships: result.data || [], total: (result.data || []).length };
+  try {
+    const result = await ncbRead<Partnership>(env, 'partnerships', cookies, filters);
+    return { partnerships: result.data || [], total: (result.data || []).length };
+  } catch {
+    if (params.phase) filters.current_phase = params.phase;
+    delete filters.phase;
+    const result = await ncbRead<Partnership>(env, 'partnerships', cookies, filters);
+    return { partnerships: result.data || [], total: (result.data || []).length };
+  }
 }
 
 export async function get_partnership_summary(_params: Record<string, never>, cookies: string, env: NCBEnv) {
@@ -39,10 +49,11 @@ export async function get_partnership_summary(_params: Record<string, never>, co
   let scoreCount = 0;
 
   for (const p of partnerships) {
-    const phase = p.current_phase || 'unknown';
+    const phase = p.phase || p.current_phase || 'unknown';
     byPhase[phase] = (byPhase[phase] || 0) + 1;
-    if (p.satisfaction_score != null) {
-      totalScore += Number(p.satisfaction_score);
+    const score = p.health_score ?? p.satisfaction_score;
+    if (score != null) {
+      totalScore += Number(score);
       scoreCount++;
     }
   }
@@ -59,13 +70,23 @@ export async function update_partnership_phase(params: { partnership_id: string;
   if (!VALID_PHASES.includes(params.phase)) {
     return { success: false, error: `Invalid phase. Must be one of: ${VALID_PHASES.join(', ')}` };
   }
-  const result = await ncbUpdate<Partnership>(env, 'partnerships', params.partnership_id, { current_phase: params.phase }, cookies);
-  return { success: true, partnership: result };
+  try {
+    const result = await ncbUpdate<Partnership>(env, 'partnerships', params.partnership_id, { phase: params.phase }, cookies);
+    return { success: true, partnership: result };
+  } catch {
+    const result = await ncbUpdate<Partnership>(env, 'partnerships', params.partnership_id, { current_phase: params.phase }, cookies);
+    return { success: true, partnership: result };
+  }
 }
 
 export async function update_satisfaction_score(params: { partnership_id: string; score: number }, cookies: string, env: NCBEnv) {
-  const result = await ncbUpdate<Partnership>(env, 'partnerships', params.partnership_id, { satisfaction_score: params.score }, cookies);
-  return { success: true, partnership: result };
+  try {
+    const result = await ncbUpdate<Partnership>(env, 'partnerships', params.partnership_id, { health_score: params.score }, cookies);
+    return { success: true, partnership: result };
+  } catch {
+    const result = await ncbUpdate<Partnership>(env, 'partnerships', params.partnership_id, { satisfaction_score: params.score }, cookies);
+    return { success: true, partnership: result };
+  }
 }
 
 export async function create_partnership(
@@ -80,8 +101,8 @@ export async function create_partnership(
     opportunity_id: params.opportunity_id,
     tier: params.tier || 'foundation',
     status: 'onboarding',
-    current_phase: params.phase || 'discover',
-    satisfaction_score: 50,
+    phase: params.phase || 'discover',
+    health_score: 50,
     start_date: today,
     target_end_date: today, // Will be updated later
     customer_email: params.customer_email || null,

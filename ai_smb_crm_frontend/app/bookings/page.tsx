@@ -76,7 +76,7 @@ export default function BookingsPage() {
   const updateBookingStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
     setUpdatingId(id);
     try {
-      const res = await fetch(`/api/data/update/bookings?id=${id}`, {
+      const res = await fetch(`/api/data/update/bookings/${id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -103,7 +103,7 @@ export default function BookingsPage() {
       const endM = endMinutes % 60;
       const end_time = `${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`;
 
-      const res = await fetch(`/api/data/update/bookings?id=${rescheduleTarget.id}`, {
+      const res = await fetch(`/api/data/update/bookings/${rescheduleTarget.id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

@@ -133,7 +133,6 @@ export function OnboardingChecklist() {
       setCompletedSteps(updated);
       persistProgress(updated);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user]);
 
   const persistProgress = useCallback(
@@ -146,7 +145,7 @@ export function OnboardingChecklist() {
         if (isDismissed !== undefined) {
           body.onboarding_dismissed = isDismissed ? 'true' : 'false';
         }
-        await fetch(`/api/data/update/user_profiles?id=${profileId}`, {
+        await fetch(`/api/data/update/user_profiles/${profileId}`, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

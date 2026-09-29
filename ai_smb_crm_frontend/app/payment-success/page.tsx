@@ -50,25 +50,8 @@ function PaymentSuccessContent() {
           setError(data.error);
         } else {
           setSession(data);
-          // Record payment in NCB if paid (user is authenticated here)
-          if (data.payment_status === 'paid') {
-            fetch('/api/data/create/payments', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                type: 'setup',
-                amount: data.amount_total ? data.amount_total / 100 : 0,
-                due_date: new Date().toISOString().split('T')[0],
-                paid_date: new Date().toISOString().split('T')[0],
-                status: 'paid',
-                stripe_session_id: data.id,
-                customer_email: data.customer_email || '',
-                opportunity_id: data.metadata?.opportunity_id ? Number(data.metadata.opportunity_id) : null,
-                partnership_id: data.metadata?.partnership_id ? Number(data.metadata.partnership_id) : null,
-              }),
-            }).catch(err => console.error('Failed to record payment:', err));
-          }
+          // Payment persistence is handled by the signed Stripe webhook.
+          // This page is display-only so refreshes cannot create duplicate records.
         }
       })
       .catch(() => setError('Failed to load payment details'))

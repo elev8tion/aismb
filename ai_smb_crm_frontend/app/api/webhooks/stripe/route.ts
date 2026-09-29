@@ -33,15 +33,41 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      // ─── Checkout (existing — assessment payments) ───
+      // ─── Checkout (CRM opportunity payments) ───
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
+        const metadata = session.metadata || {};
+        const opportunityId = metadata.opportunity_id || '';
+        const partnershipId = metadata.partnership_id || '';
+
         console.log('Checkout completed:', {
           id: session.id,
           amount_total: session.amount_total,
           email: session.customer_details?.email,
-          metadata: session.metadata,
+          metadata,
         });
+
+        // The webhook is authoritative. The unique Stripe session lookup makes retries safe.
+        if (opportunityId || partnershipId) {
+          const existing = await ncbOpenApiRead(env, 'payments', {
+            stripe_session_id: session.id,
+          });
+          if (existing.length === 0) {
+            await ncbServerCreate(env, 'payments', {
+              type: 'setup',
+              amount: (session.amount_total || 0) / 100,
+              currency: session.currency || 'usd',
+              status: session.payment_status === 'paid' ? 'paid' : 'pending',
+              paid_date: session.payment_status === 'paid'
+                ? new Date().toISOString().split('T')[0]
+                : null,
+              stripe_session_id: session.id,
+              customer_email: session.customer_details?.email || session.customer_email || '',
+              opportunity_id: opportunityId || null,
+              partnership_id: partnershipId || null,
+            });
+          }
+        }
         break;
       }
 

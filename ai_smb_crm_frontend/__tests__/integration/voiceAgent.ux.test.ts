@@ -9,6 +9,7 @@
  * - Bilingual support
  *
  * Run with: npm test -- voiceAgent.ux.test.ts
+ * Run with the required server: RUN_INTEGRATION=true npm test -- voiceAgent.ux.test.ts
  * Run with tracing: TRACE=true npm test -- voiceAgent.ux.test.ts
  *
  * Prerequisites:
@@ -19,6 +20,7 @@
 
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 
+const RUN_INTEGRATION = process.env.RUN_INTEGRATION === 'true';
 const TRACE = process.env.TRACE === 'true';
 const API_BASE = process.env.API_BASE || 'http://localhost:3003';
 const TEST_EMAIL = process.env.TEST_EMAIL || 'connect@elev8tion.one';
@@ -151,7 +153,7 @@ async function authenticate(): Promise<string> {
 
 let sessionCookie: string = '';
 
-describe('Voice Agent UX Enhancement Tests', () => {
+describe.skipIf(!RUN_INTEGRATION)('Voice Agent UX Enhancement Tests', () => {
   beforeAll(async () => {
     // Authenticate once before all tests
     sessionCookie = await authenticate();

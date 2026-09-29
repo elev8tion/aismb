@@ -156,8 +156,8 @@ export default function PortalDashboardPage() {
                   </div>
                   <div className="text-left sm:text-right">
                     <p className="text-xs text-white/50">{t.portal.healthScore}</p>
-                    <p className={`text-2xl font-bold ${getHealthColor(Number(partnership.satisfaction_score || 0))}`}>
-                      {Number(partnership.satisfaction_score || 0)}%
+                    <p className={`text-2xl font-bold ${getHealthColor(Number(partnership.health_score || 0))}`}>
+                      {Number(partnership.health_score || 0)}%
                     </p>
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export default function PortalDashboardPage() {
                   <p className="text-xs text-white/50 mb-3">{t.portal.phase}</p>
                   <div className="flex items-center gap-1">
                     {PHASES.map((phase, idx) => {
-                      const currentIdx = PHASES.indexOf(partnership.current_phase);
+                      const currentIdx = PHASES.indexOf(partnership.phase || '');
                       const isCompleted = idx < currentIdx;
                       const isCurrent = idx === currentIdx;
                       return (

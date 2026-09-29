@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import Stripe from 'stripe';
+import { getCRMAuth, unauthorizedStatus } from '@/lib/security/crmAuth';
+import type { NCBEnv } from '@/lib/agent/ncbClient';
 
 export const runtime = 'edge';
 
@@ -21,6 +23,18 @@ export async function GET(req: NextRequest) {
   const stripe = new Stripe(secret, { apiVersion: '2023-10-16' });
 
   try {
+    const auth = await getCRMAuth(env as unknown as NCBEnv & Record<string, string>, req);
+    const authError = unauthorizedStatus(auth);
+    if (authError) {
+      return NextResponse.json(
+        { error: authError === 401 ? 'Unauthorized' : 'Forbidden' },
+        { status: authError },
+      );
+    }
+    if (!auth || !['admin', 'team_member'].includes(auth.role || '')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     return NextResponse.json({
       id: session.id,

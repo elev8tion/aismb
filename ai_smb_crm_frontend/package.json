@@ -6,7 +6,7 @@
     "prebuild": "cd packages/shared-types && npm run build && cd ../..",
     "dev": "next dev --port 3001",
     "build": "next build",
-    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:build": "NPM_CONFIG_LEGACY_PEER_DEPS=true npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
@@ -17,14 +17,15 @@
     "@kre8tion/shared-types": "file:./packages/shared-types",
     "framer-motion": "^12.31.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^4.1.0",
-    "next": "15.5.2",
+    "jspdf": "4.2.1",
+    "next": "15.5.26",
     "openai": "^6.18.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^3.7.0",
     "stripe": "^14.22.0",
-    "workerd": "^1.20260205.0"
+    "workerd": "^1.20260205.0",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260203.0",

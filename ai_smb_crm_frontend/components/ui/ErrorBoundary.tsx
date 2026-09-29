@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <h3 className="font-semibold">Something went wrong</h3>
           </div>
           <p className="text-sm text-white/70 mb-4">
-            We couldn't load this section. It might be a temporary connectivity issue.
+            We couldn&apos;t load this section. It might be a temporary connectivity issue.
           </p>
           <button
             onClick={() => this.setState({ hasError: false })}

@@ -18,6 +18,7 @@ import {
 import { calculateEndTime, timeToMinutes, extractDateString, extractTimeMinutes } from '@/lib/booking/availability';
 import { fetchFromNCB, createInNCB } from '@/lib/ncb/client';
 import { runBookingPipeline } from '@/lib/booking/createBooking';
+import { generateAllCalendarLinks } from '@/lib/booking/calendarLinks';
 import { KVRateLimiter, getClientIP } from '@/lib/security/rateLimiter.kv';
 
 export const runtime = 'edge';
@@ -75,6 +76,39 @@ export async function POST(req: NextRequest) {
     const validatedData = validation.data;
 
     const isAssessment = validatedData.bookingType === 'assessment';
+
+    // Idempotency guard for Stripe-backed assessment retries. The webhook and
+    // success page may legitimately deliver the same session concurrently.
+    if (validatedData.stripe_session_id) {
+      const existing = await fetchFromNCB<Booking>(cfEnv, 'bookings', {
+        stripe_session_id: validatedData.stripe_session_id,
+      });
+      if (existing.length > 0) {
+        const booking = existing[0];
+        const calendarLinks = generateAllCalendarLinks(
+          String(booking.id),
+          booking.guest_name,
+          booking.guest_email,
+          booking.booking_date,
+          booking.start_time,
+          booking.end_time,
+          booking.timezone,
+          booking.challenge ?? undefined,
+          'assessment',
+        );
+        return NextResponse.json({
+          success: true,
+          booking,
+          calendarLinks: {
+            google: calendarLinks.google,
+            outlook: calendarLinks.outlook,
+            ics: calendarLinks.icsDataUri,
+          },
+          idempotent: true,
+        });
+      }
+    }
+
     const duration = isAssessment ? ASSESSMENT_DURATION : MEETING_DURATION;
 
     // Double-check slot availability to prevent race conditions

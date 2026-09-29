@@ -83,7 +83,7 @@ export interface Partnership extends TimestampFields {
   tier: ServiceTier;
   status: string; // e.g., 'pending', 'active', 'paused', 'cancelled', 'completed'
   phase: Nullable<string>; // e.g., 'setup', 'implementation', 'delivery', 'maintenance'
-  health_score: number; // 0-10 score
+  health_score: number; // 0-100 score
   systems_delivered: number;
   total_systems: number;
   monthly_revenue: Nullable<number>; // decimal as number
@@ -95,6 +95,9 @@ export interface Partnership extends TimestampFields {
   stripe_customer_id: Nullable<string>;
   contact_name: Nullable<string>; // Derived/joined field
   user_id: number;
+  /** Legacy NCB aliases retained during schema migration. */
+  current_phase?: Nullable<string>;
+  satisfaction_score?: Nullable<number>;
 }
 
 // ─── Activity ────────────────────────────────────────────────────────────────

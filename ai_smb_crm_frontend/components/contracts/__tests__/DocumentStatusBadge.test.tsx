@@ -5,27 +5,27 @@ import DocumentStatusBadge from '../DocumentStatusBadge';
 describe('DocumentStatusBadge', () => {
   it('renders Draft label for draft status', () => {
     render(<DocumentStatusBadge status="draft" />);
-    expect(screen.getByText('Draft')).toBeInTheDocument();
+    expect(screen.getByText('Draft')).toBeTruthy();
   });
 
   it('renders Pending Signature label for pending status', () => {
     render(<DocumentStatusBadge status="pending" />);
-    expect(screen.getByText('Pending Signature')).toBeInTheDocument();
+    expect(screen.getByText('Pending Signature')).toBeTruthy();
   });
 
   it('renders Client Signed label for client_signed status', () => {
     render(<DocumentStatusBadge status="client_signed" />);
-    expect(screen.getByText('Client Signed')).toBeInTheDocument();
+    expect(screen.getByText('Client Signed')).toBeTruthy();
   });
 
   it('renders Fully Executed label for fully_executed status', () => {
     render(<DocumentStatusBadge status="fully_executed" />);
-    expect(screen.getByText('Fully Executed')).toBeInTheDocument();
+    expect(screen.getByText('Fully Executed')).toBeTruthy();
   });
 
   it('uses custom labels when provided', () => {
     render(<DocumentStatusBadge status="draft" labels={{ draft: 'Borrador' }} />);
-    expect(screen.getByText('Borrador')).toBeInTheDocument();
+    expect(screen.getByText('Borrador')).toBeTruthy();
   });
 
   it('applies correct CSS class for draft', () => {
@@ -45,7 +45,7 @@ describe('DocumentStatusBadge', () => {
     const { container } = render(<DocumentStatusBadge status="unknown" />);
     // Should render without crashing; falls back to draft config
     const badge = container.querySelector('span');
-    expect(badge).toBeInTheDocument();
+    expect(badge).toBeTruthy();
     expect(badge?.className).toContain('bg-zinc-700');
   });
 });

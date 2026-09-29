@@ -713,7 +713,10 @@ export const ALL_CRM_FUNCTIONS: ChatCompletionTool[] = [
               'voice_sessions',
               'roi_calculations',
               'reports_weekly',
-              'settings'
+              'settings',
+              'documents',
+              'help',
+              'setup'
             ],
           },
         },

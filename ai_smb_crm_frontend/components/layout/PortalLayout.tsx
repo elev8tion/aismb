@@ -24,7 +24,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (!loading && !permissionsLoading && user && permissions.isAdmin) {
+    if (!loading && !permissionsLoading && user && (permissions.isAdmin || permissions.isTeamMember)) {
       router.push('/dashboard');
     }
   }, [user, loading, permissionsLoading, permissions.isAdmin, router]);
@@ -56,7 +56,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
     );
   }
 
-  if (!user || permissions.isAdmin) {
+  if (!user || permissions.isAdmin || permissions.isTeamMember) {
     return null;
   }
 

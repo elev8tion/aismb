@@ -5,11 +5,13 @@
  * Tests model tier routing, tool calls, and authentication.
  *
  * Run with: npm test -- crmAgent.system.test.ts
+ * Run with the required server: RUN_INTEGRATION=true npm test -- crmAgent.system.test.ts
  * Run with tracing: TRACE=true npm test -- crmAgent.system.test.ts
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 
+const RUN_INTEGRATION = process.env.RUN_INTEGRATION === 'true';
 const TRACE = process.env.TRACE === 'true';
 const API_BASE = process.env.API_BASE || 'http://localhost:3000';
 
@@ -72,7 +74,7 @@ function generateReport() {
   return report;
 }
 
-describe('CRM Agent System Tests', () => {
+describe.skipIf(!RUN_INTEGRATION)('CRM Agent System Tests', () => {
 
   // ─────────────────────────────────────────────────────────────────────────
   // Scenario 1: Authentication Check

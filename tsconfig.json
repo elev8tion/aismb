@@ -38,6 +38,10 @@
   ],
   "exclude": [
     "node_modules",
-    "ai_smb_crm_frontend"
+    "ai_smb_crm_frontend",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**",
+    "tests/**"
   ]
 }

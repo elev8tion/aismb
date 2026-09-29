@@ -18,8 +18,11 @@ interface Partnership {
   company_name?: string; // joined from companies table
   tier: string;
   status: string;
-  current_phase: string;
-  satisfaction_score: number | null;
+  phase: string | null;
+  health_score: number;
+  // Legacy aliases used by older NCB records during migration.
+  current_phase?: string | null;
+  satisfaction_score?: number | null;
   knowledge_transfer_score: number;
   engagement_level: string;
   total_revenue?: string;
@@ -82,7 +85,18 @@ export function useCustomerPortal() {
       const partnershipsData: NCBListResponse<Partnership> = await partnershipsRes.json();
       const systemsData: NCBListResponse<DeliveredSystem> = await systemsRes.json();
 
-      const rawPartnerships: Partnership[] = partnershipsData.data || [];
+      const rawPartnerships: Partnership[] = (partnershipsData.data || []).map((partnership) => {
+        const raw = partnership as Partnership & {
+          current_phase?: string | null;
+          satisfaction_score?: number | null;
+        };
+        const rawHealth = Number(raw.health_score ?? raw.satisfaction_score ?? 0);
+        return {
+          ...raw,
+          phase: raw.phase ?? raw.current_phase ?? null,
+          health_score: rawHealth <= 10 ? rawHealth * 10 : rawHealth,
+        };
+      });
 
       // Step 3: Fetch company names for each partnership's company_id
       const companyIds = [...new Set(rawPartnerships.map((p) => p.company_id).filter(Boolean))];

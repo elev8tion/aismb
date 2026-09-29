@@ -69,7 +69,7 @@ export default function SettingsPage() {
       };
 
       if (profileId) {
-        await fetch(`/api/data/update/user_profiles?id=${profileId}`, {
+        await fetch(`/api/data/update/user_profiles/${profileId}`, {
           method: 'PUT', credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

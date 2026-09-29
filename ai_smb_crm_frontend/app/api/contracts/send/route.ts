@@ -4,6 +4,7 @@ import { sendSigningRequest } from '@/lib/email/sendEmail';
 import { ncbServerRead, ncbServerUpdate, type NCBEnv } from '@/lib/agent/ncbClient';
 import { sendContractSchema } from '@/lib/validation/contract.schemas';
 import { formatZodErrors } from '@kre8tion/shared-types';
+import { getCRMAuth, unauthorizedStatus } from '@/lib/security/crmAuth';
 
 export const runtime = 'edge';
 
@@ -12,6 +13,15 @@ export async function POST(req: NextRequest) {
   const env = cfEnv as unknown as NCBEnv & Record<string, string>;
 
   try {
+    const auth = await getCRMAuth(env, req);
+    const authError = unauthorizedStatus(auth, true);
+    if (authError) {
+      return NextResponse.json(
+        { error: authError === 401 ? 'Unauthorized' : 'Forbidden' },
+        { status: authError },
+      );
+    }
+
     const body = await req.json();
 
     // Validate with Zod

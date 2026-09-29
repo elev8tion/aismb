@@ -20,6 +20,7 @@ export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [editCompany, setEditCompany] = useState<Company | null>(null);
   const [viewCompany, setViewCompany] = useState<Company | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', industry: '', employee_count: '1-5', website: '' });
@@ -80,6 +81,7 @@ export default function CompaniesPage() {
       const a = action.action;
       const payload = (action.payload || {}) as any;
       if (a === 'open_new') {
+        resetForm();
         setShowCreate(true);
       } else if (a === 'open_view') {
         const { id, query } = payload as { id?: string; query?: string };
@@ -95,6 +97,8 @@ export default function CompaniesPage() {
     return () => { unsub(); };
   }, [subscribe, companies]);
 
+  const resetForm = () => setForm({ name: '', industry: '', employee_count: '1-5', website: '' });
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -104,10 +108,67 @@ export default function CompaniesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (res.ok) { setShowCreate(false); setForm({ name: '', industry: '', employee_count: '1-5', website: '' }); fetchCompanies(); }
+      if (res.ok) { setShowCreate(false); resetForm(); fetchCompanies(); }
     } catch (err) { console.error('Failed to create company:', err); }
     finally { setSaving(false); }
   };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editCompany) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/data/update/companies/${editCompany.id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) { setEditCompany(null); resetForm(); fetchCompanies(); }
+    } catch (err) { console.error('Failed to update company:', err); }
+    finally { setSaving(false); }
+  };
+
+  const openEdit = (company: Company) => {
+    setForm({
+      name: company.name,
+      industry: company.industry || '',
+      employee_count: company.employee_count || '1-5',
+      website: company.website || '',
+    });
+    setEditCompany(company);
+  };
+
+  const renderCompanyForm = (onSubmit: (e: React.FormEvent) => void) => (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm text-white/60 mb-1">{t.common.companyName} *</label>
+        <input className="input-glass w-full" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-white/60 mb-1">{t.common.industry} *</label>
+          <select className="select-glass w-full" required value={form.industry} onChange={e => setForm({ ...form, industry: e.target.value })}>
+            <option value="">{t.common.selectIndustry}</option>
+            {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm text-white/60 mb-1">{t.companies.employees}</label>
+          <select className="select-glass w-full" value={form.employee_count} onChange={e => setForm({ ...form, employee_count: e.target.value })}>
+            {EMPLOYEE_COUNTS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm text-white/60 mb-1">{t.common.website}</label>
+        <input className="input-glass w-full" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} placeholder="https://..." />
+      </div>
+      <div className="flex gap-3 justify-end pt-2">
+        <button type="button" onClick={() => { setShowCreate(false); setEditCompany(null); resetForm(); }} className="btn-secondary">{t.common.cancel}</button>
+        <button type="submit" disabled={saving} className="btn-primary">{saving ? t.common.creating : (editCompany ? t.common.save : t.companies.addCompany)}</button>
+      </div>
+    </form>
+  );
 
   return (
     <DashboardLayout>
@@ -117,7 +178,7 @@ export default function CompaniesPage() {
           title={t.nav.companies}
           subtitle={<>{companies.length} {t.companies.companiesCount}</>}
           action={
-            <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
+            <button onClick={() => { resetForm(); setShowCreate(true); }} className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
               <PlusIcon className="w-5 h-5" />
               {t.companies.addCompany}
             </button>
@@ -178,46 +239,26 @@ export default function CompaniesPage() {
                   )}
                 </div>
 
-                <button onClick={(e) => { e.stopPropagation(); setViewCompany(company); }} className="btn-secondary w-full mt-4 text-sm">
-                  {t.companies.viewDetails}
-                </button>
+                <div className="flex gap-2 mt-4">
+                  <button onClick={(e) => { e.stopPropagation(); setViewCompany(company); }} className="btn-secondary flex-1 text-sm">
+                    {t.companies.viewDetails}
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); openEdit(company); }} className="btn-secondary text-sm">
+                    {t.common.edit}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Create Modal */}
-      <Modal open={showCreate} onClose={() => setShowCreate(false)} title={t.companies.addCompany}>
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label className="block text-sm text-white/60 mb-1">{t.common.companyName} *</label>
-            <input className="input-glass w-full" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-white/60 mb-1">{t.common.industry} *</label>
-              <select className="select-glass w-full" required value={form.industry} onChange={e => setForm({ ...form, industry: e.target.value })}>
-                <option value="">{t.common.selectIndustry}</option>
-                {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-white/60 mb-1">{t.companies.employees}</label>
-              <select className="select-glass w-full" value={form.employee_count} onChange={e => setForm({ ...form, employee_count: e.target.value })}>
-                {EMPLOYEE_COUNTS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm text-white/60 mb-1">{t.common.website}</label>
-            <input className="input-glass w-full" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} placeholder="https://..." />
-          </div>
-          <div className="flex gap-3 justify-end pt-2">
-            <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary">{t.common.cancel}</button>
-            <button type="submit" disabled={saving} className="btn-primary">{saving ? t.common.creating : t.companies.addCompany}</button>
-          </div>
-        </form>
+      {/* Create and edit modals */}
+      <Modal open={showCreate} onClose={() => { setShowCreate(false); resetForm(); }} title={t.companies.addCompany}>
+        {renderCompanyForm(handleCreate)}
+      </Modal>
+      <Modal open={!!editCompany} onClose={() => { setEditCompany(null); resetForm(); }} title={`${t.common.edit} ${t.nav.companies}`}>
+        {renderCompanyForm(handleEdit)}
       </Modal>
 
       {/* View Details Modal */}

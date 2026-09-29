@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent, Suspense } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 // Force dynamic rendering to avoid prerendering with useSearchParams
@@ -101,12 +102,12 @@ function LoginForm() {
 
           {/* Back to Home */}
           <div className="mt-6 text-center">
-            <a
+            <Link
               href="/"
               className="text-sm text-[#0EA5E9] hover:text-[#0EA5E9]/80 transition-colors"
             >
               ← Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

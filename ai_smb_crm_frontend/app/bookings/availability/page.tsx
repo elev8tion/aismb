@@ -95,7 +95,7 @@ export default function AvailabilityPage() {
     try {
       await Promise.all(
         availability.map(a =>
-          fetch(`/api/data/update/availability_settings?id=${a.id}`, {
+          fetch(`/api/data/update/availability_settings/${a.id}`, {
             method: 'PUT',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -232,7 +232,7 @@ export default function AvailabilityPage() {
 
   const removeBlockedDate = async (id: string) => {
     try {
-      const res = await fetch(`/api/data/delete/blocked_dates?id=${id}`, {
+      const res = await fetch(`/api/data/delete/blocked_dates/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
