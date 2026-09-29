@@ -23,8 +23,8 @@ import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 const RUN_INTEGRATION = process.env.RUN_INTEGRATION === 'true';
 const TRACE = process.env.TRACE === 'true';
 const API_BASE = process.env.API_BASE || 'http://localhost:3001';
-const TEST_EMAIL = process.env.TEST_EMAIL || 'connect@elev8tion.one';
-const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Kre8tion2024!';
+const TEST_EMAIL = process.env.TEST_EMAIL;
+const TEST_PASSWORD = process.env.TEST_PASSWORD;
 
 interface TraceLog {
   timestamp: string;
@@ -155,6 +155,10 @@ let sessionCookie: string = '';
 
 describe.skipIf(!RUN_INTEGRATION)('Voice Agent UX Enhancement Tests', () => {
   beforeAll(async () => {
+    if (!TEST_EMAIL || !TEST_PASSWORD) {
+      throw new Error('Live voice tests require TEST_EMAIL and TEST_PASSWORD');
+    }
+
     // Authenticate once before all tests
     sessionCookie = await authenticate();
 
