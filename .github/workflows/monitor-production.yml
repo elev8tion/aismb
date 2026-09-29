@@ -1,0 +1,42 @@
+name: Monitor Production
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check public domains and protected API boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          check_http() {
+            expected="$1"
+            url="$2"
+            actual=$(curl -sS -L --max-time 30 -o /tmp/monitor-response -w '%{http_code}' "$url")
+            test "$actual" = "$expected" || { echo "$url returned $actual, expected $expected"; exit 1; }
+            echo "$url -> $actual"
+          }
+
+          check_http 200 https://kre8tion.com
+          check_http 200 https://www.kre8tion.com
+          check_http 200 https://app.kre8tion.com
+
+          providers=$(curl -fsS --max-time 30 https://app.kre8tion.com/api/auth-providers)
+          jq -e '.providers.email == true and .providers.credential == true' <<<"$providers" >/dev/null
+          echo 'auth providers -> healthy'
+
+          protected=$(curl -sS --max-time 30 -o /tmp/monitor-protected -w '%{http_code}' \
+            https://app.kre8tion.com/api/data/read/leads)
+          test "$protected" = 401 || { echo "protected data route returned $protected"; exit 1; }
+          echo 'protected data route -> 401 as expected'
+
+          test -n "$(dig +short kre8tion.com A)"
+          test -n "$(dig +short www.kre8tion.com A)"
+          test -n "$(dig +short app.kre8tion.com A)"
+          echo 'DNS -> healthy'
