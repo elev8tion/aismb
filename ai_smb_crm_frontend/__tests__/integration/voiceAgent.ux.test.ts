@@ -94,7 +94,7 @@ async function authenticate(): Promise<string> {
   trace(scenario, 'Attempting sign-in', 'start', { email: TEST_EMAIL });
 
   try {
-    const response = await fetch(`${API_BASE}/api/auth/sign-in`, {
+    const response = await fetch(`${API_BASE}/api/auth/sign-in/email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
