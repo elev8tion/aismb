@@ -384,7 +384,7 @@ export async function POST(request: NextRequest) {
       await addMessage(sessionId, { role: 'user', content: sanitizedQuestion }, kv);
       await addMessage(sessionId, { role: 'assistant', content: cached.response }, kv);
       const duration = Date.now() - startTime;
-      return NextResponse.json({ response: cached.response, success: true, duration, model: cached.model, clientActions: [], cached: true });
+      return NextResponse.json({ response: cached.response, success: true, duration, model: cached.model, clientActions: [], toolCalls: [], cached: true });
     }
 
     // Add user message to session
@@ -397,6 +397,7 @@ export async function POST(request: NextRequest) {
     let response = '';
     let usedTools = false;
     const clientActions: Array<Record<string, unknown>> = [];
+    const toolCalls: Array<{ name: string; success: boolean; hasClientAction: boolean }> = [];
     const chatParams = buildChatParams(model);
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
@@ -436,14 +437,16 @@ export async function POST(request: NextRequest) {
           content: JSON.stringify(result),
         });
 
-        // Collect client actions to return to the UI (e.g., navigate)
-        try {
-          const r: any = result as any;
-          if (r && typeof r === 'object' && r.client_action) {
-            clientActions.push(r.client_action);
-          }
-        } catch {
-          // non-fatal
+        // Collect a safe execution trace for the demo UI without exposing tool arguments or record IDs.
+        const toolResult = result && typeof result === 'object' ? result as Record<string, unknown> : null;
+        const hasClientAction = Boolean(toolResult?.client_action);
+        toolCalls.push({
+          name: toolCall.function.name,
+          success: !toolResult?.error,
+          hasClientAction,
+        });
+        if (hasClientAction) {
+          clientActions.push(toolResult!.client_action as Record<string, unknown>);
         }
       }
 
@@ -467,7 +470,7 @@ export async function POST(request: NextRequest) {
     }
 
     const duration = Date.now() - startTime;
-    return NextResponse.json({ response, success: true, duration, model, clientActions });
+    return NextResponse.json({ response, success: true, duration, model, clientActions, toolCalls });
   } catch (error) {
     console.error('Chat error:', error);
     return NextResponse.json(

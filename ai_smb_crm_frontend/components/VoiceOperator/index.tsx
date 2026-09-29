@@ -26,6 +26,7 @@ export default function VoiceOperator() {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
   const [aiResponse, setAiResponse] = useState('');
+  const [toolActivity, setToolActivity] = useState<Array<{ name: string; success: boolean; hasClientAction: boolean }>>([]);
   const [displayError, setDisplayError] = useState<string | null>(null);
   const [browserSupported, setBrowserSupported] = useState(true);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -79,6 +80,7 @@ export default function VoiceOperator() {
           setVoiceState('idle');
           setTranscript('');
           setAiResponse('');
+          setToolActivity([]);
           setDisplayError(null);
           setShowAutoClosePrompt(false);
           setCountdown(null);
@@ -133,10 +135,15 @@ export default function VoiceOperator() {
         throw new Error(`Failed to get response: ${errorData.error || 'Unknown error'}`);
       }
 
-      const data = await response.json() as { response: string; clientActions?: Array<{ type: string; route?: string; target?: string; scope?: string; action?: string; payload?: Record<string, unknown> }> };
+      const data = await response.json() as {
+        response: string;
+        clientActions?: Array<{ type: string; route?: string; target?: string; scope?: string; action?: string; payload?: Record<string, unknown> }>;
+        toolCalls?: Array<{ name: string; success: boolean; hasClientAction: boolean }>;
+      };
 
-      // Store AI response for display
+      // Store the real agent response and safe tool execution trace for the demo UI.
       setAiResponse(data.response);
+      setToolActivity(data.toolCalls || []);
 
       // Perform client actions. If a navigate action exists, run it first and
       // schedule remaining UI actions after navigation.
@@ -255,6 +262,7 @@ export default function VoiceOperator() {
         setVoiceState('idle');
         setTranscript('');
         setAiResponse('');
+        setToolActivity([]);
         setDisplayError(null);
         clearSessionId();
         setSessionId(null);
@@ -408,6 +416,23 @@ export default function VoiceOperator() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </div>
+              )}
+
+              {/* Agent execution trace */}
+              {toolActivity.length > 0 && (
+                <div className="mb-4 rounded-lg border border-white/10 bg-black/10 p-3">
+                  <p className="mb-2 text-xs uppercase tracking-wide text-white/50">Agent actions</p>
+                  <div className="flex flex-wrap gap-2">
+                    {toolActivity.map((tool, index) => (
+                      <span
+                        key={`${tool.name}-${index}`}
+                        className={`rounded-full border px-2 py-1 text-xs ${tool.success ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-red-400/30 bg-red-400/10 text-red-300'}`}
+                      >
+                        {tool.success ? '✓' : '×'} {tool.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 

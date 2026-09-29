@@ -22,7 +22,7 @@ import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 
 const RUN_INTEGRATION = process.env.RUN_INTEGRATION === 'true';
 const TRACE = process.env.TRACE === 'true';
-const API_BASE = process.env.API_BASE || 'http://localhost:3003';
+const API_BASE = process.env.API_BASE || 'http://localhost:3001';
 const TEST_EMAIL = process.env.TEST_EMAIL || 'connect@elev8tion.one';
 const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Kre8tion2024!';
 
