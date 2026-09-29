@@ -32,6 +32,37 @@ jobs:
       - name: Install CRM dependencies
         run: npm install --legacy-peer-deps --ignore-scripts
 
+      - name: Configure CRM Pages secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NCB_INSTANCE: ${{ secrets.NCB_INSTANCE }}
+          NCB_AUTH_API_URL: ${{ secrets.NCB_AUTH_API_URL }}
+          NCB_DATA_API_URL: ${{ secrets.NCB_DATA_API_URL }}
+          NCB_OPENAPI_URL: ${{ secrets.NCB_OPENAPI_URL }}
+          NCB_SECRET_KEY: ${{ secrets.NCB_SECRET_KEY }}
+          NCB_GUEST_KEY: ${{ secrets.NCB_GUEST_KEY }}
+          EMAILIT_API_KEY: ${{ secrets.EMAILIT_API_KEY }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+        run: |
+          put_secret() {
+            value="$1"
+            name="$2"
+            if [ -n "$value" ]; then
+              printf '%s' "$value" | npx --yes wrangler@3.80.0 pages secret put "$name" --project-name=ai-smb-crm
+            fi
+          }
+          put_secret "$OPENAI_API_KEY" OPENAI_API_KEY
+          put_secret "$NCB_INSTANCE" NCB_INSTANCE
+          put_secret "$NCB_AUTH_API_URL" NCB_AUTH_API_URL
+          put_secret "$NCB_DATA_API_URL" NCB_DATA_API_URL
+          put_secret "$NCB_OPENAPI_URL" NCB_OPENAPI_URL
+          put_secret "$NCB_SECRET_KEY" NCB_SECRET_KEY
+          put_secret "$NCB_GUEST_KEY" NCB_GUEST_KEY
+          put_secret "$EMAILIT_API_KEY" EMAILIT_API_KEY
+          put_secret "$ADMIN_EMAIL" ADMIN_EMAIL
+
       - name: Build CRM for Cloudflare Pages
         run: npm run pages:build
 
