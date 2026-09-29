@@ -36,6 +36,14 @@ jobs:
           test "$protected" = 401 || { echo "protected data route returned $protected"; exit 1; }
           echo 'protected data route -> 401 as expected'
 
+          for endpoint in chat transcribe speak; do
+            voice_status=$(curl -sS --max-time 30 -o /tmp/monitor-voice -w '%{http_code}' \
+              -X POST -H 'Content-Type: application/json' --data '{}' \
+              "https://app.kre8tion.com/api/agent/$endpoint")
+            test "$voice_status" = 401 || { echo "voice endpoint $endpoint returned $voice_status"; exit 1; }
+            echo "voice endpoint $endpoint -> 401 as expected"
+          done
+
           test -n "$(dig +short kre8tion.com A)"
           test -n "$(dig +short www.kre8tion.com A)"
           test -n "$(dig +short app.kre8tion.com A)"
