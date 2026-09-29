@@ -282,14 +282,16 @@ curl -X POST "https://app.nocodebackend.com/api/user-auth/sign-in/email?instance
 
 ---
 
-## Current Admin Account
+## Current Demo Admin Account
+
+The live voice-test account is stored in the repository's GitHub Actions secrets as `TEST_EMAIL` and `TEST_PASSWORD`. It is intentionally not committed to this file.
 
 | Setting | Value |
 |---------|-------|
-| **Email** | `connect@elev8tion.one` |
-| **Password** | `TestAdmin123` |
+| **Email** | `crm-demo@elev8tion.one` |
+| **Password** | Stored in GitHub secret `TEST_PASSWORD` |
 | **Role** | `admin` |
-| **User ID** | `GlF8YbrMWMq3YsUF3jlLovv3VtKsWyQp` |
+| **User ID** | `wjazO1ZFyAnidxMSJfjzLKnPFGvpXRjr` |
 
 ---
 
