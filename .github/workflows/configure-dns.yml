@@ -22,7 +22,17 @@ jobs:
 
           auth=(-H "Authorization: Bearer $CLOUDFLARE_DNS_API_TOKEN" -H 'Content-Type: application/json')
           api='https://api.cloudflare.com/client/v4'
-          zone_id=$(curl -fsS "$api/zones?name=kre8tion.com&status=active" "${auth[@]}" | jq -r '.result[0].id // empty')
+          verify=$(curl -sS "$api/user/tokens/verify" "${auth[@]}")
+          echo "Token verification:"
+          jq '{success, errors, status: .result.status}' <<<"$verify"
+
+          zone_response=$(curl -sS -w '\n%{http_code}' "$api/zones?name=kre8tion.com&status=active" "${auth[@]}")
+          zone_status=$(tail -n 1 <<<"$zone_response")
+          zone_body=$(sed '$d' <<<"$zone_response")
+          echo "Zone lookup HTTP $zone_status"
+          jq '{success, errors, result: [.result[]? | {name, id, status}]}' <<<"$zone_body"
+          test "$zone_status" = 200
+          zone_id=$(jq -r '.result[0].id // empty' <<<"$zone_body")
           test -n "$zone_id"
 
           delete_conflicting_records() {
