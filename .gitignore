@@ -36,6 +36,7 @@ yarn-error.log*
 
 # MCP config (contains API tokens)
 .mcp.json
+.cursor/
 
 # working documentation
 *.docx
