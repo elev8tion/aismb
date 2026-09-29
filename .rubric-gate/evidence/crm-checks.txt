@@ -1,0 +1,38 @@
+=== npm run lint ===
+
+> ai-smb-crm@0.1.0 lint
+> eslint
+
+exit=0
+=== npm exec tsc -- --noEmit ===
+exit=0
+=== npm exec vitest run --exclude __tests__/integration/** ===
+npm warn "__tests__/integration/**" is being parsed as a normal command line argument.
+npm warn Unknown cli config "--exclude". This will stop working in the next major version of npm.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /Users/kcdacre8tor/Developer/aismb/ai_smb_crm_frontend
+
+No test files found, exiting with code 1
+
+filter: __tests__/integration/**
+include: **/*.test.{ts,tsx}
+exclude:  node_modules/**, **/node_modules/**, .next/**, .vercel/**
+
+exit=1
+=== npm exec -- vitest run --exclude integration ===
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /Users/kcdacre8tor/Developer/aismb/ai_smb_crm_frontend
+
+
+ Test Files  14 passed (14)
+      Tests  109 passed (109)
+   Start at  19:32:35
+   Duration  3.88s (transform 2.40s, setup 1.95s, import 3.31s, tests 896ms, environment 18.86s)
+
+exit=0

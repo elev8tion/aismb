@@ -1,0 +1,4 @@
+root audit exit=1
+info=0 low=1 moderate=5 high=3 critical=0 total=9
+crm audit exit=1
+info=0 low=1 moderate=5 high=3 critical=0 total=9

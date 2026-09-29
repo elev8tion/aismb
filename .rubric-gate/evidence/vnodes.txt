@@ -1,0 +1,12 @@
+indexed /Users/kcdacre8tor/Developer/aismb: 430 files, 4427 nodes, 330 edges in 335ms
+{
+  "ok": true,
+  "state": "current",
+  "reason": "manifest matches the current tree",
+  "head": "a17d0966547e0eb2ebf2d7196a5c69f59ffa802c",
+  "last_index_git_head": "a17d0966547e0eb2ebf2d7196a5c69f59ffa802c",
+  "last_index": 1790725154383,
+  "mismatches": [],
+  "mismatch_count": 0,
+  "fix": "vnodes index && git add .vnodes/manifest.json"
+}

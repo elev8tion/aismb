@@ -1,0 +1,7 @@
+=== git status ===
+## main...origin/main
+ M .vnodes/manifest.json
+?? .rubric-gate-state.json
+?? .rubric-gate/
+?? RUBRIC.md
+=== git diff check ===

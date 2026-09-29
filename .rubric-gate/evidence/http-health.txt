@@ -1,0 +1,10 @@
+GET https://kre8tion.com -> 200 (expected 200)
+GET https://www.kre8tion.com -> 200 (expected 200)
+GET https://app.kre8tion.com -> 200 (expected 200)
+GET /api/auth-providers -> 200; email and credential enabled
+POST https://app.kre8tion.com/api/auth/sign-in/email -> 401 (expected 401)
+GET https://app.kre8tion.com/api/data/read/leads -> 401 (expected 401)
+POST https://app.kre8tion.com/api/agent/chat -> 401 (expected 401)
+POST https://app.kre8tion.com/api/agent/transcribe -> 401 (expected 401)
+POST https://app.kre8tion.com/api/agent/speak -> 401 (expected 401)
+Protected voice endpoints correctly reject unauthenticated requests.

@@ -1,0 +1,2 @@
+=== hardcoded credential scan ===
+PASS: no known hardcoded live test password markers

@@ -1,0 +1,2 @@
+QA harness correction: initial unauthenticated transcribe probe expected HTTP 400, but the application correctly enforced authentication first and returned HTTP 401. The check expectation was corrected to 401; no application source was changed. The failed attempt is preserved at http-health-attempt-1.txt and the fresh result is in http-health.txt.
+No production source repair was required.

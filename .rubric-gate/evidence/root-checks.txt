@@ -1,0 +1,102 @@
+=== npm run lint ===
+
+> ai-smb-partners@0.1.0 lint
+> eslint
+
+exit=0
+=== npm run test:run ===
+
+> ai-smb-partners@0.1.0 test:run
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /Users/kcdacre8tor/Developer/aismb
+
+
+ Test Files  8 passed | 2 skipped (10)
+      Tests  91 passed | 22 skipped (113)
+   Start at  19:31:18
+   Duration  9.26s (transform 2.07s, setup 3.00s, import 2.20s, tests 7.73s, environment 13.44s)
+
+exit=0
+=== npm run build ===
+
+> ai-smb-partners@0.1.0 prebuild
+> cd packages/shared-types && npm run build && cd ../..
+
+
+> @kre8tion/shared-types@1.0.0 build
+> tsc
+
+
+> ai-smb-partners@0.1.0 build
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/kcdacre8tor/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles:
+   * /Users/kcdacre8tor/Developer/aismb/package-lock.json
+
+   ▲ Next.js 15.5.26
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 5.9s
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+ ⚠ Using edge runtime on a page currently disables static generation for that page
+   Generating static pages (0/13) ...
+   Generating static pages (3/13)
+   Generating static pages (6/13)
+   Generating static pages (9/13)
+ ✓ Generating static pages (13/13)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                   Size  First Load JS
+┌ ○ /                                      18.3 kB         159 kB
+├ ○ /_not-found                              996 B         104 kB
+├ ○ /admin/bookings                        4.16 kB         107 kB
+├ ○ /admin/bookings/list                   2.14 kB         105 kB
+├ ○ /admin/login                           1.42 kB         107 kB
+├ ○ /ai-disclosure                         1.07 kB         112 kB
+├ ƒ /api/admin/bookings/create               166 B         103 kB
+├ ƒ /api/admin/bookings/list                 166 B         103 kB
+├ ƒ /api/auth-providers                      166 B         103 kB
+├ ƒ /api/auth/[...path]                      166 B         103 kB
+├ ƒ /api/booking/availability                166 B         103 kB
+├ ƒ /api/booking/calendar/caldav/connect     166 B         103 kB
+├ ƒ /api/booking/calendar/google/auth        166 B         103 kB
+├ ƒ /api/booking/calendar/google/callback    166 B         103 kB
+├ ƒ /api/booking/checkout                    166 B         103 kB
+├ ƒ /api/booking/create                      166 B         103 kB
+├ ƒ /api/booking/stripe-session              166 B         103 kB
+├ ƒ /api/data/[...path]                      166 B         103 kB
+├ ƒ /api/leads/roi                           166 B         103 kB
+├ ƒ /api/voice-agent/chat                    166 B         103 kB
+├ ƒ /api/voice-agent/security-stats          166 B         103 kB
+├ ƒ /api/voice-agent/speak                   166 B         103 kB
+├ ƒ /api/voice-agent/transcribe              166 B         103 kB
+├ ƒ /api/webhooks/emailit                    166 B         103 kB
+├ ƒ /api/webhooks/stripe                     166 B         103 kB
+├ ○ /booking/payment-success               2.46 kB         141 kB
+├ ○ /privacy                               2.28 kB         114 kB
+├ ○ /refund-policy                         2.22 kB         114 kB
+└ ○ /terms                                 2.03 kB         113 kB
++ First Load JS shared by all               103 kB
+  ├ chunks/255-2dbbf79f36f0dfa2.js         46.4 kB
+  ├ chunks/4bd1b696-c023c6e3521b1417.js    54.2 kB
+  └ other shared chunks (total)            2.01 kB
+
+
+ƒ Middleware                               34.6 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+exit=0
