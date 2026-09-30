@@ -7,6 +7,8 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
 import VoiceOperator from '@/components/VoiceOperator';
 import { VoiceAgentActionsProvider } from '@/contexts/VoiceAgentActionsContext';
+import { isDemoUser } from '@/lib/demo/session';
+import { DemoBanner } from '@/components/demo/DemoBanner';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -19,6 +21,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const demo = isDemoUser(user);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -30,7 +33,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     if (!loading && !permissionsLoading && user && !permissions.isAdmin && !permissions.isTeamMember) {
       router.push('/portal');
     }
-  }, [user, loading, permissionsLoading, permissions.isAdmin, router]);
+  }, [user, loading, permissionsLoading, permissions.isAdmin, permissions.isTeamMember, router]);
 
   // Body scroll lock when mobile drawer is open
   useEffect(() => {
@@ -112,11 +115,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           isCollapsed ? 'tablet:ml-16' : 'tablet:ml-16 desktop:ml-64'
         }`}
       >
+        {demo && <DemoBanner />}
         {children}
       </main>
 
-      {/* Voice Operator FAB — visible on all authenticated pages */}
-      <VoiceOperator />
+      {!demo && <VoiceOperator />}
     </div>
     </VoiceAgentActionsProvider>
   );

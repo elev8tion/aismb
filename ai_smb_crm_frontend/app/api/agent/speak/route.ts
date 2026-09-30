@@ -5,6 +5,7 @@ import { validateText } from '@/lib/security/requestValidator';
 import { getSessionUser, type NCBEnv } from '@/lib/agent/ncbClient';
 import { checkRateLimit, getClientIP } from '@/lib/security/rateLimiter.kv';
 import { languageSchema } from '@kre8tion/shared-types';
+import { DEMO_AGENT_DISABLED, isDemoUser } from '@/lib/demo/session';
 
 export const runtime = 'edge';
 
@@ -31,6 +32,9 @@ export async function POST(request: NextRequest) {
   const user = await getSessionUser(env, cookieHeader);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (isDemoUser(user)) {
+    return NextResponse.json({ error: DEMO_AGENT_DISABLED }, { status: 404 });
   }
 
   // Per-user rate limit (budget protection)

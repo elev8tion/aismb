@@ -47,6 +47,7 @@ export interface CloudflareEnv {
 
   // Demo access (server-only; never expose credentials to the client)
   DEMO_LOGIN_ENABLED?: string;
+  DEMO_SESSION_SECRET?: string;
   DEMO_LOGIN_EMAIL?: string;
   DEMO_LOGIN_PASSWORD?: string;
   // GitHub/CI aliases used as demo-account fallback

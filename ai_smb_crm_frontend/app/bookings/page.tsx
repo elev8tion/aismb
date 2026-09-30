@@ -7,12 +7,16 @@ import Link from 'next/link';
 import { useVoiceAgentActions } from '@/contexts/VoiceAgentActionsContext';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { LandingPageBooking, BookingStatus } from '@kre8tion/shared-types';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
 
 // Type alias for clarity in this file
 type Booking = LandingPageBooking;
 
 export default function BookingsPage() {
   const { t } = useTranslations();
+  const { user } = useAuth();
+  const demo = isDemoUser(user);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -188,10 +192,12 @@ export default function BookingsPage() {
             <h1 className="text-xl md:text-2xl font-bold text-white">{t.bookings.title}</h1>
             <p className="text-sm md:text-base text-white/60 mt-1">{t.bookings.subtitle}</p>
           </div>
-          <Link href="/bookings/availability" className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
-            <ClockIcon className="w-5 h-5" />
-            {t.bookings.availability}
-          </Link>
+          {!demo && (
+            <Link href="/bookings/availability" className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
+              <ClockIcon className="w-5 h-5" />
+              {t.bookings.availability}
+            </Link>
+          )}
         </div>
 
         {/* Stats */}
@@ -295,7 +301,7 @@ export default function BookingsPage() {
                         </td>
                         <td>
                           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            {booking.status === 'pending' && (
+                            {!demo && booking.status === 'pending' && (
                               <>
                                 <button
                                   onClick={() => updateBookingStatus(String(booking.id), 'confirmed')}
@@ -322,7 +328,7 @@ export default function BookingsPage() {
                                 </button>
                               </>
                             )}
-                            {booking.status === 'confirmed' && (
+                            {!demo && booking.status === 'confirmed' && (
                               <>
                                 <button
                                   onClick={() => updateBookingStatus(String(booking.id), 'cancelled')}

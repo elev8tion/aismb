@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEnv } from '@/lib/cloudflare/env';
+import { demoSessionPayload } from '@/lib/demo/session';
+import { clearDemoSessionCookie, hasValidDemoSession } from '@/lib/demo/token';
 
 export const runtime = 'edge';
 
@@ -22,12 +24,29 @@ export async function GET(
 ) {
   try {
     const { path } = await params;
-    return proxy(req, path.join("/"));
+    const pathStr = path.join("/");
+    const env = getEnv();
+    if (pathStr === "get-session" && await hasValidDemoSession(req.headers.get("cookie"), env)) {
+      return NextResponse.json(demoSessionPayload(), {
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
+    if (pathStr === "get-session" && (!env.NCB_INSTANCE || !env.NCB_AUTH_API_URL)) {
+      return NextResponse.json({ user: null }, {
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
+    return await proxy(req, pathStr);
   } catch (error) {
+    if (await hasValidDemoSession(req.headers.get("cookie"), getEnv())) {
+      return NextResponse.json(demoSessionPayload(), {
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
     console.error('Auth GET error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal Server Error' },
-      { status: 500 }
+      { user: null },
+      { status: 200 }
     );
   }
 }
@@ -51,7 +70,7 @@ export async function POST(
       return handleSignOut(req);
     }
 
-    return proxy(req, pathStr, await req.text());
+    return await proxy(req, pathStr, await req.text());
   } catch (error) {
     console.error('Auth POST error:', error);
     return NextResponse.json(
@@ -109,11 +128,21 @@ function transformSetCookieForLocalhost(cookie: string): string {
 }
 
 async function handleSignOut(req: NextRequest) {
-  const config = getConfig();
   const response = new NextResponse(JSON.stringify({ success: true }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
+  response.headers.append("Set-Cookie", clearDemoSessionCookie(req.nextUrl.protocol === 'https:'));
+
+  let config: { instance: string; apiUrl: string } | null = null;
+  try {
+    config = getConfig();
+  } catch {
+    config = null;
+  }
+  if (!config) {
+    return response;
+  }
 
   try {
     const searchParams = new URLSearchParams();

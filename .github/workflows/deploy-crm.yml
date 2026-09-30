@@ -32,7 +32,22 @@ jobs:
       - name: Install CRM dependencies
         run: npm install --legacy-peer-deps --ignore-scripts
 
-      - name: Configure CRM Pages secrets
+      - name: Stamp deployed commit
+        run: printf 'export const BUILD_SHA = "%s";\n' "$GITHUB_SHA" > lib/buildInfo.ts
+
+      - name: Build CRM for Cloudflare Pages
+        run: npm run pages:build
+
+      - name: Deploy CRM
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3.80.0'
+          workingDirectory: ai_smb_crm_frontend
+          command: pages deploy .vercel/output/static --project-name=ai-smb-crm --commit-dirty=true --no-bundle
+
+      - name: Refresh existing CRM secrets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -45,11 +60,7 @@ jobs:
           NCB_GUEST_KEY: ${{ secrets.NCB_GUEST_KEY }}
           EMAILIT_API_KEY: ${{ secrets.EMAILIT_API_KEY }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
-          DEMO_LOGIN_ENABLED: ${{ secrets.DEMO_LOGIN_ENABLED }}
-          DEMO_LOGIN_EMAIL: ${{ secrets.DEMO_LOGIN_EMAIL }}
-          DEMO_LOGIN_PASSWORD: ${{ secrets.DEMO_LOGIN_PASSWORD }}
-          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
-          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+          DEMO_SESSION_SECRET: ${{ secrets.DEMO_SESSION_SECRET }}
         run: |
           case "$NCB_AUTH_API_URL" in
             https://app.nocodebackend.com/api/user-auth) ;;
@@ -64,6 +75,8 @@ jobs:
             name="$2"
             if [ -n "$value" ]; then
               printf '%s' "$value" | npx --yes wrangler@3.80.0 pages secret put "$name" --project-name=ai-smb-crm
+            else
+              echo "skip empty $name"
             fi
           }
           put_secret "$OPENAI_API_KEY" OPENAI_API_KEY
@@ -75,24 +88,4 @@ jobs:
           put_secret "$NCB_GUEST_KEY" NCB_GUEST_KEY
           put_secret "$EMAILIT_API_KEY" EMAILIT_API_KEY
           put_secret "$ADMIN_EMAIL" ADMIN_EMAIL
-          DEMO_EMAIL="${DEMO_LOGIN_EMAIL:-$TEST_EMAIL}"
-          DEMO_PASSWORD="${DEMO_LOGIN_PASSWORD:-$TEST_PASSWORD}"
-          DEMO_ENABLED="$DEMO_LOGIN_ENABLED"
-          if [ -z "$DEMO_ENABLED" ] && [ -n "$DEMO_EMAIL" ] && [ -n "$DEMO_PASSWORD" ]; then
-            DEMO_ENABLED=true
-          fi
-          put_secret "$DEMO_ENABLED" DEMO_LOGIN_ENABLED
-          put_secret "$DEMO_EMAIL" DEMO_LOGIN_EMAIL
-          put_secret "$DEMO_PASSWORD" DEMO_LOGIN_PASSWORD
-
-      - name: Build CRM for Cloudflare Pages
-        run: npm run pages:build
-
-      - name: Deploy CRM
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: '3.80.0'
-          workingDirectory: ai_smb_crm_frontend
-          command: pages deploy .vercel/output/static --project-name=ai-smb-crm --commit-dirty=true --no-bundle
+          put_secret "$DEMO_SESSION_SECRET" DEMO_SESSION_SECRET

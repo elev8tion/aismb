@@ -61,6 +61,12 @@ export default function FinalCTA() {
               </svg>
               {t.finalCta.ctaSecondary}
             </a>
+            <a
+              href="https://app.kre8tion.com/demo"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0A0A0B] hover:bg-[#0C1B27] border border-[#0EA5E9]/40 text-[#7DD3FC] font-semibold px-8 py-4 rounded-lg transition-colors"
+            >
+              Explore CRM Demo
+            </a>
           </div>
 
           {/* Trust Signals */}

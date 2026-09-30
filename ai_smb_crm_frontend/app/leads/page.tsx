@@ -13,6 +13,8 @@ import { Modal } from '@/components/ui/Modal';
 import { useVoiceAgentActions } from '@/contexts/VoiceAgentActionsContext';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Lead } from '@kre8tion/shared-types';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
 
 const INDUSTRIES = ['HVAC', 'Plumbing', 'Construction', 'Property Management', 'Electrical', 'Landscaping', 'Other'];
 // Valid NCB enum values for the source column (confirmed via API testing)
@@ -20,6 +22,8 @@ const SOURCES = ['voice-agent', 'roi-calculator', 'referral', 'other'];
 
 export default function LeadsPage() {
   const { t } = useTranslations();
+  const { user } = useAuth();
+  const demo = isDemoUser(user);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -209,12 +213,12 @@ export default function LeadsPage() {
         <PageHeader
           title={t.leads.title}
           subtitle={<>{filtered.length} {t.leads.totalLeads}</>}
-          action={
+          action={!demo ? (
             <button onClick={() => { setForm(emptyForm); setShowCreate(true); }} className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
               <PlusIcon className="w-5 h-5" />
               {t.leads.newLead}
             </button>
-          }
+          ) : undefined}
         />
 
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-[var(--space-gap)]">
@@ -277,7 +281,7 @@ export default function LeadsPage() {
                       <td>
                         <div className="flex items-center gap-2">
                           <button onClick={() => setViewLead(lead)} className="btn-ghost p-2" title={t.common.view}><EyeIcon className="w-4 h-4" /></button>
-                          <button onClick={() => openEdit(lead)} className="btn-ghost p-2" title={t.common.edit}><EditIcon className="w-4 h-4" /></button>
+                          {!demo && <button onClick={() => openEdit(lead)} className="btn-ghost p-2" title={t.common.edit}><EditIcon className="w-4 h-4" /></button>}
                         </div>
                       </td>
                     </tr>

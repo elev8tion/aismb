@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
 import {
   DashboardIcon, BookingsIcon, LeadsIcon, PipelineIcon,
   CompaniesIcon, ContactsIcon, PartnershipsIcon, DocumentsIcon, DraftsIcon, VoiceIcon,
@@ -35,10 +36,24 @@ const navItems = [
   { key: 'helpCenter', href: '/help', icon: HelpIcon },
 ];
 
+const DEMO_NAV_KEYS = new Set([
+  'dashboard',
+  'bookings',
+  'leads',
+  'pipeline',
+  'companies',
+  'contacts',
+  'partnerships',
+  'roiCalculations',
+  'reports',
+  'helpCenter',
+]);
+
 export function Sidebar({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
   const { t, language, setLanguage } = useTranslations();
   const { user, signOut } = useAuth();
+  const demo = isDemoUser(user);
 
   // Auto-close mobile drawer on route change
   useEffect(() => {
@@ -83,7 +98,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileC
 
         {/* Navigation — scrollable */}
         <nav className="flex-1 p-2 tablet:p-3 desktop:p-4 space-y-0.5 overflow-y-auto overscroll-contain sidebar-nav-scroll">
-          {navItems.map((item) => {
+          {(demo ? navItems.filter((item) => DEMO_NAV_KEYS.has(item.key)) : navItems).map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
 
@@ -121,14 +136,16 @@ export function Sidebar({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileC
             )}
           </button>
 
-          <Link
-            href="/settings"
-            className={`sidebar-item ${expanded ? '' : 'justify-center !p-2'}`}
-            title={!expanded ? (t.nav.settings as string) : undefined}
-          >
-            <SettingsIcon className="w-5 h-5 shrink-0" />
-            {expanded && <span className="truncate text-sm">{t.nav.settings}</span>}
-          </Link>
+          {!demo && (
+            <Link
+              href="/settings"
+              className={`sidebar-item ${expanded ? '' : 'justify-center !p-2'}`}
+              title={!expanded ? (t.nav.settings as string) : undefined}
+            >
+              <SettingsIcon className="w-5 h-5 shrink-0" />
+              {expanded && <span className="truncate text-sm">{t.nav.settings}</span>}
+            </Link>
+          )}
 
           {/* Collapse toggle — tablet+ only, not on mobile drawer */}
           {!isMobile && (

@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect, useCallback } from 'react';
 import type { NCBListResponse, NCBSingleResponse } from '@/lib/types/api';
+import { isDemoUser } from '@/lib/demo/session';
 
 interface UserProfile {
   id: number;
@@ -94,23 +95,41 @@ export function usePermissions() {
   };
 
   useEffect(() => {
+    if (isDemoUser(user)) {
+      setProfile({
+        id: 1,
+        user_id: 'demo-user',
+        role: 'team_member',
+        display_name: 'KRE8TION Demo',
+        phone: null,
+        timezone: 'America/New_York',
+        notification_preferences: null,
+        created_at: '',
+        updated_at: '',
+      });
+      setLoading(false);
+      return;
+    }
     if (user?.id) {
+      setLoading(true);
       fetchProfile(user.email);
     } else {
+      setProfile(null);
       setLoading(false);
     }
   }, [user?.id, user?.email, fetchProfile]);
 
+  const role = isDemoUser(user) ? 'team_member' : profile?.role;
   const permissions: Permissions = {
-    isAdmin: profile?.role === 'admin',
-    isTeamMember: profile?.role === 'team_member',
-    isCustomer: profile?.role === 'customer',
-    canManageUsers: profile?.role === 'admin',
-    canViewAllData: profile?.role === 'admin',
-    canEditSettings: profile?.role === 'admin',
-    canGrantAccess: profile?.role === 'admin',
-    canDeleteRecords: profile?.role === 'admin',
-    canExportData: profile?.role === 'admin' || profile?.role === 'team_member',
+    isAdmin: role === 'admin',
+    isTeamMember: role === 'team_member',
+    isCustomer: role === 'customer',
+    canManageUsers: role === 'admin',
+    canViewAllData: role === 'admin',
+    canEditSettings: role === 'admin',
+    canGrantAccess: role === 'admin',
+    canDeleteRecords: role === 'admin',
+    canExportData: role === 'admin' || role === 'team_member',
   };
 
   const refreshProfile = useCallback(() => {
@@ -120,10 +139,12 @@ export function usePermissions() {
     }
   }, [user?.id, user?.email, fetchProfile]);
 
+  const profileMatchesUser = !user?.id || String(profile?.user_id) === String(user.id);
+
   return {
     profile,
     permissions,
-    loading,
+    loading: isDemoUser(user) ? false : (loading || (!profileMatchesUser && !error)),
     error,
     refreshProfile,
     isAuthenticated: !!user,

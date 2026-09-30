@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getOptionalRequestContext } from "@cloudflare/next-on-pages";
 import { checkRateLimit, getClientIP } from '@/lib/security/rateLimiter.kv';
 import { extractAuthCookies, getSessionUser, type NCBEnv } from "@/lib/agent/ncbClient";
+import { isDemoUser } from "@/lib/demo/session";
+import { demoReadOnlyResponse, demoReadResponse } from "@/lib/demo/data";
 
 export const runtime = 'edge';
 
@@ -92,6 +94,19 @@ function extractTableName(path: string): string | null {
 
 function extractOperation(path: string): string {
   return path.split('/')[0] || '';
+}
+
+function demoDataResponse(pathStr: string) {
+  if (extractOperation(pathStr) !== 'read') {
+    return NextResponse.json(demoReadOnlyResponse(), { status: 403 });
+  }
+  return NextResponse.json(demoReadResponse(extractTableName(pathStr)), {
+    headers: { 'Cache-Control': 'private, no-store' },
+  });
+}
+
+function demoReadOnly() {
+  return NextResponse.json(demoReadOnlyResponse(), { status: 403 });
 }
 
 function isAuthorized(table: string | null, role: string | null, operation: string): boolean {
@@ -324,6 +339,9 @@ export async function GET(
   const cookieHeader = req.headers.get("cookie") || "";
 
   const user = await getSessionUser(env, cookieHeader);
+  if (isDemoUser(user)) {
+    return demoDataResponse(pathStr);
+  }
   const role = user ? await getUserRole(config, user.id) : null;
 
   if (!user) {
@@ -379,6 +397,9 @@ export async function POST(
   const cookieHeader = req.headers.get("cookie") || "";
 
   const user = await getSessionUser(env, cookieHeader);
+  if (isDemoUser(user)) {
+    return demoReadOnly();
+  }
   const role = user ? await getUserRole(config, user.id) : null;
 
   if (!user) {
@@ -430,6 +451,9 @@ export async function PUT(
   const cookieHeader = req.headers.get("cookie") || "";
 
   const user = await getSessionUser(env, cookieHeader);
+  if (isDemoUser(user)) {
+    return demoReadOnly();
+  }
   const role = user ? await getUserRole(config, user.id) : null;
 
   if (!user) {
@@ -479,6 +503,9 @@ export async function DELETE(
   const cookieHeader = req.headers.get("cookie") || "";
 
   const user = await getSessionUser(env, cookieHeader);
+  if (isDemoUser(user)) {
+    return demoReadOnly();
+  }
   const role = user ? await getUserRole(config, user.id) : null;
 
   if (!user) {

@@ -11,6 +11,10 @@ jobs:
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Check public domains and protected API boundaries
         shell: bash
         run: |
@@ -48,3 +52,28 @@ jobs:
           test -n "$(dig +short www.kre8tion.com A)"
           test -n "$(dig +short app.kre8tion.com A)"
           echo 'DNS -> healthy'
+
+          check_deployed_sha() {
+            name="$1"
+            url="$2"
+            scope="$3"
+            body=$(curl -fsS --max-time 30 "$url")
+            sha=$(jq -er '.sha' <<<"$body")
+            [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "$name build sha is missing or invalid: $sha"; exit 1; }
+            git cat-file -e "$sha^{commit}" || { echo "$name sha $sha is not in this repository"; exit 1; }
+            git merge-base --is-ancestor "$sha" HEAD || { echo "$name sha $sha is not an ancestor of HEAD"; exit 1; }
+            if [ "$scope" = crm ]; then
+              pending=$(git diff --name-only "$sha" HEAD -- ai_smb_crm_frontend .github/workflows/deploy-crm.yml)
+            else
+              pending=$(git diff --name-only "$sha" HEAD | grep -Ev '^(ai_smb_crm_frontend/|\.github/workflows/deploy-crm\.yml$)' || true)
+            fi
+            if [ -n "$pending" ]; then
+              echo "$name is deployed at $sha, behind HEAD $(git rev-parse HEAD)"
+              echo "$pending"
+              exit 1
+            fi
+            echo "$name -> $sha (current for $scope)"
+          }
+
+          check_deployed_sha landing https://kre8tion.com/api/build landing
+          check_deployed_sha crm https://app.kre8tion.com/api/build crm

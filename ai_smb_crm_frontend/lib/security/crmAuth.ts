@@ -1,9 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { getSessionUser, type NCBEnv } from '@/lib/agent/ncbClient';
+import { isDemoUser } from '@/lib/demo/session';
 
 export interface CRMAuth {
   user: { id: string; email: string; name: string };
   role: string | null;
+  isDemo?: boolean;
 }
 
 function openApiBase(env: NCBEnv) {
@@ -35,6 +37,7 @@ export async function getCRMAuth(
   const cookieHeader = req.headers.get('cookie') || '';
   const user = await getSessionUser(env, cookieHeader);
   if (!user) return null;
+  if (isDemoUser(user)) return { user, role: 'team_member', isDemo: true };
 
   const profiles = await openApiRead(env, 'user_profiles');
   const profile = profiles.find((row) => String(row.user_id) === String(user.id));
@@ -59,6 +62,7 @@ export async function hasPartnershipAccess(
 
 export function unauthorizedStatus(auth: CRMAuth | null, adminOnly = false): 401 | 403 | null {
   if (!auth) return 401;
+  if (auth.isDemo) return 403;
   if (adminOnly && auth.role !== 'admin') return 403;
   return null;
 }

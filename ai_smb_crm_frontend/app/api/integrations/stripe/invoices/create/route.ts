@@ -4,6 +4,8 @@ import Stripe from 'stripe';
 import { getTierPricing, type TierKey } from '@/lib/stripe/pricing';
 import { createInvoiceSchema } from '@/lib/validation/stripe.schemas';
 import { formatZodErrors } from '@kre8tion/shared-types';
+import { getCRMAuth, unauthorizedStatus } from '@/lib/security/crmAuth';
+import type { NCBEnv } from '@/lib/agent/ncbClient';
 
 export const runtime = 'edge';
 
@@ -11,14 +13,19 @@ export async function POST(req: NextRequest) {
   const cfEnv = getEnv();
   const env = cfEnv as unknown as Record<string, string>;
 
-  const secret = env.STRIPE_SECRET_KEY;
-  if (!secret) {
-    return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
-  }
-
-  const stripe = new Stripe(secret, { apiVersion: '2023-10-16' });
-
   try {
+    const auth = await getCRMAuth(env as unknown as NCBEnv & Record<string, string>, req);
+    const authError = unauthorizedStatus(auth);
+    if (authError || !auth || !['admin', 'team_member'].includes(auth.role || '')) {
+      const status = authError || 403;
+      return NextResponse.json({ error: status === 401 ? 'Unauthorized' : 'Forbidden' }, { status });
+    }
+
+    const secret = env.STRIPE_SECRET_KEY;
+    if (!secret) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
+    }
+    const stripe = new Stripe(secret, { apiVersion: '2023-10-16' });
     const body = await req.json();
 
     // Validate with Zod

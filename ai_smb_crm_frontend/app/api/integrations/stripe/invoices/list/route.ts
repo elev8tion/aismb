@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEnv } from '@/lib/cloudflare/env';
 import Stripe from 'stripe';
+import { getCRMAuth, unauthorizedStatus } from '@/lib/security/crmAuth';
+import type { NCBEnv } from '@/lib/agent/ncbClient';
 
 export const runtime = 'edge';
 
@@ -8,14 +10,19 @@ export async function GET(req: NextRequest) {
   const cfEnv = getEnv();
   const env = cfEnv as unknown as Record<string, string>;
 
-  const secret = env.STRIPE_SECRET_KEY;
-  if (!secret) {
-    return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
-  }
-
-  const stripe = new Stripe(secret, { apiVersion: '2023-10-16' });
-
   try {
+    const auth = await getCRMAuth(env as unknown as NCBEnv & Record<string, string>, req);
+    const authError = unauthorizedStatus(auth);
+    if (authError || !auth || !['admin', 'team_member'].includes(auth.role || '')) {
+      const status = authError || 403;
+      return NextResponse.json({ error: status === 401 ? 'Unauthorized' : 'Forbidden' }, { status });
+    }
+
+    const secret = env.STRIPE_SECRET_KEY;
+    if (!secret) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
+    }
+    const stripe = new Stripe(secret, { apiVersion: '2023-10-16' });
     const { searchParams } = new URL(req.url);
     const customer_id = searchParams.get('customer_id');
     const partnership_id = searchParams.get('partnership_id');

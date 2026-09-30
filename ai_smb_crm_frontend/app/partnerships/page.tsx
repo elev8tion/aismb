@@ -14,6 +14,8 @@ import SendContractModal from '@/components/contracts/SendContractModal';
 import { DocumentRecord, DocumentStatus } from '@/lib/contracts/types';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Partnership } from '@kre8tion/shared-types';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
 
 interface DeliveredSystem {
   id: string;
@@ -78,6 +80,8 @@ function getBillingStatusTag(paymentStatus: string | undefined, t: any) {
 
 export default function PartnershipsPage() {
   const { t } = useTranslations();
+  const { user } = useAuth();
+  const demo = isDemoUser(user);
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewPartnership, setViewPartnership] = useState<Partnership | null>(null);
@@ -177,8 +181,8 @@ export default function PartnershipsPage() {
   useEffect(() => { fetchPartnerships(); }, [fetchPartnerships]);
 
   useEffect(() => {
-    if (partnerships.length > 0) fetchContractStatuses(partnerships);
-  }, [partnerships, fetchContractStatuses]);
+    if (!demo && partnerships.length > 0) fetchContractStatuses(partnerships);
+  }, [demo, partnerships, fetchContractStatuses]);
 
   // Voice actions
   const { subscribe } = useVoiceAgentActions();
@@ -437,16 +441,20 @@ export default function PartnershipsPage() {
                   {/* Quick Actions */}
                   <div className="sm:col-span-2 flex flex-wrap items-center gap-2 md:gap-3 lg:justify-end">
                     <button onClick={() => setViewPartnership(partnership)} className="btn-secondary text-sm flex-1 sm:flex-none">{t.partnerships.viewDetails}</button>
-                    <button onClick={() => handleScheduleMeeting(partnership)} className="btn-secondary text-sm flex-1 sm:flex-none">{t.partnerships.scheduleMeeting}</button>
-                    {(partnership.status === 'active' || partnership.status === 'onboarding') && !contractStatuses[partnership.id] && (
-                      <button onClick={() => setSendContractPartnership(partnership)} className="btn-primary text-sm flex-1 sm:flex-none">{t.documents.sendContract}</button>
+                    {!demo && (
+                      <>
+                        <button onClick={() => handleScheduleMeeting(partnership)} className="btn-secondary text-sm flex-1 sm:flex-none">{t.partnerships.scheduleMeeting}</button>
+                        {(partnership.status === 'active' || partnership.status === 'onboarding') && !contractStatuses[partnership.id] && (
+                          <button onClick={() => setSendContractPartnership(partnership)} className="btn-primary text-sm flex-1 sm:flex-none">{t.documents.sendContract}</button>
+                        )}
+                        {(partnership.status === 'active' || partnership.status === 'onboarding') && !partnership.payment_status && contractStatuses[partnership.id] === 'fully_executed' && (
+                          <button onClick={() => openSendInvoice(partnership)} className="btn-primary text-sm flex-1 sm:flex-none">{t.billing.sendSetupInvoice}</button>
+                        )}
+                        <button onClick={() => openViewInvoices(partnership)} className="btn-secondary text-sm flex-1 sm:flex-none">{t.billing.viewInvoices}</button>
+                        <button onClick={() => { setGrantForm({ customer_user_id: '', access_level: 'view' }); setGrantAccessPartnership(partnership); }} className="btn-secondary text-sm flex-1 sm:flex-none">{t.portal.grantAccess}</button>
+                        <button onClick={() => openUpdate(partnership)} className="btn-primary text-sm flex-1 sm:flex-none">{t.partnerships.updateProgress}</button>
+                      </>
                     )}
-                    {(partnership.status === 'active' || partnership.status === 'onboarding') && !partnership.payment_status && contractStatuses[partnership.id] === 'fully_executed' && (
-                      <button onClick={() => openSendInvoice(partnership)} className="btn-primary text-sm flex-1 sm:flex-none">{t.billing.sendSetupInvoice}</button>
-                    )}
-                    <button onClick={() => openViewInvoices(partnership)} className="btn-secondary text-sm flex-1 sm:flex-none">{t.billing.viewInvoices}</button>
-                    <button onClick={() => { setGrantForm({ customer_user_id: '', access_level: 'view' }); setGrantAccessPartnership(partnership); }} className="btn-secondary text-sm flex-1 sm:flex-none">{t.portal.grantAccess}</button>
-                    <button onClick={() => openUpdate(partnership)} className="btn-primary text-sm flex-1 sm:flex-none">{t.partnerships.updateProgress}</button>
                   </div>
                 </div>
               </div>

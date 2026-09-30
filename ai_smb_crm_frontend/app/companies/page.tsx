@@ -11,12 +11,16 @@ import { Modal } from '@/components/ui/Modal';
 import { useVoiceAgentActions } from '@/contexts/VoiceAgentActionsContext';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Company } from '@kre8tion/shared-types';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
 
 const INDUSTRIES = ['HVAC', 'Plumbing', 'Construction', 'Property Management', 'Electrical', 'Landscaping', 'Other'];
 const EMPLOYEE_COUNTS = ['1-5', '5-10', '10-25', '25-50', '50-100', '100+'];
 
 export default function CompaniesPage() {
   const { t } = useTranslations();
+  const { user } = useAuth();
+  const demo = isDemoUser(user);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -177,12 +181,12 @@ export default function CompaniesPage() {
         <PageHeader
           title={t.nav.companies}
           subtitle={<>{companies.length} {t.companies.companiesCount}</>}
-          action={
+          action={!demo ? (
             <button onClick={() => { resetForm(); setShowCreate(true); }} className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
               <PlusIcon className="w-5 h-5" />
               {t.companies.addCompany}
             </button>
-          }
+          ) : undefined}
         />
 
         {loading ? (
@@ -243,9 +247,11 @@ export default function CompaniesPage() {
                   <button onClick={(e) => { e.stopPropagation(); setViewCompany(company); }} className="btn-secondary flex-1 text-sm">
                     {t.companies.viewDetails}
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); openEdit(company); }} className="btn-secondary text-sm">
-                    {t.common.edit}
-                  </button>
+                  {!demo && (
+                    <button onClick={(e) => { e.stopPropagation(); openEdit(company); }} className="btn-secondary text-sm">
+                      {t.common.edit}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

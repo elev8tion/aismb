@@ -1,21 +1,31 @@
 # Demo access
 
-Testers do **not** type email/password. They click **Enter demo**. The server signs into the isolated demo account and sets the session cookie. Credentials never reach the browser.
+Public testers use either:
 
-Operator email/password is hidden behind **Operator sign in**.
+- `https://app.kre8tion.com/demo` for one-click entry, or
+- **Enter demo** on the login page.
 
-## Secrets (GitHub → Cloudflare Pages)
+Both paths create the same signed, HttpOnly, eight-hour demo session. No email or password is sent to the browser.
 
-Prefer:
+## Production secret
+
+Set a dedicated Cloudflare Pages secret when possible:
 
 ```text
-DEMO_LOGIN_ENABLED=true
-DEMO_LOGIN_EMAIL=<demo-account-email>
-DEMO_LOGIN_PASSWORD=<demo-account-password>
+DEMO_SESSION_SECRET=<random high-entropy value>
 ```
 
-If those are empty, deploy maps GitHub `TEST_EMAIL` / `TEST_PASSWORD` onto `DEMO_LOGIN_*` and enables demo login.
+If it is absent, the server uses the existing `NCB_SECRET_KEY` only as the HMAC signing secret. Production demo access is unavailable when neither secret exists. The tracked development fallback is never accepted in production.
 
-Set `DEMO_LOGIN_ENABLED=false` to turn the tester button off.
+The older `DEMO_LOGIN_EMAIL` and `DEMO_LOGIN_PASSWORD` secrets are not required by the fixture demo.
 
-Keep the demo account least-privileged and separate from any owner/admin account. Do not put a real password in a tracked file or in the login UI.
+## Access model
+
+- Demo identity: `demo-user`
+- Role: `team_member`
+- Data: fictional in-code fixtures
+- Writes: blocked with HTTP 403
+- Privileged integrations: blocked
+- Session cookie: `HttpOnly`, `SameSite=Lax`, and `Secure` on HTTPS
+
+Operator email/password login remains behind **Operator sign in** and uses the normal NCB authentication path.

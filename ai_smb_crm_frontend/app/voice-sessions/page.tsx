@@ -4,6 +4,9 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { useTranslations } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { VoiceIcon, LeadsStatIcon } from '@/components/icons';
 import { VoiceSession, ConversationMessage, ParsedVoiceSession } from '@kre8tion/shared-types';
@@ -16,6 +19,8 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 export default function VoiceSessionsPage() {
   const { t } = useTranslations();
+  const { user } = useAuth();
+  const router = useRouter();
   const [sessions, setSessions] = useState<VoiceSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -56,8 +61,12 @@ export default function VoiceSessionsPage() {
   }, []);
 
   useEffect(() => {
+    if (isDemoUser(user)) {
+      router.replace('/dashboard');
+      return;
+    }
     fetchSessions();
-  }, [fetchSessions]);
+  }, [user, router, fetchSessions]);
 
   // Voice actions
   const { subscribe } = useVoiceAgentActions();

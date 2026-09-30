@@ -10,12 +10,16 @@ import { Modal } from '@/components/ui/Modal';
 import { useVoiceAgentActions } from '@/contexts/VoiceAgentActionsContext';
 import type { NCBListResponse, CheckoutSessionResponse, Opportunity } from '@kre8tion/shared-types';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
 
 const STAGES = ['new-lead', 'contacted', 'discovery-call', 'proposal-sent', 'negotiation', 'closed-won'];
 const TIERS = ['discovery', 'foundation', 'architect'];
 
 export default function PipelinePage() {
   const { t } = useTranslations();
+  const { user } = useAuth();
+  const demo = isDemoUser(user);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -173,12 +177,12 @@ export default function PipelinePage() {
         <PageHeader
           title={t.pipeline.title}
           subtitle={<>{t.pipeline.totalPipelineValue}: <span className="text-white font-semibold">${totalValue.toLocaleString()}</span></>}
-          action={
+          action={!demo ? (
             <button onClick={() => openCreateForStage('new-lead')} className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
               <PlusIcon className="w-5 h-5" />
               {t.pipeline.newOpportunity}
             </button>
-          }
+          ) : undefined}
         />
 
         {loading ? (
@@ -208,7 +212,7 @@ export default function PipelinePage() {
                           <span className="text-base md:text-lg font-semibold text-white">${Number(deal.total_contract_value || deal.setup_fee || 0).toLocaleString()}</span>
                           <span className={`tag text-xs ${getTierClass(deal.tier)}`}>{deal.tier}</span>
                         </div>
-                        {deal.stage !== 'closed-won' && (
+                        {!demo && deal.stage !== 'closed-won' && (
                           <div className="mt-3 flex items-center gap-2">
                             <button
                               className="btn-primary text-xs px-3 py-1.5"
@@ -220,9 +224,11 @@ export default function PipelinePage() {
                         )}
                       </div>
                     ))}
-                    <button onClick={() => openCreateForStage(stageKey)} className="w-full p-3 border border-dashed border-white/10 rounded-xl text-white/40 hover:border-white/20 hover:text-white/60 transition-colors">
-                      {t.pipeline.addDeal}
-                    </button>
+                    {!demo && (
+                      <button onClick={() => openCreateForStage(stageKey)} className="w-full p-3 border border-dashed border-white/10 rounded-xl text-white/40 hover:border-white/20 hover:text-white/60 transition-colors">
+                        {t.pipeline.addDeal}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -306,7 +312,7 @@ export default function PipelinePage() {
                 <p className="text-sm font-medium text-white mt-1">${Number(viewDeal.total_contract_value || viewDeal.setup_fee || 0).toLocaleString()}</p>
               </div>
             </div>
-            {viewDeal.stage !== 'closed-won' && (
+            {!demo && viewDeal.stage !== 'closed-won' && (
               <button
                 onClick={() => { setViewDeal(null); startCheckout(viewDeal); }}
                 className="btn-primary w-full mt-4"

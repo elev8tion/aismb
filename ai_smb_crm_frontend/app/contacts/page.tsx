@@ -9,6 +9,8 @@ import { Modal } from '@/components/ui/Modal';
 import { useVoiceAgentActions } from '@/contexts/VoiceAgentActionsContext';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { Contact as BaseContact } from '@kre8tion/shared-types';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demo/session';
 
 // Extended with joined fields
 interface Contact extends BaseContact {
@@ -19,6 +21,8 @@ const ROLES = ['Owner', 'CEO', 'Operations Manager', 'IT Manager', 'Office Manag
 
 export default function ContactsPage() {
   const { t } = useTranslations();
+  const { user } = useAuth();
+  const demo = isDemoUser(user);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -197,12 +201,12 @@ export default function ContactsPage() {
         <PageHeader
           title={t.nav.contacts}
           subtitle={<>{filtered.length} {t.contacts.contactsCount}</>}
-          action={
+          action={!demo ? (
             <button onClick={() => { setForm(emptyForm); setShowCreate(true); }} className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
               <PlusIcon className="w-5 h-5" />
               {t.contacts.addContact}
             </button>
-          }
+          ) : undefined}
         />
 
         <div className="mb-[var(--space-gap)]">
@@ -257,7 +261,7 @@ export default function ContactsPage() {
                           {contact.phone && (
                             <a href={`tel:${contact.phone}`} className="btn-ghost p-2" title={t.common.phone}><PhoneIcon className="w-4 h-4" /></a>
                           )}
-                          <button onClick={() => openEdit(contact)} className="btn-ghost p-2" title={t.common.edit}><EditIcon className="w-4 h-4" /></button>
+                          {!demo && <button onClick={() => openEdit(contact)} className="btn-ghost p-2" title={t.common.edit}><EditIcon className="w-4 h-4" /></button>}
                         </div>
                       </td>
                     </tr>

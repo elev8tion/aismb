@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
@@ -10,27 +10,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [demoAvailable, setDemoAvailable] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const [showOperator, setShowOperator] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, refreshSession } = useAuth();
   const { t } = useTranslations();
   const router = useRouter();
-
-  useEffect(() => {
-    let active = true;
-    fetch('/api/demo-login', { cache: 'no-store' })
-      .then(async (res): Promise<{ enabled?: boolean }> => res.ok ? res.json() : { enabled: false })
-      .then((data) => {
-        if (active) setDemoAvailable(data.enabled === true);
-      })
-      .catch(() => {
-        if (active) setDemoAvailable(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const handleDemoLogin = async () => {
     setError('');
@@ -44,6 +28,7 @@ export default function LoginPage() {
         const data = await res.json().catch(() => null) as { error?: string } | null;
         throw new Error(data?.error || 'Demo sign-in failed');
       }
+      await refreshSession();
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Demo sign-in failed');
@@ -88,24 +73,22 @@ export default function LoginPage() {
             </div>
           )}
 
-          {demoAvailable && (
-            <div className="space-y-4">
-              <p className="text-center text-sm text-white/60">
-                Testers enter with one click. Credentials stay on the server.
-              </p>
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                disabled={loading || demoLoading}
-                className="btn-primary w-full"
-              >
-                {demoLoading ? 'Opening demo…' : 'Enter demo'}
-              </button>
-            </div>
-          )}
+          <div className="space-y-4">
+            <p className="text-center text-sm text-white/60">
+              Testers enter with one click. No email. No password.
+            </p>
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={loading || demoLoading}
+              className="btn-primary w-full"
+            >
+              {demoLoading ? 'Opening demo…' : 'Enter demo'}
+            </button>
+          </div>
 
-          {(!demoAvailable || showOperator) && (
-            <form onSubmit={handleSubmit} className={`space-y-6 ${demoAvailable ? 'mt-8 border-t border-white/10 pt-6' : ''}`}>
+          {showOperator && (
+            <form onSubmit={handleSubmit} className="space-y-6 mt-8 border-t border-white/10 pt-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
                   {t.auth.email}
@@ -139,14 +122,14 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading || demoLoading}
-                className={demoAvailable ? 'btn-secondary w-full' : 'btn-primary w-full'}
+                className="btn-secondary w-full"
               >
                 {loading ? t.auth.signingIn : t.auth.signIn}
               </button>
             </form>
           )}
 
-          {demoAvailable && !showOperator && (
+          {!showOperator && (
             <button
               type="button"
               onClick={() => setShowOperator(true)}

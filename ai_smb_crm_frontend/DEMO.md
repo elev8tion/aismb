@@ -1,48 +1,32 @@
-# Live Voice Demo
+# Public CRM Demo
 
-This demo keeps the agentic path live. It does not use canned responses:
+The public demo is a safe, read-only product tour. It uses fictional fixture records and never reads from or writes to the production CRM database.
 
-```text
-microphone -> OpenAI transcription -> CRM agent/tool call -> NCB record -> OpenAI speech
-```
-
-## Setup
-
-1. Copy `.env.example` to `.env.local`.
-2. Set `NCB_INSTANCE`, `NCB_AUTH_API_URL`, `NCB_DATA_API_URL`, `NCB_SECRET_KEY`, and `OPENAI_API_KEY`. Do **not** set `EMAILIT_API_KEY` for this demo. Product mail is REST in production (GitHub → Cloudflare). Auth mail is NCB SMTP. See `docs/EMAIL.md`.
-3. Use a demo CRM account with seeded records. The agent uses the authenticated account's real CRM data.
-4. Start the CRM:
+## Run locally
 
 ```bash
 npm run dev
 ```
 
-The app runs at `http://localhost:3001`.
+Open `http://localhost:3001/demo`. The route creates a signed, eight-hour, HttpOnly demo session and redirects to `/dashboard`.
 
-## Demo path
+Local development uses a development-only signing key when no environment secret is present. Production requires `DEMO_SESSION_SECRET` or the existing `NCB_SECRET_KEY`.
 
-1. Sign in with the demo CRM account.
-2. Open the voice operator.
-3. Try: `Show me qualified leads`.
-4. Try: `Move Acme Plumbing to proposal sent`.
-5. Refresh the pipeline page and confirm the persisted change.
-6. Try: `What bookings do I have this week?`.
+## Five-minute demo path
 
-The voice panel displays the transcription, spoken response, and the real tool names executed. Tool arguments and record IDs are not exposed in the UI.
+1. Start at `https://kre8tion.com` and select **Open CRM Demo**.
+2. Review Dashboard metrics and recent activity.
+3. Open Leads and inspect the qualified Northstar Dental lead.
+4. Open Pipeline and follow Northstar, River Park, Lumen, and BrightWire across stages.
+5. Open Companies, Contacts, Partnerships, ROI Calculations, and the Weekly Report to show the same records across the workflow.
 
-## Live verification
+## Safety boundaries
 
-The normal test suite skips external-service tests. Run the live CRM suites only when the CRM server and credentials are configured:
+- Fixture data only; addresses use the reserved `.example` domain.
+- Data mutations return `403 DEMO_READ_ONLY`.
+- Payments, invoices, subscriptions, contracts, admin actions, and CRM agent endpoints reject demo sessions.
+- Settings, documents, drafts, and voice sessions are hidden from demo navigation; Partnerships is view-only.
+- The demo role is `team_member`, never `admin`.
+- Signing credentials and API keys never reach the browser.
 
-```bash
-RUN_INTEGRATION=true npm exec vitest run __tests__/integration/crmAgent.system.test.ts
-RUN_INTEGRATION=true npm exec vitest run __tests__/integration/voiceAgent.ux.test.ts
-```
-
-For a different server:
-
-```bash
-RUN_INTEGRATION=true API_BASE=https://demo.example.com npm exec vitest run __tests__/integration/voiceAgent.ux.test.ts
-```
-
-The voice UX test expects a real `/api/auth/sign-in`, `/api/agent/chat`, `/api/agent/transcribe`, and `/api/agent/speak` path. It verifies the live response shape and session behavior; it does not replace OpenAI or CRM calls with fixtures.
+The operator login and live voice-agent path remain available to authorized real accounts; they are not part of the public demo.

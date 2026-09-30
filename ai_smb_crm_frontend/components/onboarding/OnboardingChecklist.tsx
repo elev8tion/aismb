@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { isDemoUser } from '@/lib/demo/session';
 
 interface OnboardingStep {
   id: string;
@@ -176,7 +177,7 @@ export function OnboardingChecklist() {
   const completedCount = ONBOARDING_STEPS.filter((step) => completedSteps[step.id]).length;
   const progressPercent = Math.round((completedCount / totalSteps) * 100);
 
-  if (dismissed || loading || completedCount === totalSteps) {
+  if (isDemoUser(user) || dismissed || loading || completedCount === totalSteps) {
     return null;
   }
 

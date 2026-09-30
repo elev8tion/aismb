@@ -70,6 +70,12 @@ export default function Header() {
             <div className="hidden lg:flex items-center gap-4">
               <LanguageSwitcher />
               <a
+                href="https://app.kre8tion.com/demo"
+                className="text-sm lg:text-base font-semibold text-[#38BDF8] hover:text-white transition-colors"
+              >
+                CRM Demo
+              </a>
+              <a
                 href="#get-started"
                 className="text-sm lg:text-base font-medium text-white/70 hover:text-white transition-colors"
               >
@@ -136,6 +142,13 @@ export default function Header() {
                   </a>
                 ))}
                 <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+                  <a
+                    href="https://app.kre8tion.com/demo"
+                    className="block px-4 py-3 text-sm font-semibold text-[#38BDF8] hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Open CRM Demo
+                  </a>
                   <a
                     href="#get-started"
                     className="block px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"

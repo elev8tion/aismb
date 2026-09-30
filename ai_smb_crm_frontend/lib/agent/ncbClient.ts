@@ -1,12 +1,16 @@
 // Server-side NCB fetch wrapper for agent tools
 // Mirrors the pattern from app/api/data/[...path]/route.ts
 
+import { DEMO_USER } from '@/lib/demo/session';
+import { hasValidDemoSession } from '@/lib/demo/token';
+
 export interface NCBEnv {
   NCB_INSTANCE: string;
   NCB_DATA_API_URL: string;
   NCB_AUTH_API_URL: string;
   NCB_OPENAPI_URL?: string;
   NCB_SECRET_KEY?: string;
+  DEMO_SESSION_SECRET?: string;
 }
 
 function getConfig(env: NCBEnv) {
@@ -292,8 +296,11 @@ export async function getSessionUser(
   env: NCBEnv,
   cookieHeader: string
 ): Promise<{ id: string; email: string; name: string } | null> {
+  if (await hasValidDemoSession(cookieHeader, env)) return DEMO_USER;
+
   const authCookies = extractAuthCookies(cookieHeader);
   if (!authCookies) return null;
+  if (!env?.NCB_INSTANCE || !env?.NCB_AUTH_API_URL) return null;
 
   const config = getConfig(env);
   const url = `${config.authApiUrl}/get-session?instance=${config.instance}`;
