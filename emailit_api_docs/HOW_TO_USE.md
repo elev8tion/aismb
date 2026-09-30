@@ -1,5 +1,7 @@
 # EmailIt API Documentation - Usage Guide
 
+> **This repo:** vendor dump only. Send with `POST /v1/emails` (not `/v1/emails/send`). This app does not use SMTP. Auth SMTP is NCB. See `docs/EMAIL.md` and `README.md` in this folder.
+
 ## What This Is
 
 **EmailIt** is a transactional email API service for sending emails programmatically. This folder contains complete API documentation, examples, and screenshots to help you integrate EmailIt into your applications.

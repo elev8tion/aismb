@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [demoAvailable, setDemoAvailable] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
+  const [showOperator, setShowOperator] = useState(false);
   const { signIn } = useAuth();
   const { t } = useTranslations();
   const router = useRouter();
@@ -80,77 +81,80 @@ export default function LoginPage() {
           <p className="text-white/60 mt-2">{t.auth.signInSubtitle}</p>
         </div>
 
-        {/* Form */}
         <div className="card p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
-                {t.auth.email}
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-glass w-full"
-                placeholder="you@company.com"
-                required
-              />
+          {error && (
+            <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              {error}
             </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
-                {t.auth.password}
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-glass w-full"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
-            <div className="flex items-center">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded border-white/20 bg-transparent" />
-                <span className="text-sm text-white/60">{t.auth.rememberMe}</span>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading || demoLoading}
-              className="btn-primary w-full"
-            >
-              {loading ? t.auth.signingIn : t.auth.signIn}
-            </button>
-          </form>
+          )}
 
           {demoAvailable && (
-            <div className="mt-6 border-t border-white/10 pt-6">
-              <p className="text-center text-xs text-white/50 mb-3">
-                Demo access keeps credentials server-side.
+            <div className="space-y-4">
+              <p className="text-center text-sm text-white/60">
+                Testers enter with one click. Credentials stay on the server.
               </p>
               <button
                 type="button"
                 onClick={handleDemoLogin}
                 disabled={loading || demoLoading}
-                className="btn-secondary w-full"
+                className="btn-primary w-full"
               >
-                {demoLoading ? 'Opening demo…' : 'Use demo access'}
+                {demoLoading ? 'Opening demo…' : 'Enter demo'}
               </button>
             </div>
           )}
 
+          {(!demoAvailable || showOperator) && (
+            <form onSubmit={handleSubmit} className={`space-y-6 ${demoAvailable ? 'mt-8 border-t border-white/10 pt-6' : ''}`}>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
+                  {t.auth.email}
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input-glass w-full"
+                  placeholder="you@company.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
+                  {t.auth.password}
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input-glass w-full"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || demoLoading}
+                className={demoAvailable ? 'btn-secondary w-full' : 'btn-primary w-full'}
+              >
+                {loading ? t.auth.signingIn : t.auth.signIn}
+              </button>
+            </form>
+          )}
+
+          {demoAvailable && !showOperator && (
+            <button
+              type="button"
+              onClick={() => setShowOperator(true)}
+              className="mt-6 w-full text-center text-xs text-white/40 hover:text-white/60 transition-colors"
+            >
+              Operator sign in
+            </button>
+          )}
         </div>
 
         {/* Back to landing */}

@@ -378,7 +378,7 @@ If missing `📧 Admin alert sent`:
 - Email env vars not set
 - EmailIt API error
 
-**Test EmailIt directly**:
+**Test EmailIt directly** (REST product mail, not NCB SMTP). Canonical: `docs/EMAIL.md`.
 ```bash
 curl https://api.emailit.com/v1/emails \
   -X POST \

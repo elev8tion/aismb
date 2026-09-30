@@ -162,13 +162,17 @@ app/api/
 - **Instance**: `?instance=36905_ai_smb_crm` (lowercase `i`)
 - **Use for**: CRM tool calls, RLS-protected data
 
-### 2. EmailIt (Transactional Emails)
+### 2. EmailIt (product mail — REST, not SMTP)
 
-- **API**: `POST https://api.emailit.com/v1/emails`
-- **Auth**: `Authorization: Bearer ${EMAILIT_API_KEY}`
+Canonical: `docs/EMAIL.md`.
+
+- **API**: `POST https://api.emailit.com/v1/emails` (not `/v1/emails/send` — that 405s)
+- **Auth**: `Authorization: Bearer ${EMAILIT_API_KEY}` (GitHub secret → Cloudflare Pages)
 - **From**: `AI KRE8TION Partners <bookings@kre8tion.com>`
 - **Tags**: `['kre8tion', 'landing', '<type>']` (landing page)
 - **Tags**: `['kre8tion', 'crm', '<type>']` (CRM)
+- This app does **not** use SMTP. NCB sends auth mail over EmailIt SMTP from its dashboard.
+- Local voice demo does not need `EMAILIT_API_KEY`.
 
 ### 3. Cloudflare KV Namespaces
 

@@ -103,7 +103,7 @@ Required in both GitHub Actions secrets AND Cloudflare dashboard (Settings → E
 | `NCB_AUTH_API_URL` | NCB Auth API base URL |
 | `NCB_OPENAPI_URL` | NCB OpenAPI base URL (server-to-server) |
 | `NCB_SECRET_KEY` | NCB OpenAPI Bearer token |
-| `EMAILIT_API_KEY` | EmailIt email sending API key |
+| `EMAILIT_API_KEY` | EmailIt REST key for product mail (not SMTP). Auth mail is NCB SMTP. See `docs/EMAIL.md`. |
 | `ADMIN_EMAIL` | Admin notification recipient |
 
 GitHub Actions also requires:

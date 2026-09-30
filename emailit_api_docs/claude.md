@@ -1,5 +1,7 @@
 # EmailIt API Documentation
 
+> **This repo:** vendor dump only. Live send URL is `POST /v1/emails`, not `/v1/emails/send`. This app does not use SMTP. See `docs/EMAIL.md`.
+
 EmailIt is a transactional email API service that allows you to send emails programmatically and manage email infrastructure through a REST API.
 
 ## Base Information

@@ -1,8 +1,12 @@
 # Demo access
 
-Demo credentials must stay server-side. Do not put a real username or password in a tracked file or expose the password in the login UI.
+Testers do **not** type email/password. They click **Enter demo**. The server signs into the isolated demo account and sets the session cookie. Credentials never reach the browser.
 
-Configure these as private Cloudflare Pages secrets (or in local `.env.local`):
+Operator email/password is hidden behind **Operator sign in**.
+
+## Secrets (GitHub → Cloudflare Pages)
+
+Prefer:
 
 ```text
 DEMO_LOGIN_ENABLED=true
@@ -10,6 +14,8 @@ DEMO_LOGIN_EMAIL=<demo-account-email>
 DEMO_LOGIN_PASSWORD=<demo-account-password>
 ```
 
-When configured, the login page shows **Use demo access**. The server signs into the isolated demo account and forwards the session cookie; the credentials never reach the browser.
+If those are empty, deploy maps GitHub `TEST_EMAIL` / `TEST_PASSWORD` onto `DEMO_LOGIN_*` and enables demo login.
 
-Keep the demo account least-privileged and separate from any owner/admin account.
+Set `DEMO_LOGIN_ENABLED=false` to turn the tester button off.
+
+Keep the demo account least-privileged and separate from any owner/admin account. Do not put a real password in a tracked file or in the login UI.

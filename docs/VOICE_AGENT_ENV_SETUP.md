@@ -43,26 +43,29 @@ NCB_SECRET_KEY=...
 
 ---
 
-### EmailIt (Transactional Emails)
+### EmailIt (product mail — REST, not SMTP)
+
+Canonical: `docs/EMAIL.md`.
 
 ```bash
 EMAILIT_API_KEY=...
 ADMIN_EMAIL=kc@kre8tion.com
 ```
 
-**Where to get `EMAILIT_API_KEY`**:
-- Login to https://emailit.com
-- Go to Settings → API Keys
-- Copy the API key
+This is the REST key for `POST https://api.emailit.com/v1/emails`. Store it in GitHub Actions secrets; deploy pushes it to Cloudflare Pages. This app does **not** use SMTP.
 
-**Used for**:
+Auth mail (signup / verify / password reset) is sent by **NCB over EmailIt SMTP**. That lives in the NCB dashboard, not this repo.
+
+Local CRM voice demo does **not** need `EMAILIT_API_KEY`.
+
+**Used for** (production product mail):
 - Booking confirmations
 - Assessment confirmations
 - Lead dossiers (admin notifications)
 - ROI report delivery
-- **Admin alerts for high-value leads** (if `FF_VOICE_ADMIN_ALERTS=true`)
+- Admin alerts for high-value leads (if `FF_VOICE_ADMIN_ALERTS=true`)
 
-**Domain verification**: `kre8tion.com` must be verified in EmailIt with SPF, DKIM, and DMARC records.
+**Domain verification**: `kre8tion.com` is already verified in EmailIt with SPF, DKIM, and DMARC.
 
 ---
 
@@ -187,18 +190,18 @@ STRIPE_PRICE_ARCHITECT_MONTHLY=price_...
 
 ---
 
-### EmailIt (CRM Emails)
+### EmailIt (CRM product mail — same REST key)
 
 ```bash
 EMAILIT_API_KEY=...
 ```
 
-**Same key as landing page**.
+Same GitHub → Cloudflare REST key as the landing page. Not SMTP. Voice demo does not need it.
 
 **Used for**:
 - Welcome emails (on setup payment received)
 - Payment failure alerts
-- Partnership status updates
+- Contract signing request / signed notifications
 
 ---
 
@@ -270,6 +273,8 @@ Should return `{"status":"success","data":[...]}`. If 401:
 ---
 
 ### Test EmailIt API
+
+REST only (`POST /v1/emails`). Do not use `/v1/emails/send` (405). Do not use SMTP. See `docs/EMAIL.md`. Local voice demo does not need this.
 
 ```bash
 curl https://api.emailit.com/v1/emails \

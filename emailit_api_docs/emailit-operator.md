@@ -1,5 +1,7 @@
 # EmailIt API Operator
 
+> **This repo:** vendor dump only. Do not implement SMTP here. Do not call `/v1/emails/send`. Follow `docs/EMAIL.md` and `lib/email/sendEmail.ts`.
+
 Expert operator for the EmailIt transactional email API. Use this skill when working with EmailIt for sending emails, managing domains, handling webhooks, or integrating email functionality.
 
 ## When to Use This Skill

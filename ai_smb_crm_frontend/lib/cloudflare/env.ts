@@ -49,6 +49,9 @@ export interface CloudflareEnv {
   DEMO_LOGIN_ENABLED?: string;
   DEMO_LOGIN_EMAIL?: string;
   DEMO_LOGIN_PASSWORD?: string;
+  // GitHub/CI aliases used as demo-account fallback
+  TEST_EMAIL?: string;
+  TEST_PASSWORD?: string;
 
   // Feature Flags
   FF_VOICE_LEAD_EXTRACTION?: string;

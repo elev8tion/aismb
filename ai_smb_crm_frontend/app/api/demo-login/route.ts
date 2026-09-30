@@ -5,13 +5,15 @@ export const runtime = 'edge';
 
 function getConfig() {
   const env = getEnv();
-  return {
-    enabled: env.DEMO_LOGIN_ENABLED === 'true',
-    email: env.DEMO_LOGIN_EMAIL,
-    password: env.DEMO_LOGIN_PASSWORD,
-    instance: env.NCB_INSTANCE,
-    apiUrl: env.NCB_AUTH_API_URL,
-  };
+  const email = env.DEMO_LOGIN_EMAIL || env.TEST_EMAIL;
+  const password = env.DEMO_LOGIN_PASSWORD || env.TEST_PASSWORD;
+  const instance = env.NCB_INSTANCE;
+  const apiUrl = env.NCB_AUTH_API_URL;
+  const explicitOff = env.DEMO_LOGIN_ENABLED === 'false';
+  const hasCreds = Boolean(email && password && instance && apiUrl);
+  // Testers get one-click demo whenever the demo account exists, unless explicitly off.
+  const enabled = hasCreds && !explicitOff;
+  return { enabled, email, password, instance, apiUrl };
 }
 
 function transformSetCookie(cookie: string): string {

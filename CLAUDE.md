@@ -88,9 +88,11 @@ All API routes run on Cloudflare's edge. Critical rules:
 - `lib/voiceAgent/sessionManager.ts` — KV-backed conversation memory
 
 ### Email
-- All transactional email goes through `lib/email/sendEmail.ts` (`sendViaEmailIt()`)
-- From address: `AI KRE8TION Partners <bookings@kre8tion.com>`
-- Env var: `EMAILIT_API_KEY`
+Canonical: `docs/EMAIL.md`. Do not mix the two EmailIt paths.
+- **This app** sends product mail via REST (`sendViaEmailIt()` in `lib/email/sendEmail.ts`). Not SMTP. Not nodemailer.
+- From: `AI KRE8TION Partners <bookings@kre8tion.com>`
+- Secret: GitHub `EMAILIT_API_KEY` → Cloudflare Pages. Local CRM demo does not need it.
+- **NCB** sends auth mail (signup / verify / password reset) over EmailIt SMTP from the NCB dashboard. That is not in this repo.
 
 ## NCB Leads Table Requirements
 - `user_id` is a required FK — omit it and the create silently fails

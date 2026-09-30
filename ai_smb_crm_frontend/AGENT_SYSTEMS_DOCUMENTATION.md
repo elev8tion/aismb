@@ -721,6 +721,8 @@ NCB_SECRET_KEY=<from NCB Dashboard → Settings>
 OPENAI_API_KEY=sk-...
 ```
 
+Voice demo needs NCB + OpenAI only. Do not add `EMAILIT_API_KEY` for the demo. Product mail is EmailIt REST in production; auth mail is NCB SMTP. See `docs/EMAIL.md`.
+
 #### 3. Cloudflare KV Bindings
 **Configured in `wrangler.toml`, NOT in `.env`**
 

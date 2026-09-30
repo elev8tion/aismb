@@ -9,7 +9,7 @@ microphone -> OpenAI transcription -> CRM agent/tool call -> NCB record -> OpenA
 ## Setup
 
 1. Copy `.env.example` to `.env.local`.
-2. Set `NCB_INSTANCE`, `NCB_AUTH_API_URL`, `NCB_DATA_API_URL`, `NCB_SECRET_KEY`, and `OPENAI_API_KEY`.
+2. Set `NCB_INSTANCE`, `NCB_AUTH_API_URL`, `NCB_DATA_API_URL`, `NCB_SECRET_KEY`, and `OPENAI_API_KEY`. Do **not** set `EMAILIT_API_KEY` for this demo. Product mail is REST in production (GitHub → Cloudflare). Auth mail is NCB SMTP. See `docs/EMAIL.md`.
 3. Use a demo CRM account with seeded records. The agent uses the authenticated account's real CRM data.
 4. Start the CRM:
 

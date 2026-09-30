@@ -588,6 +588,8 @@ Run this checklist **before every production deployment**:
 
 ### EmailIt Delivery Dashboard
 
+Product mail only (REST). Auth mail is NCB SMTP. See `docs/EMAIL.md`.
+
 **Where**: https://emailit.com/dashboard
 
 **What to watch**:

@@ -8,7 +8,7 @@ Next.js 15 App Router landing page deployed on **Cloudflare Pages**. Features an
 - **KV Namespaces**: `VOICE_SESSIONS`, `RATE_LIMIT_KV`, `COST_MONITOR_KV`, `RESPONSE_CACHE_KV`
 - **OpenAI**: `gpt-4.1-nano` (chat), `whisper-1` (STT), `gpt-4o-mini-tts` (TTS)
 - **CRM**: NocodeBackend (NCB) — OpenAPI for guest writes, Data Proxy for authenticated CRUD
-- **Email**: EmailIt transactional API (`bookings@kre8tion.com`)
+- **Email**: EmailIt REST API for product mail (`bookings@kre8tion.com`). NCB uses EmailIt SMTP for auth mail. See `docs/EMAIL.md`.
 - **Payments**: Stripe Checkout for $250 on-site assessment fee
 
 ### Key Modules
@@ -21,7 +21,7 @@ Next.js 15 App Router landing page deployed on **Cloudflare Pages**. Features an
 | `lib/booking/calendarLinks.ts` | Google/Outlook calendar link generation |
 | `lib/shared/formatters.ts` | Date/time formatting utilities |
 | `lib/voiceAgent/` | Voice agent: intent routing, agents, lead scoring, session storage |
-| `lib/email/sendEmail.ts` | EmailIt transactional sender + templates |
+| `lib/email/sendEmail.ts` | EmailIt REST sender + templates (not SMTP) |
 | `lib/security/` | Rate limiting, cost monitoring, input validation |
 
 ## Local Development
@@ -40,7 +40,7 @@ See `.env.example` for the full list. Key variables:
 - `OPENAI_API_KEY` — OpenAI API access
 - `NCB_*` — NocodeBackend instance and API URLs
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — Stripe payments
-- `EMAILIT_API_KEY` — EmailIt transactional email
+- `EMAILIT_API_KEY` — EmailIt REST key (GitHub → Cloudflare). Not needed for the CRM voice demo. Not SMTP.
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google Calendar OAuth (optional)
 
 ## Deployment
