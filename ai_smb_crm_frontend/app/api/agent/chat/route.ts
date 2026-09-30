@@ -11,7 +11,8 @@ import { ALL_CRM_FUNCTIONS } from '@/lib/agent/functions';
 import { executeTool } from '@/lib/agent/tools';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { languageSchema } from '@kre8tion/shared-types';
-import { DEMO_AGENT_DISABLED, isDemoUser } from '@/lib/demo/session';
+import { DEMO_AGENT_PROMPT } from '@/lib/demo/agentTools';
+import { isDemoUser } from '@/lib/demo/session';
 
 export const runtime = 'edge';
 
@@ -314,9 +315,7 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  if (isDemoUser(user)) {
-    return NextResponse.json({ error: DEMO_AGENT_DISABLED }, { status: 404 });
-  }
+  const demo = isDemoUser(user);
 
   // Per-user rate limit (budget protection)
   if (rateLimitKv) {
@@ -370,7 +369,7 @@ export async function POST(request: NextRequest) {
 
     // Build messages — select language-matched system prompt and few-shots based on UI toggle
     const isSpanish = validLanguage === 'es';
-    const systemPrompt = isSpanish ? SYSTEM_PROMPT_ES : SYSTEM_PROMPT_EN;
+    const systemPrompt = `${isSpanish ? SYSTEM_PROMPT_ES : SYSTEM_PROMPT_EN}${demo ? `\n\n${DEMO_AGENT_PROMPT}` : ''}`;
     const fewShots = isSpanish ? FEWSHOTS_ES : FEWSHOTS_EN;
 
     const messages: ChatCompletionMessageParam[] = [
@@ -408,7 +407,9 @@ export async function POST(request: NextRequest) {
       const completion = await openai.chat.completions.create({
         model,
         messages: currentMessages,
-        tools: ALL_CRM_FUNCTIONS,
+        tools: demo
+          ? ALL_CRM_FUNCTIONS.filter((tool) => tool.type === 'function' && !['create_lead','update_lead_status','create_opportunity','move_deal','create_contact','create_company','confirm_booking','cancel_booking','block_date','unblock_date','create_partnership','update_partnership_phase','update_satisfaction_score','log_partner_interaction','log_activity','schedule_followup','bulk_update_lead_status','bulk_assign_leads','draft_email','draft_sms','run_roi_calculation','ui_open_new','ui_open_edit'].includes(tool.function.name))
+          : ALL_CRM_FUNCTIONS,
         ...chatParams,
       });
 

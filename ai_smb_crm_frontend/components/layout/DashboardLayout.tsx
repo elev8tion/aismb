@@ -119,7 +119,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {children}
       </main>
 
-      {!demo && <VoiceOperator />}
+      <VoiceOperator />
     </div>
     </VoiceAgentActionsProvider>
   );

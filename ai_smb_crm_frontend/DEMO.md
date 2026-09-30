@@ -24,9 +24,10 @@ Local development uses a development-only signing key when no environment secret
 
 - Fixture data only; addresses use the reserved `.example` domain.
 - Data mutations return `403 DEMO_READ_ONLY`.
-- Payments, invoices, subscriptions, contracts, admin actions, and CRM agent endpoints reject demo sessions.
-- Settings, documents, drafts, and voice sessions are hidden from demo navigation; Partnerships is view-only.
+- Payments, invoices, subscriptions, contracts, and admin actions reject demo sessions.
+- The voice operator is available inside the demo. It answers from fixture records and can open demo pages. It cannot change records.
+- Settings, documents, drafts, and voice-session history stay hidden; Partnerships is view-only.
 - The demo role is `team_member`, never `admin`.
 - Signing credentials and API keys never reach the browser.
 
-The operator login and live voice-agent path remain available to authorized real accounts; they are not part of the public demo.
+A real operator login still uses the live CRM voice agent and the real database. The public demo voice agent does not.

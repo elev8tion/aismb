@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { executeDemoTool } from '../agentTools';
 import { demoReadOnlyResponse, demoReadResponse, getDemoRows } from '../data';
 import { createDemoSessionToken, hasValidDemoSession, setDemoSessionCookie } from '../token';
 
@@ -28,6 +29,16 @@ describe('demo session token', () => {
     const token = await createDemoSessionToken(env, now);
     const nineHoursLater = now + 9 * 60 * 60 * 1_000;
     expect(await hasValidDemoSession(`aismb-demo-session=${token}`, env, nineHoursLater)).toBe(false);
+  });
+});
+
+describe('demo voice tools', () => {
+  it('answers from fixture leads and refuses a live write', () => {
+    const listed = executeDemoTool('list_leads', {}) as { total: number };
+    expect(listed.total).toBe(4);
+    expect(executeDemoTool('move_deal', { name: 'Northstar' })).toMatchObject({ code: 'DEMO_READ_ONLY' });
+    expect(executeDemoTool('navigate', { target: 'settings' })).toMatchObject({ ok: false });
+    expect(executeDemoTool('navigate', { target: 'leads' })).toMatchObject({ route: '/leads' });
   });
 });
 

@@ -1,6 +1,8 @@
 // Tool Registry — routes function calls to domain handlers
 
 import type { NCBEnv } from '../ncbClient';
+import { executeDemoTool } from '@/lib/demo/agentTools';
+import { DEMO_USER } from '@/lib/demo/session';
 import * as leads from './leads';
 import * as bookings from './bookings';
 import * as pipeline from './pipeline';
@@ -115,6 +117,8 @@ export async function executeTool(
   cookies: string,
   env: NCBEnv
 ): Promise<unknown> {
+  if (userId === DEMO_USER.id) return executeDemoTool(name, params);
+
   const handler = registry[name];
   if (!handler) {
     return { error: `Unknown tool: ${name}` };
