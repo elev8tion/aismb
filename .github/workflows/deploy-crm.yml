@@ -45,6 +45,9 @@ jobs:
           NCB_GUEST_KEY: ${{ secrets.NCB_GUEST_KEY }}
           EMAILIT_API_KEY: ${{ secrets.EMAILIT_API_KEY }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          DEMO_LOGIN_ENABLED: ${{ secrets.DEMO_LOGIN_ENABLED }}
+          DEMO_LOGIN_EMAIL: ${{ secrets.DEMO_LOGIN_EMAIL }}
+          DEMO_LOGIN_PASSWORD: ${{ secrets.DEMO_LOGIN_PASSWORD }}
         run: |
           case "$NCB_AUTH_API_URL" in
             https://app.nocodebackend.com/api/user-auth) ;;
@@ -70,6 +73,9 @@ jobs:
           put_secret "$NCB_GUEST_KEY" NCB_GUEST_KEY
           put_secret "$EMAILIT_API_KEY" EMAILIT_API_KEY
           put_secret "$ADMIN_EMAIL" ADMIN_EMAIL
+          put_secret "$DEMO_LOGIN_ENABLED" DEMO_LOGIN_ENABLED
+          put_secret "$DEMO_LOGIN_EMAIL" DEMO_LOGIN_EMAIL
+          put_secret "$DEMO_LOGIN_PASSWORD" DEMO_LOGIN_PASSWORD
 
       - name: Build CRM for Cloudflare Pages
         run: npm run pages:build
