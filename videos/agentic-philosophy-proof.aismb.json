@@ -1,0 +1,12 @@
+{
+  "format": "aismb/v1",
+  "name": "agentic-philosophy-proof",
+  "created_at": "2026-10-01T20:33:25",
+  "source_root": "/Users/kcdacre8tor/Developer/aismb",
+  "app": "both",
+  "landing_origin": "https://kre8tion.com",
+  "crm_origin": "https://app.kre8tion.com",
+  "admin_api_key": "",
+  "requests": [],
+  "metadata": {}
+}
